@@ -1,15 +1,12 @@
 from datetime import datetime
-import csv
 import os
-import re
-import chromadb
 import pandas as pd
 import requests
 import streamlit as st
 
 # 1. Page Configuration & Professional Styling
 st.set_page_config(
-    page_title="ANUAARIMATERIALS | Aari & Craft Supplies",
+    page_title="ANUAARI MATERIALS | Aari & Craft Supplies",
     page_icon="🧵",
     layout="wide",
 )
@@ -22,11 +19,11 @@ st.markdown(
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
             font-size: 14px !important;
-            color: #1e293b !important;
+            color: #2d1524 !important;
         }
 
         .stApp {
-            background-color: #f8fafc !important; 
+            background-color: #faf7f9 !important; 
         }
 
         #MainMenu, header, footer {visibility: hidden; display: none !important;}
@@ -43,78 +40,76 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Top Announcement Bar */
+        /* Top Announcement Bar - Elegant Plum Theme */
         .top-promo-bar {
-            background: #1e3a8a;
+            background: linear-gradient(135deg, #6b1d4f 0%, #4a1135 100%);
             color: #ffffff;
-            padding: 6px 12px;
+            padding: 8px 16px;
             font-size: 12px;
             font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.15);
         }
 
-        /* --- EXACT REFERENCE CARD STYLING --- */
+        /* --- REDESIGNED PRODUCT CARD STYLING --- */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            padding: 0px !important;
+            border: 1px solid #f3e8f1 !important;
+            border-radius: 16px !important;
+            padding: 12px !important;
             overflow: hidden !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(107, 29, 79, 0.1) !important;
+            border-color: #e8d0e4 !important;
         }
 
-        /* Light-grey image container header matching reference site */
+        /* Clean Rearranged Image Frame */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
-            padding: 12px 0px !important;
+            padding: 8px !important;
             width: 100% !important;
-            background-color: #f1f5f9 !important;
+            background-color: #fcf9fb !important;
+            border-radius: 12px !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
         }
 
-        /* Uncropped Full View Centered Image */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 220px !important;
+            height: 200px !important;
             object-fit: contain !important;
             object-position: center center !important;
-            background-color: #f1f5f9 !important;
+            border-radius: 8px !important;
             display: block !important;
         }
 
-        /* Inner Content Padding */
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
-            padding-left: 14px !important;
-            padding-right: 14px !important;
-        }
-
-        /* Storefront Blue Pill Buttons */
+        /* Storefront Accent Buttons */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: #2b3a97 !important;
+            background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
             font-size: 13px !important;
-            border-radius: 20px !important;
-            padding: 0.45rem 0.75rem !important;
+            border-radius: 24px !important;
+            padding: 0.5rem 1rem !important;
             width: 100% !important;
             display: block !important;
-            box-shadow: 0 2px 5px rgba(43, 58, 151, 0.15) !important;
+            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
+            transition: all 0.2s ease;
         }
         div.stButton > button:hover {
-            background: #1e2975 !important;
-            color: #ffffff !important;
+            background: linear-gradient(135deg, #53143c 0%, #3a0d29 100%) !important;
+            box-shadow: 0 6px 15px rgba(107, 29, 79, 0.3) !important;
         }
 
         .login-wrapper {
@@ -128,13 +123,13 @@ st.markdown(
             width: 100%;
             max-width: 420px;
             padding: 30px;
-            border-radius: 16px;
+            border-radius: 20px;
             background: #ffffff !important;
-            border: 1px solid #e2e8f0 !important;
-            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.08);
+            border: 1px solid #f3e8f1 !important;
+            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
         }
     </style>
-""",
+    """,
     unsafe_allow_html=True,
 )
 
@@ -151,15 +146,6 @@ if "selected_menu" not in st.session_state:
     st.session_state.selected_menu = None
 
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
-
-# Database Connection
-db_path = "./chroma_db_anuaari"
-try:
-    chroma_client = chromadb.PersistentClient(path=db_path)
-    collection = chroma_client.get_or_create_collection(name="anuaari_inventory_library")
-except Exception as e:
-    st.error(f"Error connecting to Database: {e}")
-    st.stop()
 
 
 def log_login_to_sheet(name, phone):
@@ -179,7 +165,7 @@ if not st.session_state.logged_in_user:
     st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
     st.markdown(
         """
-        <div style="background: #ffffff; padding: 20px; border-radius: 14px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; max-width: 420px; margin-left: auto; margin-right: auto;">
+        <div style="background: #ffffff; padding: 24px; border-radius: 16px; text-align: center; border: 1px solid #f3e8f1; box-shadow: 0 6px 20px rgba(107,29,79,0.04); margin-bottom: 20px; max-width: 420px; margin-left: auto; margin-right: auto;">
             <div style="font-size: 26px; font-weight: 900; letter-spacing: 1px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
             <div style="font-size: 15px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px;">aari work supplies</div>
         </div>
@@ -193,8 +179,8 @@ if not st.session_state.logged_in_user:
         st.markdown(
             """
             <div class="login-card">
-                <div style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 4px; text-align: center;">Customer Sign In</div>
-                <div style="font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 20px; font-weight: 800; color: #2d1524; margin-bottom: 4px; text-align: center;">Customer Sign In</div>
+                <div style="font-size: 13px; color: #7a6372; font-weight: 500; margin-bottom: 16px; text-align: center;">
                     Enter your name and mobile number to browse inventory
                 </div>
             </div>
@@ -238,7 +224,7 @@ logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
 with logo_col:
     st.markdown(
         """
-        <div style="background: #ffffff; padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0; display: inline-block;">
+        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
             <span style="font-size: 20px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
             <span style="font-size: 13px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 8px;">aari work supplies</span>
         </div>
@@ -262,7 +248,7 @@ with nav_col3:
         st.session_state.clear()
         st.rerun()
 
-st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
 
 # Load Inventory Directly from Google Sheets
@@ -357,7 +343,7 @@ if st.session_state.current_view == "Home":
     if st.session_state.selected_menu not in categories:
         st.session_state.selected_menu = categories[0]
 
-    st.markdown("<span style='color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;'>Master Categories</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;'>✨ Master Categories</span>", unsafe_allow_html=True)
     
     for i in range(0, len(categories), 5):
         cat_cols = st.columns(5, gap="small")
@@ -366,13 +352,13 @@ if st.session_state.current_view == "Home":
         for idx, cat in enumerate(cat_batch):
             with cat_cols[idx]:
                 is_selected = (st.session_state.selected_menu == cat)
-                button_label = f"📁 {cat}" if is_selected else cat
+                button_label = f"🧵 {cat}" if is_selected else cat
                 
                 if st.button(button_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
                     st.session_state.selected_menu = cat
                     st.rerun()
 
-    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
     # 4-Column Product Grid
     current_cat = st.session_state.get("selected_menu", categories[0])
@@ -389,27 +375,27 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Image Container with Badges Overlay
+                        # Image Container Layout
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
                             else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; background:#f1f5f9; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
+                                st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#b09cb0; border-radius:8px;'>No Image Available</div>", unsafe_allow_html=True)
                         except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; background:#f1f5f9; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#b09cb0; border-radius:8px;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name Only
+                        # Product Name
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
+                            f"<div style='text-align: center; font-weight: 700; font-size: 13px; color: #2d1524; height: 42px; overflow: hidden; margin-top: 10px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # Pricing (Current Red Price + Strikethrough Regular Price)
+                        # Pricing Section
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 12px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #b91c1c; margin-bottom: 10px;'>"
+                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #9ca3af; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
@@ -434,14 +420,14 @@ if st.session_state.current_view == "Home":
                             st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
                             st.success("Added to cart!")
                             st.rerun()
-                        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-        
+                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            
         st.markdown("<br>", unsafe_allow_html=True)
     else:
         st.info("No items found in this category.")
 
 else:
-    # --- CART & CHECKOUT VIEW (WITH COD SUPPORT) ---
+    # --- CART & CHECKOUT VIEW ---
     st.subheader("🛒 Shopping Cart & Secure Checkout")
     if st.session_state.cart:
         for c_idx, item in enumerate(st.session_state.cart):
