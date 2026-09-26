@@ -43,7 +43,7 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Custom Brand Logo Banner matching reference style */
+        /* Custom Brand Logo Banner replacing emojis with text */
         .anuaari-logo-container {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             padding: 16px;
@@ -174,8 +174,8 @@ if not st.session_state.logged_in_user:
     st.markdown(
         """
         <div class="anuaari-logo-container" style="max-width: 450px; margin: 0 auto 20px auto;">
-            <div class="logo-main-text">🌸 ANUAARI 🌸</div>
-            <div class="logo-sub-text">materials</div>
+            <div class="logo-main-text">ANUAARI MATERIALS</div>
+            <div class="logo-sub-text">aari work supplies</div>
             <div class="logo-footer-text">SAI AARI ENTERPRISES</div>
         </div>
         """,
@@ -222,8 +222,8 @@ if not st.session_state.logged_in_user:
 st.markdown(
     """
     <div class="anuaari-logo-container">
-        <div class="logo-main-text">🌸 ANUAARI 🌸</div>
-        <div class="logo-sub-text">materials</div>
+        <div class="logo-main-text">ANUAARI MATERIALS</div>
+        <div class="logo-sub-text">aari work supplies</div>
         <div class="logo-footer-text">SAI AARI ENTERPRISES • PH: 9840450113</div>
     </div>
 """,
