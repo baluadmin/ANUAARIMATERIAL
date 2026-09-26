@@ -3,7 +3,6 @@ import csv
 import os
 import re
 import chromadb
-from google import genai
 import pandas as pd
 import requests
 import streamlit as st
@@ -119,7 +118,7 @@ if "cart" not in st.session_state:
 if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_menu" not in st.session_state:
-    st.session_state.selected_menu = "Beads"
+    st.session_state.selected_menu = None
 if "product_page" not in st.session_state:
     st.session_state.product_page = 0
 if "quantities" not in st.session_state:
@@ -263,12 +262,12 @@ if not inv_df.empty:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
             product_records.append({
-                "id": str(row.iloc[0]).strip(),         # Item_ID
-                "name": str(row.iloc[1]).strip(),       # Category / Name
-                "category": str(row.iloc[2]).strip(),   # Subcategory or Category
-                "stock": str(row.iloc[3]).strip(),      # Stock Status
-                "price": str(row.iloc[4]).strip(),      # Price (INR)
-                "description": str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else "",
+                "id": str(row.iloc[0]).strip(),             # Item_ID
+                "name": str(row.iloc[1]).strip(),           # Product Name
+                "category": str(row.iloc[2]).strip(),       # Master Category (Column C)
+                "subcategory": str(row.iloc[3]).strip(),    # Sub-Category (Column D)
+                "price": str(row.iloc[4]).strip(),          # Price (INR)
+                "stock": str(row.iloc[5]).strip(),          # Stock Status
                 "image": str(row.iloc[6]).strip() if len(row) > 6 and pd.notna(row.iloc[6]) else "",
             })
     except Exception:
@@ -276,7 +275,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Crystal Diamond Cut Beads", "price": "45", "stock": "In Stock", "category": "Beads", "description": "Sparkling crystal beads", "image": ""}
+        {"id": "AB0001", "name": "Crystal Diamond Cut Beads", "category": "Beads", "subcategory": "Crystal Beads", "price": "45", "stock": "In Stock", "image": ""}
     ]
 
 
@@ -310,38 +309,48 @@ def process_cart_checkout(address: str, secondary_phone: str, description: str) 
     return f"Checkout complete! Order placed successfully for: {cart_summary}."
 
 
-# --- VIEW SWITCHING: HOME VS CART (Clean 2-Column Full-Width Layout) ---
+# --- VIEW SWITCHING: HOME VS CART (Master Category & Subcategory Hierarchy) ---
 if st.session_state.current_view == "Home":
     col_menu, col_items = st.columns([1, 3], gap="medium")
 
-    # 1. Categories Menu
+    # 1. Master Categories Menu Sidebar
     with col_menu:
-        st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Categories</span>", unsafe_allow_html=True)
+        st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Master Categories</span>", unsafe_allow_html=True)
         with st.container(height=650, border=True):
             categories = list(set([p["category"] for p in product_records if p["category"]]))
             if not categories:
-                categories = ["Beads", "Stones", "Threads"]
+                categories = ["Beads", "Stones", "Thread Materials"]
+                
+            if st.session_state.selected_menu not in categories:
+                st.session_state.selected_menu = categories[0]
+
             for cat in categories:
                 if st.button(cat, key=f"menu_btn_{cat}", use_container_width=True):
                     st.session_state.selected_menu = cat
                     st.session_state.product_page = 0
                     st.rerun()
 
-    # 2. Product Items Display
+    # 2. Product Items & Subcategory View
     with col_items:
         current_cat = st.session_state.get("selected_menu", categories[0])
-        st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Category:</span> <span style='color: #0f172a; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
+        st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Selected Category:</span> <span style='color: #0f172a; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
+        
         with st.container(height=650, border=True):
             filtered_items = [p for p in product_records if p["category"] == current_cat]
 
             if filtered_items:
-                for idx, prod in enumerate(filtered_items):
-                    qty_key = f"qty_{current_cat}_{idx}"
-                    if qty_key not in st.session_state.quantities:
-                        st.session_state.quantities[qty_key] = 1
+                # Subcategory selector inside the category view
+                subcats = list(set([p["subcategory"] for p in filtered_items if p["subcategory"]]))
+                if subcats:
+                    selected_subcat = st.selectbox("Filter Sub-Category", ["All Subcategories"] + subcats)
+                    if selected_subcat != "All Subcategories":
+                        filtered_items = [p for p in filtered_items if p["subcategory"] == selected_subcat]
 
-                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | {prod['stock']}</div>", unsafe_allow_html=True)
+                st.markdown("---")
+
+                for idx, prod in enumerate(filtered_items):
+                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']} <span style='color: #64748b; font-size: 13px;'>({prod.get('subcategory', '')})</span></div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
 
                     if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
                         st.session_state.cart.append({"product": f"{prod['id']} - {prod['name']}", "quantity": "1 Units"})
@@ -349,7 +358,7 @@ if st.session_state.current_view == "Home":
                         st.rerun()
                     st.markdown("<hr style='margin: 6px 0;'>", unsafe_allow_html=True)
             else:
-                st.info("No items found in this category.")
+                st.info("No items found in this master category.")
 
 else:
     # --- CART & CHECKOUT VIEW ---
