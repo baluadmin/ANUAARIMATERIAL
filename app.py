@@ -46,7 +46,7 @@ st.markdown(
         /* Uniform Product Image Container Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 180px !important;
+            height: 160px !important;
             object-fit: cover !important;
             border-radius: 8px !important;
         }
@@ -241,11 +241,23 @@ if not inv_df.empty:
     try:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
-            img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
             cat_val = str(row.iloc[1]).strip()
-            
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
+
+            # Gather all available image columns starting from Column F (index 5 onwards)
+            img_list = []
+            for col_idx in range(5, len(row)):
+                val = str(row.iloc[col_idx]).strip()
+                if val and val.lower() != "nan":
+                    # Check local folder path or URL
+                    loc_path = f"images/{val}"
+                    if os.path.exists(val):
+                        img_list.append(val)
+                    elif os.path.exists(loc_path):
+                        img_list.append(loc_path)
+                    else:
+                        img_list.append(val) # URL or default string
 
             product_records.append({
                 "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
@@ -254,7 +266,7 @@ if not inv_df.empty:
                 "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
                 "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
-                "image": img_val,                           # Column F: Image Filename
+                "images": img_list,                         # List of all images from Column F onwards
                 "stock": "In Stock",
             })
     except Exception:
@@ -262,7 +274,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "AAI", "category": "General", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "AAI", "category": "General", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "images": [], "stock": "In Stock"}
     ]
 
 
@@ -325,7 +337,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW WITH UNIFORM IMAGE SIZING ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW WITH MULTI-IMAGE SUPPORT ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -338,17 +350,18 @@ if st.session_state.current_view == "Home":
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
                     with st.container(border=True):
-                        # 1. Product Image (CSS enforces uniform 180px height & cover crop)
-                        img_path = prod.get('image', '')
-                        local_path1 = f"images/{img_path}" if img_path else ""
+                        # 1. Image Gallery Rendering
+                        img_list = prod.get('images', [])
                         
                         try:
-                            if img_path and os.path.exists(img_path):
-                                st.image(img_path, use_container_width=True)
-                            elif local_path1 and os.path.exists(local_path1):
-                                st.image(local_path1, use_container_width=True)
-                            elif img_path and img_path.startswith('http'):
-                                st.image(img_path, use_container_width=True)
+                            if len(img_list) > 1:
+                                # If multiple images exist, render them as a thumbnail row or gallery carousel
+                                img_cols = st.columns(len(img_list), gap="small")
+                                for img_i, img_src in enumerate(img_list):
+                                    with img_cols[img_i]:
+                                        st.image(img_src, use_container_width=True)
+                            elif len(img_list) == 1:
+                                st.image(img_list[0], use_container_width=True)
                             else:
                                 st.markdown("🖼️ *No Image*")
                         except Exception:
