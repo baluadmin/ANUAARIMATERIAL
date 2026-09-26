@@ -57,7 +57,7 @@ st.markdown(
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             border-radius: 16px !important;
-            padding: 14px !important;
+            padding: 12px !important;
             box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -71,7 +71,7 @@ st.markdown(
         /* Image Frame */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
-            padding: 8px !important;
+            padding: 4px !important;
             width: 100% !important;
             background-color: #fcf9fb !important;
             border-radius: 12px !important;
@@ -82,7 +82,7 @@ st.markdown(
 
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 190px !important;
+            height: 150px !important;
             object-fit: contain !important;
             object-position: center center !important;
             border-radius: 8px !important;
@@ -262,6 +262,10 @@ if not inv_df.empty:
                 cat_val = "General"
 
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
+            desc_val = str(row.iloc[6]).strip() if len(row) > 6 and pd.notna(row.iloc[6]) else ""
+            if desc_val.lower() == "nan":
+                desc_val = ""
+
             loc_path = f"images/{img_val}"
             if img_val and img_val.lower() != "nan":
                 if os.path.exists(img_val):
@@ -280,6 +284,7 @@ if not inv_df.empty:
                 "price": str(row.iloc[3]).strip(),
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
                 "image": main_img,
+                "description": desc_val,
                 "stock": "In Stock",
             })
     except Exception:
@@ -287,7 +292,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "Beads", "price": "90.00", "colors": "Red, Blue, Green", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "Beads", "price": "90.00", "colors": "Red, Blue, Green", "image": "", "description": "High quality glassy finish beads for grand aari embroidery work.", "stock": "In Stock"}
     ]
 
 
@@ -373,19 +378,31 @@ if st.session_state.current_view == "Home":
                     with st.container(border=True):
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
+                        desc_text = prod.get('description', '')
 
-                        # Image Container
-                        try:
-                            if img_path:
-                                st.image(img_path, use_container_width=True)
-                            else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#94a3b8; font-size:12px; font-weight:700; border-radius:8px;'>No Image Available</div>", unsafe_allow_html=True)
-                        except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#94a3b8; font-size:12px; font-weight:700; border-radius:8px;'>Image Error</div>", unsafe_allow_html=True)
+                        # Split card inner content into Image (left) and Description (right)
+                        card_col_img, card_col_desc = st.columns([1, 1], gap="small")
+
+                        with card_col_img:
+                            try:
+                                if img_path:
+                                    st.image(img_path, use_container_width=True)
+                                else:
+                                    st.markdown("<div style='text-align:center; padding:50px 0; background:#fcf9fb; color:#94a3b8; font-size:11px; font-weight:700; border-radius:8px;'>No Image</div>", unsafe_allow_html=True)
+                            except Exception:
+                                st.markdown("<div style='text-align:center; padding:50px 0; background:#fcf9fb; color:#94a3b8; font-size:11px; font-weight:700; border-radius:8px;'>Error</div>", unsafe_allow_html=True)
+
+                        with card_col_desc:
+                            st.markdown(
+                                f"<div style='font-size: 11px; font-weight: 600; color: #475569; background: #f8fafc; padding: 6px; border-radius: 8px; height: 150px; overflow-y: auto; border: 1px solid #e2e8f0;'>"
+                                f"<strong>Details:</strong><br>{desc_text if desc_text else 'No additional details available.'}"
+                                f"</div>",
+                                unsafe_allow_html=True
+                            )
                         
                         # Product Name
                         st.markdown(
-                            f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 10px; line-height: 1.3;'>"
+                            f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
