@@ -71,10 +71,9 @@ st.markdown(
         /* Image Frame */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
-            padding: 4px !important;
+            padding: 0px !important;
             width: 100% !important;
-            background-color: #fcf9fb !important;
-            border-radius: 12px !important;
+            background-color: transparent !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
@@ -380,7 +379,7 @@ if st.session_state.current_view == "Home":
                         img_path = prod.get('image', '')
                         desc_text = prod.get('description', '')
 
-                        # Split card inner content into Image (left) and Description (right)
+                        # Split card inner content into Image (left) and Description (right) without any container box
                         card_col_img, card_col_desc = st.columns([1, 1], gap="small")
 
                         with card_col_img:
@@ -388,13 +387,13 @@ if st.session_state.current_view == "Home":
                                 if img_path:
                                     st.image(img_path, use_container_width=True)
                                 else:
-                                    st.markdown("<div style='text-align:center; padding:50px 0; background:#fcf9fb; color:#94a3b8; font-size:11px; font-weight:700; border-radius:8px;'>No Image</div>", unsafe_allow_html=True)
+                                    st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
                             except Exception:
-                                st.markdown("<div style='text-align:center; padding:50px 0; background:#fcf9fb; color:#94a3b8; font-size:11px; font-weight:700; border-radius:8px;'>Error</div>", unsafe_allow_html=True)
+                                st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>Error</div>", unsafe_allow_html=True)
 
                         with card_col_desc:
                             st.markdown(
-                                f"<div style='font-size: 11px; font-weight: 600; color: #475569; background: #f8fafc; padding: 6px; border-radius: 8px; height: 150px; overflow-y: auto; border: 1px solid #e2e8f0;'>"
+                                f"<div style='font-size: 11px; font-weight: 600; color: #475569; padding: 2px 0px; height: 150px; overflow-y: auto; line-height: 1.4;'>"
                                 f"<strong>Details:</strong><br>{desc_text if desc_text else 'No additional details available.'}"
                                 f"</div>",
                                 unsafe_allow_html=True
