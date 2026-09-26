@@ -355,21 +355,19 @@ if st.session_state.current_view == "Home":
                 
                 with col_img:
                     img_path = prod.get('image', '')
-                    
-                    # Bulletproof local & remote image fallback loader
                     local_path1 = f"images/{img_path}" if img_path else ""
                     
-                    if img_path and os.path.exists(img_path):
-                        st.image(img_path, use_column_width=True)
-                    elif local_path1 and os.path.exists(local_path1):
-                        st.image(local_path1, use_column_width=True)
-                    elif img_path and img_path.startswith('http'):
-                        try:
-                            st.image(img_path, use_column_width=True)
-                        except Exception:
-                            st.markdown("🖼️ *Preview unavailable*")
-                    else:
-                        st.markdown("🖼️ *No Image Available*")
+                    try:
+                        if img_path and os.path.exists(img_path):
+                            st.image(img_path, width=120)
+                        elif local_path1 and os.path.exists(local_path1):
+                            st.image(local_path1, width=120)
+                        elif img_path and img_path.startswith('http'):
+                            st.image(img_path, width=120)
+                        else:
+                            st.markdown("🖼️ *No Image*")
+                    except Exception:
+                        st.markdown("🖼️ *Image Unavailable*")
                 
                 with col_info:
                     subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
