@@ -8,13 +8,26 @@ from datetime import datetime
 
 st.set_page_config(page_title="ANUAARIMATERIAL Store", page_icon="🧵", layout="wide")
 
-# Sidebar settings
-st.sidebar.header("⚙️ Configuration")
-gemini_api_key = st.sidebar.text_input("Gemini API Key:", type="password")
+# --- HARDCODED CONFIGURATION (No sidebar typing needed) ---
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
 
-# Paste your published CSV links or use public sheet URLs
-inventory_csv = st.sidebar.text_input("Inventory CSV URL", value="PASTE_INVENTORY_CSV_LINK")
-login_csv = st.sidebar.text_input("LOGIN CSV URL", value="PASTE_LOGIN_CSV_LINK")
+# Published Public CSV Links for your Google Sheet tabs
+INVENTORY_CSV_URL = "YOUR_PUBLISHED_INVENTORY_CSV_LINK_HERE"
+LOGIN_CSV_URL = "YOUR_PUBLISHED_LOGIN_CSV_LINK_HERE"
+
+# Google Service Account Credentials for writing orders directly to sheet
+GOOGLE_CREDS_JSON = {
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "your-private-key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----\n",
+  "client_email": "your-service-account@your-project.iam.gserviceaccount.com",
+  "client_id": "your-client-id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/your-service-account%40your-project.iam.gserviceaccount.com"
+}
 
 st.title("🧵 ANUAARIMATERIAL E-Commerce Platform")
 
@@ -29,7 +42,7 @@ if not st.session_state.logged_in:
     
     if st.button("Login"):
         try:
-            df_login = pd.read_csv(login_csv)
+            df_login = pd.read_csv(LOGIN_CSV_URL)
             df_login.columns = df_login.columns.str.strip()
             match = df_login[df_login['MOBILE NUMBER'].astype(str).str.contains(phone_input)]
             if not match.empty and phone_input:
@@ -49,7 +62,7 @@ else:
 
     # --- STORE CATALOG & FILTERS ---
     try:
-        df_inv = pd.read_csv(inventory_csv)
+        df_inv = pd.read_csv(INVENTORY_CSV_URL)
         df_inv.columns = df_inv.columns.str.strip()
 
         if "Category" in df_inv.columns:
@@ -92,7 +105,33 @@ else:
                 
                 submitted = st.form_submit_button("Submit Order")
                 if submitted:
-                    st.success("Order form ready! Connect your Google Service Account credentials to auto-sync this directly to your 'ANUAAARI Orders' tab[cite: 2].")
+                    try:
+                        creds_path = "temp_order_creds.json"
+                        with open(creds_path, "w") as f:
+                            json.dump(GOOGLE_CREDS_JSON, f)
+
+                        gc = gspread.service_account(filename=creds_path)
+                        sheet = gc.open("ANUAARIMATERIAL").worksheet("ANUAAARI Orders")
+                        
+                        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        row_data = [
+                            timestamp,
+                            c_name,
+                            p_phone,
+                            st.session_state.checkout_item,
+                            address,
+                            s_phone,
+                            notes
+                        ]
+                        
+                        sheet.append_row(row_data)
+                        
+                        if os.path.exists(creds_path):
+                            os.remove(creds_path)
+                            
+                        st.success("🎉 Order successfully placed and saved directly to your ANUAAARI Orders sheet!")
+                    except Exception as e:
+                        st.error(f"Failed to save order to Google Sheet: {e}")
 
     except Exception as e:
-        st.warning("⚠️ Please provide valid published CSV links in the sidebar to load your store database.")
+        st.warning(f"⚠️ Could not load inventory. Check your public CSV URLs. Error: {e}")
