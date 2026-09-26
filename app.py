@@ -530,8 +530,6 @@ elif st.session_state.current_view == "Categories":
         st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
         render_product_grid(filtered_items)
-    else:
-        st.info("👈 Please select a Master Category above to view subcategories and items.")
 
 
 elif st.session_state.current_view == "Cart":
