@@ -43,6 +43,14 @@ st.markdown(
             max-width: 100% !important;
         }
 
+        /* Uniform Product Image Container Styling */
+        [data-testid="stImage"] img {
+            width: 100% !important;
+            height: 180px !important;
+            object-fit: cover !important;
+            border-radius: 8px !important;
+        }
+
         /* Storefront Card Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: #1e3a8a !important;
@@ -236,7 +244,6 @@ if not inv_df.empty:
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
             cat_val = str(row.iloc[1]).strip()
             
-            # Clean up NaN category values from sheet
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
 
@@ -318,7 +325,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW WITH UNIFORM IMAGE SIZING ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -331,7 +338,7 @@ if st.session_state.current_view == "Home":
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
                     with st.container(border=True):
-                        # 1. Product Image
+                        # 1. Product Image (CSS enforces uniform 180px height & cover crop)
                         img_path = prod.get('image', '')
                         local_path1 = f"images/{img_path}" if img_path else ""
                         
