@@ -379,7 +379,7 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Title & Price (Stray number completely removed)
+                        # Product Name Only (Product ID removed) & Price
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 38px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
                             f"{prod['name']}"
@@ -448,3 +448,4 @@ else:
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
         st.info("Your cart is empty. Click Home to browse products.")
+        
