@@ -402,9 +402,9 @@ def render_product_grid(items):
 
                     desc_text = prod.get('description', '')
 
-                    # Render up to 3 images side-by-side cleanly
+                    # Render up to 3 images side-by-side cleanly using small columns
                     if len(img_list) > 0:
-                        img_cols = st.columns(len(img_list), gap="xs")
+                        img_cols = st.columns(len(img_list), gap="small")
                         for img_i, img_url in enumerate(img_list):
                             with img_cols[img_i]:
                                 st.markdown(
