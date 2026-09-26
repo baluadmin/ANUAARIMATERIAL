@@ -128,7 +128,7 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Buttons Styling - Touch Friendly for Mobile */
+        /* Buttons Styling - Touch Friendly */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
@@ -136,7 +136,7 @@ st.markdown(
             font-weight: 700 !important;
             font-size: 13px !important;
             border-radius: 12px !important;
-            padding: 0.5rem 0.8rem !important;
+            padding: 0.5rem 0.5rem !important;
             width: 100% !important;
             box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
             min-height: 40px !important;
@@ -186,6 +186,8 @@ if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = None
+if "selected_subcategory" not in st.session_state:
+    st.session_state.selected_subcategory = None
 if "shuffled_seed" not in st.session_state:
     st.session_state.shuffled_seed = random.randint(1, 10000)
 
@@ -194,11 +196,7 @@ GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tC
 
 def log_login_to_sheet(name, phone):
     try:
-        payload = {
-            "Type": "Login",
-            "Customer_Name": name,
-            "Primary_Phone": phone,
-        }
+        payload = {"Type": "Login", "Customer_Name": name, "Primary_Phone": phone}
         requests.post(GOOGLE_SCRIPT_URL, json=payload)
     except Exception as e:
         print(f"Login sheet error: {e}")
@@ -259,13 +257,13 @@ if not st.session_state.logged_in_user:
 
 
 # --- HEADER & NAVIGATION BAR ---
-logo_col, nav_col1, nav_col2, nav_col3 = st.columns([2.5, 1, 1, 0.8], gap="small")
+logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([2.0, 0.8, 1.2, 0.8, 0.5], gap="small")
 
 with logo_col:
     st.markdown(
         f"""
-        <div style="background: #ffffff; padding: 8px 12px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
-            <span style="font-size: 15px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
+        <div style="background: #ffffff; padding: 8px 10px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
+            <span style="font-size: 14px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -274,8 +272,14 @@ with logo_col:
 with nav_col1:
     if st.button("🏠 Home", use_container_width=True):
         st.session_state.current_view = "Home"
-        st.session_state.selected_category = None  # Reset category view on Home click
-        st.session_state.shuffled_seed = random.randint(1, 10000)  # Re-shuffle products on home click
+        st.session_state.shuffled_seed = random.randint(1, 10000)
+        st.rerun()
+
+with nav_col_cat:
+    if st.button("🗂️ Category", use_container_width=True):
+        st.session_state.current_view = "Categories"
+        st.session_state.selected_category = None
+        st.session_state.selected_subcategory = None
         st.rerun()
 
 with nav_col2:
@@ -316,6 +320,11 @@ if not inv_df.empty:
             cat_val = str(row.iloc[1]).strip()
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
+            
+            # Read subcategory from col C (index 2)
+            subcat_val = str(row.iloc[2]).strip() if len(row) > 2 and pd.notna(row.iloc[2]) else ""
+            if subcat_val.lower() == "nan":
+                subcat_val = ""
 
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
             desc_val = str(row.iloc[6]).strip() if len(row) > 6 and pd.notna(row.iloc[6]) else ""
@@ -335,198 +344,204 @@ if not inv_df.empty:
 
             product_records.append({
                 "id": str(row.iloc[0]).strip(),
-                "name": str(row.iloc[2]).strip(),
+                "name": subcat_val if subcat_val else "Craft Item", # Fallback name
                 "category": cat_val,
-                "price": str(row.iloc[3]).strip(),
+                "subcategory": subcat_val,
+                "price": str(row.iloc[3]).strip() if len(row) > 3 else "0.0",
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
                 "image": main_img,
                 "description": desc_val,
-                "stock": "In Stock",
             })
     except Exception:
         product_records = []
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "Beads", "price": "90.00", "colors": "Red, Blue, Green", "image": "", "description": "High quality glassy finish beads for grand aari embroidery work.", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "image": "", "description": "High quality beads."}
     ]
 
 
-def process_cart_checkout(address: str, payment_method: str, secondary_phone: str, description: str) -> str:
+def process_cart_checkout(address: str, payment_method: str, secondary_phone: str, notes: str) -> str:
     if not st.session_state.cart:
         return "Your cart is empty."
-    customer_name = st.session_state.logged_in_user
-    primary_phone = st.session_state.user_phone
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cart_summary = ", ".join([f"{qty} Units of {item}" for item, qty in st.session_state.cart.items()])
-
     try:
         order_data = {
             "Type": "Order",
             "Timestamp": timestamp,
-            "Customer_Name": customer_name,
-            "Primary_Phone": primary_phone,
+            "Customer_Name": st.session_state.logged_in_user,
+            "Primary_Phone": st.session_state.user_phone,
             "Items": cart_summary,
             "Address": address,
             "Payment_Method": payment_method,
             "Secondary_Phone": secondary_phone,
-            "Description": description,
+            "Description": notes,
         }
         requests.post(GOOGLE_SCRIPT_URL, json=order_data)
-    except Exception as e:
-        print(f"Order sheet error: {e}")
-
+    except Exception:
+        pass
     st.session_state.cart = {}
-    return f"Order placed successfully ({payment_method}) for: {cart_summary}."
+    return f"Order placed successfully ({payment_method})!"
 
 
-# --- STOREFRONT CATALOG VIEW ---
-if st.session_state.current_view == "Home":
-    categories = list(set([p["category"] for p in product_records if p["category"]]))
-    if not categories:
-        categories = ["General"]
+def render_product_grid(items):
+    if not items:
+        st.info("No items found.")
+        return
 
-    # Category Selection Header & Tabs
-    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>Category</span>", unsafe_allow_html=True)
-
-    for i in range(0, len(categories), 3):
-        cat_cols = st.columns(3, gap="small")
-        cat_batch = categories[i : i + 3]
+    for i in range(0, len(items), 2):
+        cols = st.columns(2, gap="small")
+        batch = items[i : i + 2]
         
-        for idx, cat in enumerate(cat_batch):
-            with cat_cols[idx]:
-                is_selected = (st.session_state.selected_category == cat)
-                button_label = f"📂 {cat}" if is_selected else cat
-                
-                if st.button(button_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
-                    st.session_state.selected_category = cat
-                    st.rerun()
+        for col_idx, prod in enumerate(batch):
+            with cols[col_idx]:
+                with st.container(border=True):
+                    # Use unique item ID to prevent shuffling conflicts
+                    u_key = prod['id'] 
+                    img_src = get_image_src(prod.get('image', ''))
+                    desc_text = prod.get('description', '')
 
-    st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
-
-    # Filter or Shuffle Products
-    if st.session_state.selected_category:
-        filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category]
-        header_title = st.session_state.selected_category
-    else:
-        # Shuffle products randomly when no specific category is selected
-        filtered_items = list(product_records)
-        random.seed(st.session_state.shuffled_seed)
-        random.shuffle(filtered_items)
-        header_title = "Featured Products"
-
-    grid_head_col1, grid_head_col2 = st.columns([2, 1])
-    with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
-    with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-
-    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
-
-    # Responsive 2-Column Grid
-    if filtered_items:
-        for i in range(0, len(filtered_items), 2):
-            cols = st.columns(2, gap="small")
-            batch = filtered_items[i : i + 2]
-            
-            for col_idx, prod in enumerate(batch):
-                with cols[col_idx]:
-                    with st.container(border=True):
-                        global_idx = i + col_idx
-                        img_path = prod.get('image', '')
-                        desc_text = prod.get('description', '')
-                        img_src = get_image_src(img_path)
-
-                        # Compact Image Display
+                    # Image & Description Row
+                    card_col_img, card_col_desc = st.columns([1, 1], gap="small")
+                    with card_col_img:
                         if img_src:
                             st.markdown(
                                 f"""
-                                <a href="#modal_{global_idx}">
+                                <a href="#modal_{u_key}">
                                     <img src="{img_src}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
                                 </a>
-                                <div id="modal_{global_idx}" class="lightbox-overlay" onclick="location.href='#';">
+                                <div id="modal_{u_key}" class="lightbox-overlay" onclick="location.href='#';">
                                     <a href="#" class="close-hint">&times;</a>
                                     <img src="{img_src}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
                                 </div>
-                                """,
-                                unsafe_allow_html=True,
+                                """, unsafe_allow_html=True
                             )
                         else:
                             st.markdown("<div style='text-align:center; padding:40px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
-                        # Description Text Below Image
+                    with card_col_desc:
                         st.markdown(
                             f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 4px 0px; max-height: 80px; overflow-y: auto; line-height: 1.3;'>"
                             f"<strong>Details:</strong> {desc_text if desc_text else 'No additional details.'}"
-                            f"</div>",
-                            unsafe_allow_html=True,
+                            f"</div>", unsafe_allow_html=True
                         )
-                        
-                        # Product Name
-                        st.markdown(
-                            f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
-                            f"{prod['name']}"
-                            f"</div>", 
-                            unsafe_allow_html=True,
-                        )
+                    
+                    # Name
+                    st.markdown(
+                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
+                        f"{prod['name']}"
+                        f"</div>", unsafe_allow_html=True
+                    )
 
-                        # Pricing Section
-                        st.markdown(
-                            f"<div style='font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 6px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 10px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
-                            f"</div>", 
-                            unsafe_allow_html=True,
-                        )
+                    # Price
+                    st.markdown(
+                        f"<div style='font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 6px;'>"
+                        f"Rs. {prod['price']} <span style='font-size: 10px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
+                        f"</div>", unsafe_allow_html=True
+                    )
 
-                        # Color Dropdown Options Parser
-                        raw_colors = prod.get('colors', '')
-                        for sep in ['\\', ',', '&']:
-                            raw_colors = raw_colors.replace(sep, '|')
-                        color_list = [c.strip() for c in raw_colors.split('|') if c.strip()]
-                        selected_color = color_list[0] if color_list else "Standard"
+                    # Colors
+                    raw_colors = prod.get('colors', '')
+                    for sep in ['\\', ',', '&']: raw_colors = raw_colors.replace(sep, '|')
+                    color_list = [c.strip() for c in raw_colors.split('|') if c.strip()]
+                    selected_color = color_list[0] if color_list else "Standard"
 
-                        if color_list:
-                            selected_color = st.selectbox(
-                                "Options", 
-                                color_list, 
-                                key=f"color_{global_idx}", 
-                                label_visibility="collapsed",
-                            )
+                    if color_list:
+                        selected_color = st.selectbox("Options", color_list, key=f"color_{u_key}", label_visibility="collapsed")
 
-                        # Item Key for Cart Storage
-                        item_key = f"{prod['name']} ({selected_color})"
-                        current_qty = st.session_state.cart.get(item_key, 0)
+                    # Cart Layout
+                    item_key = f"{prod['name']} ({selected_color})"
+                    current_qty = st.session_state.cart.get(item_key, 0)
 
-                        # Quantity Stepper Layout ([ - ] [ Qty ] [ + ])
-                        q_col1, q_col2, q_col3 = st.columns([1, 1.2, 1], gap="small")
-                        
-                        with q_col1:
-                            if st.button("➖", key=f"minus_{global_idx}", use_container_width=True):
-                                if current_qty > 0:
-                                    st.session_state.cart[item_key] = current_qty - 1
-                                    if st.session_state.cart[item_key] == 0:
-                                        del st.session_state.cart[item_key]
-                                    st.rerun()
-
-                        with q_col2:
-                            st.markdown(
-                                f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>",
-                                unsafe_allow_html=True,
-                            )
-
-                        with q_col3:
-                            if st.button("➕", key=f"plus_{global_idx}", use_container_width=True):
-                                st.session_state.cart[item_key] = current_qty + 1
+                    q_col1, q_col2, q_col3 = st.columns([1, 1.2, 1], gap="small")
+                    with q_col1:
+                        if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
+                            if current_qty > 0:
+                                st.session_state.cart[item_key] = current_qty - 1
+                                if st.session_state.cart[item_key] == 0: del st.session_state.cart[item_key]
                                 st.rerun()
+                    with q_col2:
+                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                    with q_col3:
+                        if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
+                            st.session_state.cart[item_key] = current_qty + 1
+                            st.rerun()
 
-                        st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
-            
-        st.markdown("<br>", unsafe_allow_html=True)
+                    st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
+
+
+# --- ROUTING LOGIC ---
+
+if st.session_state.current_view == "Home":
+    filtered_items = list(product_records)
+    random.seed(st.session_state.shuffled_seed)
+    random.shuffle(filtered_items)
+
+    grid_head_col1, grid_head_col2 = st.columns([2, 1])
+    with grid_head_col1:
+        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
+    with grid_head_col2:
+        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+
+    render_product_grid(filtered_items)
+
+
+elif st.session_state.current_view == "Categories":
+    categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
+    
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
+    
+    for i in range(0, len(categories), 3):
+        cat_cols = st.columns(3, gap="small")
+        for idx, cat in enumerate(categories[i : i + 3]):
+            with cat_cols[idx]:
+                is_selected = (st.session_state.selected_category == cat)
+                btn_label = f"📂 {cat}" if is_selected else cat
+                if st.button(btn_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
+                    st.session_state.selected_category = cat
+                    st.session_state.selected_subcategory = None
+                    st.rerun()
+
+    st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+
+    if st.session_state.selected_category:
+        subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
+        
+        if subcats:
+            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 12px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
+            for i in range(0, len(subcats), 3):
+                subcat_cols = st.columns(3, gap="small")
+                for idx, subcat in enumerate(subcats[i : i + 3]):
+                    with subcat_cols[idx]:
+                        is_sel_sub = (st.session_state.selected_subcategory == subcat)
+                        sub_label = f"✨ {subcat}" if is_sel_sub else subcat
+                        if st.button(sub_label, key=f"sub_btn_{i}_{idx}", use_container_width=True):
+                            st.session_state.selected_subcategory = subcat
+                            st.rerun()
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+        if st.session_state.selected_subcategory:
+            filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == st.session_state.selected_subcategory]
+            header_title = st.session_state.selected_subcategory
+        else:
+            filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category]
+            header_title = f"All {st.session_state.selected_category}"
+
+        grid_head_col1, grid_head_col2 = st.columns([2, 1])
+        with grid_head_col1:
+            st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
+        with grid_head_col2:
+            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+
+        render_product_grid(filtered_items)
     else:
-        st.info("No items found in this category.")
+        st.info("👈 Please select a Master Category above to view subcategories and items.")
 
-else:
-    # --- CART & CHECKOUT VIEW ---
+
+elif st.session_state.current_view == "Cart":
     st.subheader("🛒 Shopping Cart & Secure Checkout")
     if st.session_state.cart:
         for item_desc, qty in list(st.session_state.cart.items()):
@@ -554,4 +569,4 @@ else:
                 else:
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
-        st.info("Your cart is empty. Click Home to browse products.")
+        st.info("Your cart is empty. Click Home or Category to browse products.")
