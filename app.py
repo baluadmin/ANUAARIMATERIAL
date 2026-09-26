@@ -21,8 +21,8 @@ st.markdown(
 
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: 15px !important;
-            color: #0f172a !important;
+            font-size: 14px !important;
+            color: #1e293b !important;
         }
 
         .stApp {
@@ -43,17 +43,17 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Dynamic Full/Thumbnail Product Image Styling */
+        /* Exact Catalog Product Image Card Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 220px !important;
+            height: 210px !important;
             object-fit: cover !important;
-            border-radius: 8px !important;
+            border-radius: 12px !important;
         }
 
-        /* Storefront Card Styling */
+        /* E-Commerce Catalog Pill Button Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: #1e3a8a !important;
+            background: #2b3a97 !important; /* Classic Storefront Blue */
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
@@ -62,10 +62,10 @@ st.markdown(
             padding: 0.45rem 0.75rem !important;
             width: 100% !important;
             display: block !important;
-            box-shadow: 0 2px 5px rgba(30, 58, 138, 0.2) !important;
+            box-shadow: 0 2px 5px rgba(43, 58, 151, 0.2) !important;
         }
         div.stButton > button:hover {
-            background: #1d4ed8 !important;
+            background: #1e2975 !important;
             color: #ffffff !important;
         }
 
@@ -336,7 +336,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW WITH ADAPTIVE IMAGE RENDERING ---
+    # --- 4-COLUMN STOREFRONT CATALOG GRID VIEW ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -349,7 +349,7 @@ if st.session_state.current_view == "Home":
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
                     with st.container(border=True):
-                        # 1. Image Rendering (Full width if 1 image, Grid if multiple)
+                        # 1. Dynamic Image Rendering (Full if 1, Grid if multiple)
                         img_list = prod.get('images', [])
                         
                         try:
@@ -366,17 +366,17 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("🖼️ *Image Unavailable*")
                         
-                        # 2. Centered Product Title
+                        # 2. Centered Product Title (Catalog Style)
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 700; font-size: 13px; color: #0f172a; height: 42px; overflow: hidden; margin-top: 6px;'>"
-                            f"{prod['id']} - {prod['name']}"
+                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
+                            f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # 3. Centered Price
+                        # 3. Centered Red/Blue Pricing (Matching Reference Site)
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #1e3a8a; margin-bottom: 8px;'>"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 10px;'>"
                             f"Rs. {prod['price']}"
                             f"</div>", 
                             unsafe_allow_html=True
