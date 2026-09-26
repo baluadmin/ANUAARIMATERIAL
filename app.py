@@ -43,27 +43,45 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        .brand-banner {
-            background: linear-gradient(135deg, #1d4ed8 0%, #0284c7 100%) !important;
-            padding: 14px 18px !important;
-            border-radius: 12px !important;
-            text-align: center !important;
-            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25) !important;
-            margin-bottom: 12px !important;
-            border: 1px solid #38bdf8 !important;
+        /* Custom Brand Logo Banner matching reference style */
+        .anuaari-logo-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 16px;
+            border-radius: 14px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 14px;
         }
-        .brand-banner .brand-title {
-            font-size: 22px !important;
-            font-weight: 800 !important;
-            color: #ffffff !important;
-            margin: 0 0 4px 0 !important;
-            text-transform: uppercase !important;
+        .logo-main-text {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #6b1d4f; /* Rich Maroon / Plum */
+            text-transform: uppercase;
+            margin: 0;
         }
-        .brand-banner .brand-phone {
-            font-size: 15px !important;
-            font-weight: 700 !important;
-            color: #e0f2fe !important;
-            margin: 0 !important;
+        .logo-sub-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #d97706; /* Warm Golden Amber */
+            text-transform: lowercase;
+            font-style: italic;
+            letter-spacing: 0.5px;
+            margin-top: -2px;
+            margin-bottom: 4px;
+        }
+        .logo-footer-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-top: 1px solid #cbd5e1;
+            display: inline-block;
+            padding-top: 4px;
+            padding-left: 20px;
+            padding-right: 20px;
         }
 
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
@@ -155,13 +173,10 @@ if not st.session_state.logged_in_user:
     st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
     st.markdown(
         """
-        <div style="text-align: center; margin-bottom: 22px;">
-            <div style="font-size: 30px; font-weight: 800; text-transform: uppercase; color: #0f172a;">
-                ANUAARIMATERIAL
-            </div>
-            <p style="font-size: 14px; color: #64748b; font-weight: 600; margin: 0;">
-                Aari Work & Embroidery Materials &nbsp;|&nbsp; <span style="color: #0284c7; font-weight: 700;">📞 9840450113</span>
-            </p>
+        <div class="anuaari-logo-container" style="max-width: 450px; margin: 0 auto 20px auto;">
+            <div class="logo-main-text">🌸 ANUAARI 🌸</div>
+            <div class="logo-sub-text">materials</div>
+            <div class="logo-footer-text">SAI AARI ENTERPRISES</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -173,7 +188,6 @@ if not st.session_state.logged_in_user:
         st.markdown(
             """
             <div class="login-card">
-                <div style="font-size: 26px; text-align: center; margin-bottom: 10px;">🧵</div>
                 <div style="font-size: 21px; font-weight: 800; color: #0f172a; margin-bottom: 4px; text-align: center;">Welcome Customer</div>
                 <div style="font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 18px; text-align: center;">
                     Enter your details to explore collections & order supplies
@@ -207,9 +221,10 @@ if not st.session_state.logged_in_user:
 # --- AFTER LOGIN HEADER & NAVIGATION ---
 st.markdown(
     """
-    <div class="brand-banner">
-        <div class="brand-title">ANUAARIMATERIAL E-Commerce</div>
-        <div class="brand-phone">📞 Contact: 9840450113</div>
+    <div class="anuaari-logo-container">
+        <div class="logo-main-text">🌸 ANUAARI 🌸</div>
+        <div class="logo-sub-text">materials</div>
+        <div class="logo-footer-text">SAI AARI ENTERPRISES • PH: 9840450113</div>
     </div>
 """,
     unsafe_allow_html=True,
@@ -262,12 +277,12 @@ if not inv_df.empty:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
-                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name
-                "category": str(row.iloc[1]).strip(),       # Column B: Category
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
+                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name[cite: 3]
+                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
+                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options[cite: 3]
                 "stock": "In Stock",
             })
     except Exception:
@@ -352,7 +367,7 @@ if st.session_state.current_view == "Home":
                 st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
                 st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
 
-                # Parse multiple colors from Google Sheet Column E (comma or ampersand separated)
+                # Parse multiple colors from Google Sheet Column E (comma or ampersand separated)[cite: 3]
                 raw_colors = prod.get('colors', '')
                 color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
                 
