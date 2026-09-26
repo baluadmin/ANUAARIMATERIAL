@@ -96,7 +96,7 @@ st.markdown(
             top: 0;
             width: 100vw;
             height: 100vh;
-            background-color: rgba(20, 5, 15, 0.85);
+            background-color: rgba(20, 5, 15, 0.9);
             backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
@@ -105,30 +105,63 @@ st.markdown(
         .lightbox-overlay:target {
             display: flex;
         }
+        .lightbox-content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+        }
         .lightbox-img {
-            max-width: 90vw;
-            max-height: 85vh;
+            max-width: 85vw;
+            max-height: 80vh;
             object-fit: contain;
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
             animation: zoomIn 0.25s ease-out;
-            cursor: default;
         }
         .close-hint {
             position: absolute;
-            top: 20px;
-            right: 25px;
+            top: -50px;
+            right: 0px;
             color: #ffffff;
             font-size: 28px;
             font-weight: bold;
             text-decoration: none;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: bold;
+            text-decoration: none;
+            background: rgba(107, 29, 79, 0.7);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: background 0.2s;
+        }
+        .nav-btn:hover {
+            background: rgba(107, 29, 79, 1);
+        }
+        .prev-btn {
+            left: -70px;
+        }
+        .next-btn {
+            right: -70px;
         }
 
         @keyframes zoomIn {
@@ -402,11 +435,15 @@ def render_product_grid(items):
                     img_list = [get_image_src(img.strip()) for img in raw_imgs.split('|') if img.strip() and img.strip().lower() != 'nan']
 
                     desc_text = prod.get('description', '')
+                    total_imgs = len(img_list)
 
-                    # Render up to 3 images side-by-side cleanly using small columns
-                    if len(img_list) > 0:
-                        img_cols = st.columns(len(img_list), gap="small")
+                    # Render up to 3 images side-by-side with Lightbox + Left/Right navigation
+                    if total_imgs > 0:
+                        img_cols = st.columns(total_imgs, gap="small")
                         for img_i, img_url in enumerate(img_list):
+                            prev_i = (img_i - 1) % total_imgs
+                            next_i = (img_i + 1) % total_imgs
+                            
                             with img_cols[img_i]:
                                 st.markdown(
                                     f"""
@@ -414,8 +451,12 @@ def render_product_grid(items):
                                         <img src="{img_url}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
                                     </a>
                                     <div id="modal_{u_key}_{img_i}" class="lightbox-overlay" onclick="location.href='#';">
-                                        <a href="#" class="close-hint">&times;</a>
-                                        <img src="{img_url}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
+                                        <div class="lightbox-content" onclick="event.stopPropagation();">
+                                            <a href="#" class="close-hint">&times;</a>
+                                            <a href="#modal_{u_key}_{prev_i}" class="nav-btn prev-btn">‹</a>
+                                            <img src="{img_url}" class="lightbox-img" alt="{prod['name']}" />
+                                            <a href="#modal_{u_key}_{next_i}" class="nav-btn next-btn">›</a>
+                                        </div>
                                     </div>
                                     """, unsafe_allow_html=True
                                 )
