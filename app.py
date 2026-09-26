@@ -43,7 +43,7 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Custom Brand Logo Banner replacing emojis with text */
+        /* Custom Brand Logo Banner without footer info */
         .anuaari-logo-container {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             padding: 16px;
@@ -69,19 +69,7 @@ st.markdown(
             font-style: italic;
             letter-spacing: 0.5px;
             margin-top: -2px;
-            margin-bottom: 4px;
-        }
-        .logo-footer-text {
-            font-size: 12px;
-            font-weight: 700;
-            color: #64748b;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-top: 1px solid #cbd5e1;
-            display: inline-block;
-            padding-top: 4px;
-            padding-left: 20px;
-            padding-right: 20px;
+            margin-bottom: 2px;
         }
 
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
@@ -176,7 +164,6 @@ if not st.session_state.logged_in_user:
         <div class="anuaari-logo-container" style="max-width: 450px; margin: 0 auto 20px auto;">
             <div class="logo-main-text">ANUAARI MATERIALS</div>
             <div class="logo-sub-text">aari work supplies</div>
-            <div class="logo-footer-text">SAI AARI ENTERPRISES</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -224,7 +211,6 @@ st.markdown(
     <div class="anuaari-logo-container">
         <div class="logo-main-text">ANUAARI MATERIALS</div>
         <div class="logo-sub-text">aari work supplies</div>
-        <div class="logo-footer-text">SAI AARI ENTERPRISES • PH: 9840450113</div>
     </div>
 """,
     unsafe_allow_html=True,
@@ -277,12 +263,12 @@ if not inv_df.empty:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
-                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name[cite: 3]
-                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options[cite: 3]
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
+                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name
+                "category": str(row.iloc[1]).strip(),       # Column B: Category
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
+                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options
                 "stock": "In Stock",
             })
     except Exception:
@@ -367,7 +353,7 @@ if st.session_state.current_view == "Home":
                 st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
                 st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
 
-                # Parse multiple colors from Google Sheet Column E (comma or ampersand separated)[cite: 3]
+                # Parse multiple colors from Google Sheet Column E (comma or ampersand separated)
                 raw_colors = prod.get('colors', '')
                 color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
                 
