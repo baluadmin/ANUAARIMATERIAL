@@ -262,13 +262,23 @@ if not inv_df.empty:
     try:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
+            img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
+            
+            # Format GitHub Raw Image URL automatically
+            if img_val and not img_val.startswith("http"):
+                formatted_img_name = img_val.replace(" ", "%20")
+                img_url = f"https://raw.githubusercontent.com/baluadmin/ANUAARIMATERIAL/main/images/{formatted_img_name}"
+            else:
+                img_url = img_val
+
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
-                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name
-                "category": str(row.iloc[1]).strip(),       # Column B: Category
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
+                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name[cite: 3]
+                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
+                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options[cite: 3]
+                "image": img_url,                           # Column F: GitHub Image Link[cite: 4]
                 "stock": "In Stock",
             })
     except Exception:
@@ -276,7 +286,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "AAI", "category": "AAI", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "stock": "In Stock"}
+        {"id": "AB0001", "name": "AAI", "category": "AAI", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "image": "", "stock": "In Stock"}
     ]
 
 
@@ -320,25 +330,13 @@ if st.session_state.current_view == "Home":
     if st.session_state.selected_menu not in categories:
         st.session_state.selected_menu = categories[0]
 
-    # --- COLUMN-WISE MASTER CATEGORIES HEADER WITH GITHUB IMAGES ---
+    # --- COLUMN-WISE MASTER CATEGORIES HEADER ---
     st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Master Categories</span>", unsafe_allow_html=True)
-    
-    # Map your category names to your GitHub raw image links here
-    category_images = {
-        "Beads": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/beads.jpg",
-        "Stones": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/stones.jpg",
-        "Threads": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/threads.jpg",
-    }
     
     cat_cols = st.columns(len(categories) if len(categories) > 0 else 1, gap="small")
     
     for idx, cat in enumerate(categories):
         with cat_cols[idx]:
-            # Display GitHub category image if mapped
-            cat_img = category_images.get(cat, "")
-            if cat_img:
-                st.image(cat_img, use_column_width=True)
-
             is_selected = (st.session_state.selected_menu == cat)
             button_label = f"📂 {cat}" if is_selected else cat
             
@@ -349,7 +347,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH COLOR SWATCH SELECTION ---
+    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH IMAGES & COLOR SWATCHES ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
     
@@ -360,35 +358,47 @@ if st.session_state.current_view == "Home":
             st.markdown("---")
 
             for idx, prod in enumerate(filtered_items):
-                subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
+                col_img, col_info = st.columns([1, 3], gap="medium")
                 
-                st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
-
-                # Parse multiple colors from Google Sheet Column E (comma or ampersand separated)
-                raw_colors = prod.get('colors', '')
-                color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
+                with col_img:
+                    if prod.get('image') and prod['image'].startswith('http'):
+                        try:
+                            st.image(prod['image'], use_column_width=True)
+                        except Exception:
+                            st.markdown("🖼️ *Image loading error*")
+                    else:
+                        st.markdown("🖼️ *No Image*")
                 
-                selected_color = color_list[0] if color_list else "Standard"
-
-                if color_list:
-                    st.markdown("<div style='font-size: 13px; font-weight: 700; color: #475569; margin-top: 6px;'>Select Color Option:</div>", unsafe_allow_html=True)
-                    selected_color = st.radio(
-                        "Choose Color", 
-                        color_list, 
-                        key=f"color_radio_{current_cat}_{idx}", 
-                        horizontal=True, 
-                        label_visibility="collapsed"
-                    )
-                    st.markdown(f"<div style='font-size: 13px; color: #0284c7; font-weight: 600; margin-bottom: 6px;'>Selected Color: <b>{selected_color}</b></div>", unsafe_allow_html=True)
-
-                if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
-                    item_desc = f"{prod['id']} - {prod['name']} (Color: {selected_color})"
-                    st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
-                    st.success(f"Added {selected_color} variant to cart!")
-                    st.rerun()
+                with col_info:
+                    subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
                     
-                st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
+
+                    # Parse multiple colors from Google Sheet Column E
+                    raw_colors = prod.get('colors', '')
+                    color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
+                    
+                    selected_color = color_list[0] if color_list else "Standard"
+
+                    if color_list:
+                        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #475569; margin-top: 6px;'>Select Color Option:</div>", unsafe_allow_html=True)
+                        selected_color = st.radio(
+                            "Choose Color", 
+                            color_list, 
+                            key=f"color_radio_{current_cat}_{idx}", 
+                            horizontal=True, 
+                            label_visibility="collapsed"
+                        )
+                        st.markdown(f"<div style='font-size: 13px; color: #0284c7; font-weight: 600; margin-bottom: 6px;'>Selected Color: <b>{selected_color}</b></div>", unsafe_allow_html=True)
+
+                    if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
+                        item_desc = f"{prod['id']} - {prod['name']} (Color: {selected_color})"
+                        st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
+                        st.success(f"Added {selected_color} variant to cart!")
+                        st.rerun()
+                        
+                st.markdown("<hr style='margin: 12px 0;'>", unsafe_allow_html=True)
         else:
             st.info("No items found in this master category.")
 
