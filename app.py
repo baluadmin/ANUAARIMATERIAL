@@ -74,7 +74,7 @@ st.markdown(
 
         /* Storefront Card Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: #1e3a8a !important; /* Professional E-Commerce Navy / Blue */
+            background: #1e3a8a !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
@@ -340,15 +340,11 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW (MATCHING REFERENCE) ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW (WITHOUT CATEGORY BANNER LABEL) ---
     current_cat = st.session_state.get("selected_menu", categories[0])
-    st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
-    
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
     if filtered_items:
-        st.markdown("---")
-
         # Chunk items into rows of 4 products per row
         for i in range(0, len(filtered_items), 4):
             cols = st.columns(4, gap="medium")
