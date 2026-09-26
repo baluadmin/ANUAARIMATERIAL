@@ -97,7 +97,7 @@ st.markdown(
             font-weight: 700 !important;
             font-size: 13px !important;
             border-radius: 12px !important;
-            padding: 0.5rem 1rem !important;
+            padding: 0.4rem 0.8rem !important;
             width: 100% !important;
             box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
             transition: all 0.2s ease;
@@ -134,7 +134,7 @@ if "logged_in_user" not in st.session_state:
 if "user_phone" not in st.session_state:
     st.session_state.user_phone = None
 if "cart" not in st.session_state:
-    st.session_state.cart = []
+    st.session_state.cart = {}  # Format: {item_key: quantity}
 if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
@@ -223,8 +223,8 @@ with nav_col1:
         st.rerun()
 
 with nav_col2:
-    cart_count = len(st.session_state.cart)
-    if st.button(f"🛒 Cart ({cart_count})", use_container_width=True):
+    total_cart_items = sum(st.session_state.cart.values())
+    if st.button(f"🛒 Cart ({total_cart_items})", use_container_width=True):
         st.session_state.current_view = "Cart"
         st.rerun()
 
@@ -297,7 +297,7 @@ def process_cart_checkout(address: str, payment_method: str, secondary_phone: st
     customer_name = st.session_state.logged_in_user
     primary_phone = st.session_state.user_phone
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cart_summary = ", ".join([f"{item['quantity']} of {item['product']}" for item in st.session_state.cart])
+    cart_summary = ", ".join([f"{qty} Units of {item}" for item, qty in st.session_state.cart.items()])
 
     try:
         order_data = {
@@ -315,7 +315,7 @@ def process_cart_checkout(address: str, payment_method: str, secondary_phone: st
     except Exception as e:
         print(f"Order sheet error: {e}")
 
-    st.session_state.cart = []
+    st.session_state.cart = {}
     return f"Order placed successfully ({payment_method}) for: {cart_summary}."
 
 
@@ -414,13 +414,32 @@ if st.session_state.current_view == "Home":
                                 label_visibility="collapsed"
                             )
 
-                        # Action Button
-                        btn_label = "Select & Add" if color_list else "Add To Cart"
-                        if st.button(f"🛒 {btn_label}", key=f"cart_{global_idx}", use_container_width=True):
-                            item_desc = f"{prod['name']} ({selected_color})"
-                            st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
-                            st.success("Added to cart!")
-                            st.rerun()
+                        # Item Key for Cart Storage
+                        item_key = f"{prod['name']} ({selected_color})"
+                        current_qty = st.session_state.cart.get(item_key, 0)
+
+                        # Quantity Stepper Layout ([ - ] [ Qty ] [ + ])
+                        q_col1, q_col2, q_col3 = st.columns([1, 1.2, 1], gap="small")
+                        
+                        with q_col1:
+                            if st.button("➖", key=f"minus_{global_idx}", use_container_width=True):
+                                if current_qty > 0:
+                                    st.session_state.cart[item_key] = current_qty - 1
+                                    if st.session_state.cart[item_key] == 0:
+                                        del st.session_state.cart[item_key]
+                                    st.rerun()
+
+                        with q_col2:
+                            st.markdown(
+                                f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>",
+                                unsafe_allow_html=True
+                            )
+
+                        with q_col3:
+                            if st.button("➕", key=f"plus_{global_idx}", use_container_width=True):
+                                st.session_state.cart[item_key] = current_qty + 1
+                                st.rerun()
+
                         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
@@ -431,13 +450,13 @@ else:
     # --- CART & CHECKOUT VIEW ---
     st.subheader("🛒 Shopping Cart & Secure Checkout")
     if st.session_state.cart:
-        for c_idx, item in enumerate(st.session_state.cart):
+        for item_desc, qty in list(st.session_state.cart.items()):
             col_item, col_rem = st.columns([4, 1])
             with col_item:
-                st.markdown(f"• **{item['product']}** ({item['quantity']})")
+                st.markdown(f"• **{item_desc}** — Quantity: **{qty} Units**")
             with col_rem:
-                if st.button("Remove", key=f"rem_{c_idx}"):
-                    st.session_state.cart.pop(c_idx)
+                if st.button("Remove", key=f"rem_{item_desc}"):
+                    del st.session_state.cart[item_desc]
                     st.rerun()
 
         st.markdown("---")
