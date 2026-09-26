@@ -43,10 +43,10 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Uniform Product Image Container Styling */
+        /* Uniform Product Image Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 160px !important;
+            height: 180px !important;
             object-fit: cover !important;
             border-radius: 8px !important;
         }
@@ -245,19 +245,18 @@ if not inv_df.empty:
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
 
-            # Gather all available image columns starting from Column F (index 5 onwards)
+            # Gather all non-empty image columns starting from Column F (index 5 onwards)
             img_list = []
             for col_idx in range(5, len(row)):
                 val = str(row.iloc[col_idx]).strip()
                 if val and val.lower() != "nan":
-                    # Check local folder path or URL
                     loc_path = f"images/{val}"
                     if os.path.exists(val):
                         img_list.append(val)
                     elif os.path.exists(loc_path):
                         img_list.append(loc_path)
                     else:
-                        img_list.append(val) # URL or default string
+                        img_list.append(val)
 
             product_records.append({
                 "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
@@ -266,7 +265,7 @@ if not inv_df.empty:
                 "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
                 "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
-                "images": img_list,                         # List of all images from Column F onwards
+                "images": img_list,                         # List of all uploaded images
                 "stock": "In Stock",
             })
     except Exception:
@@ -337,7 +336,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW WITH MULTI-IMAGE SUPPORT ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW WITH DYNAMIC IMAGE RENDERING ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -350,18 +349,20 @@ if st.session_state.current_view == "Home":
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
                     with st.container(border=True):
-                        # 1. Image Gallery Rendering
+                        # 1. Dynamic Image Rendering (1 Full Image vs Multi-Image Grid)
                         img_list = prod.get('images', [])
                         
                         try:
-                            if len(img_list) > 1:
-                                # If multiple images exist, render them as a thumbnail row or gallery carousel
-                                img_cols = st.columns(len(img_list), gap="small")
-                                for img_i, img_src in enumerate(img_list):
-                                    with img_cols[img_i]:
-                                        st.image(img_src, use_container_width=True)
-                            elif len(img_list) == 1:
+                            if len(img_list) == 1:
+                                # Show 1 image full width
                                 st.image(img_list[0], use_container_width=True)
+                            elif len(img_list) > 1:
+                                # Show multiple images in a compact 2-column thumbnail grid
+                                for row_start in range(0, min(len(img_list), 4), 2):
+                                    sub_cols = st.columns(2, gap="small")
+                                    for sub_i, img_src in enumerate(img_list[row_start : row_start + 2]):
+                                        with sub_cols[sub_i]:
+                                            st.image(img_src, use_container_width=True)
                             else:
                                 st.markdown("🖼️ *No Image*")
                         except Exception:
