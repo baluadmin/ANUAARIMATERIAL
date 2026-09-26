@@ -128,13 +128,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Initialize Session States
+# Initialize Session States safely
 if "logged_in_user" not in st.session_state:
     st.session_state.logged_in_user = None
 if "user_phone" not in st.session_state:
     st.session_state.user_phone = None
-if "cart" not in st.session_state:
-    st.session_state.cart = {}  # Format: {item_key: quantity}
+if "cart" not in st.session_state or not isinstance(st.session_state.cart, dict):
+    st.session_state.cart = {}
 if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
@@ -223,7 +223,7 @@ with nav_col1:
         st.rerun()
 
 with nav_col2:
-    total_cart_items = sum(st.session_state.cart.values())
+    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
     if st.button(f"🛒 Cart ({total_cart_items})", use_container_width=True):
         st.session_state.current_view = "Cart"
         st.rerun()
