@@ -57,45 +57,18 @@ st.markdown(
             margin-bottom: 12px;
         }
 
-        /* --- TRUE FULL-BLEED EDGE-TO-EDGE CARD STYLING --- */
+        /* Card Container Styling */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 12px !important;
-            padding: 0px !important;
+            padding: 16px !important;
             overflow: hidden !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
         }
         
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
-        }
-
-        /* Force image wrapper to touch card boundaries completely */
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-        }
-
-        /* True Full Screen Edge-to-Edge Image */
-        [data-testid="stImage"] img {
-            width: 100% !important;
-            height: 260px !important;
-            object-fit: cover !important;
-            object-position: center center !important;
-            border-top-left-radius: 12px !important;
-            border-top-right-radius: 12px !important;
-            border-bottom-left-radius: 0px !important;
-            border-bottom-right-radius: 0px !important;
-            display: block !important;
-            margin: 0 !important;
-        }
-
-        /* Add inner padding back for text/buttons below the image */
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
-            padding-left: 14px !important;
-            padding-right: 14px !important;
         }
 
         /* Storefront Blue Pill Buttons */
@@ -289,25 +262,12 @@ if not inv_df.empty:
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
 
-            img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
-            loc_path = f"images/{img_val}"
-            if img_val and img_val.lower() != "nan":
-                if os.path.exists(img_val):
-                    main_img = img_val
-                elif os.path.exists(loc_path):
-                    main_img = loc_path
-                else:
-                    main_img = img_val
-            else:
-                main_img = ""
-
             product_records.append({
                 "id": str(row.iloc[0]).strip(),
                 "name": str(row.iloc[2]).strip(),
                 "category": cat_val,
                 "price": str(row.iloc[3]).strip(),
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
-                "image": main_img,
                 "stock": "In Stock",
             })
     except Exception:
@@ -315,7 +275,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Sample Item", "category": "General", "price": "130.00", "colors": "red, blue", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Sample Item", "category": "General", "price": "130.00", "colors": "red, blue", "stock": "In Stock"}
     ]
 
 
@@ -386,20 +346,10 @@ if st.session_state.current_view == "Home":
                 with cols[col_idx]:
                     with st.container(border=True):
                         global_idx = i + col_idx
-                        img_path = prod.get('image', '')
-
-                        # Full-Bleed Edge-to-Edge Image Display
-                        try:
-                            if img_path:
-                                st.image(img_path, use_container_width=True)
-                            else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
-                        except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name Only (Product ID completely removed)
+                        # Product Name Only
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
+                            f"<div style='text-align: center; font-weight: 600; font-size: 14px; color: #1e293b; height: 48px; overflow: hidden; margin-top: 4px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
@@ -407,7 +357,7 @@ if st.session_state.current_view == "Home":
 
                         # Pricing + In Stock Status Tag
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 2px;'>"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
                             f"Rs. {prod['price']} <span style='font-size: 11px; color: #16a34a; font-weight: 700; margin-left: 6px;'>● In Stock</span>"
                             f"</div>", 
                             unsafe_allow_html=True
@@ -429,11 +379,11 @@ if st.session_state.current_view == "Home":
                         # Action Button
                         btn_label = "Select Options" if color_list else "Add To Cart"
                         if st.button(btn_label, key=f"cart_{global_idx}", use_container_width=True):
-                            item_desc = f"{prod['id']} - {prod['name']} ({selected_color})"
+                            item_desc = f"{prod['name']} ({selected_color})"
                             st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
                             st.success("Added to cart!")
                             st.rerun()
-                        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     else:
