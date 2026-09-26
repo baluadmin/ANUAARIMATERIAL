@@ -33,20 +33,19 @@ st.markdown(
         div[data-testid="stDecoration"] {display: none !important;}
 
         .block-container {
-            padding-top: 1.5rem !important;
+            padding-top: 1rem !important;
             padding-bottom: 2rem !important;
             padding-left: 1.5rem !important;
             padding-right: 1.5rem !important;
             max-width: 100% !important;
         }
 
-        /* --- REDESIGNED PRODUCT CARD STYLING --- */
+        /* Product Card Styling */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             border-radius: 16px !important;
-            padding: 12px !important;
-            overflow: hidden !important;
+            padding: 14px !important;
             box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -57,7 +56,7 @@ st.markdown(
             border-color: #e8d0e4 !important;
         }
 
-        /* Clean Rearranged Image Frame */
+        /* Image Frame */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
             padding: 8px !important;
@@ -71,30 +70,29 @@ st.markdown(
 
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 200px !important;
+            height: 190px !important;
             object-fit: contain !important;
             object-position: center center !important;
             border-radius: 8px !important;
             display: block !important;
         }
 
-        /* Storefront Accent Buttons */
+        /* Buttons Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
             font-size: 13px !important;
-            border-radius: 24px !important;
+            border-radius: 12px !important;
             padding: 0.5rem 1rem !important;
             width: 100% !important;
-            display: block !important;
             box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
             transition: all 0.2s ease;
         }
         div.stButton > button:hover {
             background: linear-gradient(135deg, #53143c 0%, #3a0d29 100%) !important;
-            box-shadow: 0 6px 15px rgba(107, 29, 79, 0.3) !important;
+            opacity: 0.95;
         }
 
         .login-wrapper {
@@ -127,8 +125,8 @@ if "cart" not in st.session_state:
     st.session_state.cart = []
 if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
-if "selected_menu" not in st.session_state:
-    st.session_state.selected_menu = None
+if "selected_category" not in st.session_state:
+    st.session_state.selected_category = None
 
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
 
@@ -151,8 +149,9 @@ if not st.session_state.logged_in_user:
     st.markdown(
         """
         <div style="background: #ffffff; padding: 24px; border-radius: 16px; text-align: center; border: 1px solid #f3e8f1; box-shadow: 0 6px 20px rgba(107,29,79,0.04); margin-bottom: 20px; max-width: 420px; margin-left: auto; margin-right: auto;">
-            <div style="font-size: 26px; font-weight: 900; letter-spacing: 1px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
-            <div style="font-size: 15px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px;">aari work supplies</div>
+            <div style="display: inline-block; background: rgba(107,29,79,0.1); color: #6b1d4f; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-extrabold: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Exclusive Store</div>
+            <div style="font-size: 24px; font-weight: 900; letter-spacing: 0.5px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
+            <div style="font-size: 13px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px; margin-top: 4px;">aari work supplies</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -164,8 +163,8 @@ if not st.session_state.logged_in_user:
         st.markdown(
             """
             <div class="login-card">
-                <div style="font-size: 20px; font-weight: 800; color: #2d1524; margin-bottom: 4px; text-align: center;">Customer Sign In</div>
-                <div style="font-size: 13px; color: #7a6372; font-weight: 500; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-align: center;">Customer Sign In</div>
+                <div style="font-size: 12px; color: #64748b; font-weight: 500; margin-bottom: 16px; text-align: center;">
                     Enter your name and mobile number to browse inventory
                 </div>
             </div>
@@ -193,32 +192,32 @@ if not st.session_state.logged_in_user:
 
 
 # --- HEADER & NAVIGATION BAR ---
-logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
+logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.2, 1, 1, 1], gap="small")
 
 with logo_col:
     st.markdown(
-        """
+        f"""
         <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
-            <span style="font-size: 20px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
-            <span style="font-size: 13px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 8px;">aari work supplies</span>
+            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
+            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
 with nav_col1:
-    if st.button("Home", use_container_width=True):
+    if st.button("🏠 Home", use_container_width=True):
         st.session_state.current_view = "Home"
         st.rerun()
 
 with nav_col2:
     cart_count = len(st.session_state.cart)
-    if st.button(f"Cart ({cart_count})", use_container_width=True):
+    if st.button(f"🛒 Cart ({cart_count})", use_container_width=True):
         st.session_state.current_view = "Cart"
         st.rerun()
 
 with nav_col3:
-    if st.button("Logout", use_container_width=True):
+    if st.button("🚪 Logout", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
@@ -276,7 +275,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "General", "price": "90.00", "colors": "red \ blue \ green", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "Beads", "price": "90.00", "colors": "Red, Blue, Green", "image": "", "stock": "In Stock"}
     ]
 
 
@@ -314,30 +313,44 @@ if st.session_state.current_view == "Home":
     if not categories:
         categories = ["General"]
         
-    if st.session_state.selected_menu not in categories:
-        st.session_state.selected_menu = categories[0]
+    if st.session_state.selected_category not in categories:
+        st.session_state.selected_category = categories[0]
 
-    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;'>✨ Master Categories</span>", unsafe_allow_html=True)
-    
+    # Category Selection Header & Tabs
+    cat_top_col1, cat_top_col2 = st.columns([3, 1])
+    with cat_top_col1:
+        st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>📁 Master Categories</span>", unsafe_allow_html=True)
+    with cat_top_col2:
+        st.markdown(f"<div style='text-align: right; font-size: 12px; font-weight: 600; color: #64748b;'>Welcome, {st.session_state.logged_in_user}</div>", unsafe_allow_html=True)
+
     for i in range(0, len(categories), 5):
         cat_cols = st.columns(5, gap="small")
         cat_batch = categories[i : i + 5]
         
         for idx, cat in enumerate(cat_batch):
             with cat_cols[idx]:
-                is_selected = (st.session_state.selected_menu == cat)
-                button_label = f"🧵 {cat}" if is_selected else cat
+                is_selected = (st.session_state.selected_category == cat)
+                button_label = f"📂 {cat}" if is_selected else cat
                 
                 if st.button(button_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
-                    st.session_state.selected_menu = cat
+                    st.session_state.selected_category = cat
                     st.rerun()
 
-    st.markdown("<hr style='margin: 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
-    # 4-Column Product Grid
-    current_cat = st.session_state.get("selected_menu", categories[0])
+    # Product Section Header
+    current_cat = st.session_state.get("selected_category", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
+    grid_head_col1, grid_head_col2 = st.columns([3, 1])
+    with grid_head_col1:
+        st.markdown(f"<h3 style='margin: 0; font-size: 18px; font-weight: 900; color: #0f172a;'>{current_cat}</h3>", unsafe_allow_html=True)
+    with grid_head_col2:
+        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+
+    # 4-Column Product Grid
     if filtered_items:
         for i in range(0, len(filtered_items), 4):
             cols = st.columns(4, gap="medium")
@@ -349,18 +362,18 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Image Container Layout
+                        # Image Container
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
                             else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#b09cb0; border-radius:8px;'>No Image Available</div>", unsafe_allow_html=True)
+                                st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#94a3b8; font-size:12px; font-weight:700; border-radius:8px;'>No Image Available</div>", unsafe_allow_html=True)
                         except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#b09cb0; border-radius:8px;'>Image Error</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#94a3b8; font-size:12px; font-weight:700; border-radius:8px;'>Image Error</div>", unsafe_allow_html=True)
                         
                         # Product Name
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 700; font-size: 13px; color: #2d1524; height: 42px; overflow: hidden; margin-top: 10px; line-height: 1.3;'>"
+                            f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 10px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
@@ -368,13 +381,13 @@ if st.session_state.current_view == "Home":
 
                         # Pricing Section
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #b91c1c; margin-bottom: 10px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #9ca3af; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
+                            f"<div style='font-weight: 800; font-size: 14px; color: #dc2626; margin-bottom: 8px;'>"
+                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # Color / Option Dropdown Splitter (supports backslash, comma, ampersand)
+                        # Color Dropdown Options Parser (Supports comma, backslash, ampersand)
                         raw_colors = prod.get('colors', '')
                         for sep in ['\\', ',', '&']:
                             raw_colors = raw_colors.replace(sep, '|')
@@ -390,8 +403,8 @@ if st.session_state.current_view == "Home":
                             )
 
                         # Action Button
-                        btn_label = "Select Options" if color_list else "Add To Cart"
-                        if st.button(btn_label, key=f"cart_{global_idx}", use_container_width=True):
+                        btn_label = "Select & Add" if color_list else "Add To Cart"
+                        if st.button(f"🛒 {btn_label}", key=f"cart_{global_idx}", use_container_width=True):
                             item_desc = f"{prod['name']} ({selected_color})"
                             st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
                             st.success("Added to cart!")
@@ -419,10 +432,10 @@ else:
         with st.form("checkout_form"):
             address = st.text_area("Delivery Address (with Pincode):")
             sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
-            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (GPay / PhonePe / UPI)"], horizontal=True)
+            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
             notes = st.text_area("Custom Instructions / Notes:")
 
-            if st.form_submit_button("Complete Order"):
+            if st.form_submit_button("Complete Order Now"):
                 if address and len(sec_phone) == 10:
                     res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
