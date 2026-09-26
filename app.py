@@ -57,18 +57,46 @@ st.markdown(
             margin-bottom: 12px;
         }
 
-        /* Card Container Styling */
+        /* --- EXACT REFERENCE CARD STYLING --- */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
             border-radius: 12px !important;
-            padding: 16px !important;
+            padding: 0px !important;
             overflow: hidden !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            transition: all 0.2s ease-in-out;
         }
         
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Light-grey image container header matching reference site */
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
+            margin: 0 !important;
+            padding: 12px 0px !important;
+            width: 100% !important;
+            background-color: #f1f5f9 !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        /* Uncropped Full View Centered Image */
+        [data-testid="stImage"] img {
+            width: 100% !important;
+            height: 220px !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            background-color: #f1f5f9 !important;
+            display: block !important;
+        }
+
+        /* Inner Content Padding */
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
+            padding-left: 14px !important;
+            padding-right: 14px !important;
         }
 
         /* Storefront Blue Pill Buttons */
@@ -262,12 +290,25 @@ if not inv_df.empty:
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
 
+            img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
+            loc_path = f"images/{img_val}"
+            if img_val and img_val.lower() != "nan":
+                if os.path.exists(img_val):
+                    main_img = img_val
+                elif os.path.exists(loc_path):
+                    main_img = loc_path
+                else:
+                    main_img = img_val
+            else:
+                main_img = ""
+
             product_records.append({
                 "id": str(row.iloc[0]).strip(),
                 "name": str(row.iloc[2]).strip(),
                 "category": cat_val,
                 "price": str(row.iloc[3]).strip(),
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
+                "image": main_img,
                 "stock": "In Stock",
             })
     except Exception:
@@ -275,7 +316,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Sample Item", "category": "General", "price": "130.00", "colors": "red, blue", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "General", "price": "90.00", "colors": "red, blue", "image": "", "stock": "In Stock"}
     ]
 
 
@@ -346,19 +387,29 @@ if st.session_state.current_view == "Home":
                 with cols[col_idx]:
                     with st.container(border=True):
                         global_idx = i + col_idx
+                        img_path = prod.get('image', '')
+
+                        # Image Container with Badges Overlay
+                        try:
+                            if img_path:
+                                st.image(img_path, use_container_width=True)
+                            else:
+                                st.markdown("<div style='text-align:center; padding:70px 0; background:#f1f5f9; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
+                        except Exception:
+                            st.markdown("<div style='text-align:center; padding:70px 0; background:#f1f5f9; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
                         # Product Name Only
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 14px; color: #1e293b; height: 48px; overflow: hidden; margin-top: 4px; line-height: 1.3;'>"
+                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # Pricing + In Stock Status Tag
+                        # Pricing (Current Red Price + Strikethrough Regular Price)
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #16a34a; font-weight: 700; margin-left: 6px;'>● In Stock</span>"
+                            f"Rs. {prod['price']} <span style='font-size: 12px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
@@ -383,7 +434,7 @@ if st.session_state.current_view == "Home":
                             st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
                             st.success("Added to cart!")
                             st.rerun()
-                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+                        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     else:
