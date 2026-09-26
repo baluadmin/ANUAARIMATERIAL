@@ -43,35 +43,6 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Custom Brand Logo Banner */
-        .anuaari-logo-container {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            padding: 16px;
-            border-radius: 14px;
-            text-align: center;
-            border: 2px solid #e2e8f0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 14px;
-        }
-        .logo-main-text {
-            font-size: 32px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            color: #6b1d4f; /* Rich Maroon / Plum */
-            text-transform: uppercase;
-            margin: 0;
-        }
-        .logo-sub-text {
-            font-size: 20px;
-            font-weight: 700;
-            color: #d97706; /* Warm Golden Amber */
-            text-transform: lowercase;
-            font-style: italic;
-            letter-spacing: 0.5px;
-            margin-top: -2px;
-            margin-bottom: 2px;
-        }
-
         /* Storefront Card Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: #1e3a8a !important;
@@ -161,9 +132,9 @@ if not st.session_state.logged_in_user:
     st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
     st.markdown(
         """
-        <div class="anuaari-logo-container" style="max-width: 450px; margin: 0 auto 20px auto;">
-            <div class="logo-main-text">ANUAARI MATERIALS</div>
-            <div class="logo-sub-text">aari work supplies</div>
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); padding: 16px; border-radius: 14px; text-align: center; border: 2px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; max-width: 450px; margin-left: auto; margin-right: auto;">
+            <div style="font-size: 32px; font-weight: 900; letter-spacing: 1px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
+            <div style="font-size: 20px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px; margin-top: -2px;">aari work supplies</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -205,35 +176,35 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- AFTER LOGIN HEADER & NAVIGATION ---
-st.markdown(
-    """
-    <div class="anuaari-logo-container">
-        <div class="logo-main-text">ANUAARI MATERIALS</div>
-        <div class="logo-sub-text">aari work supplies</div>
-    </div>
-""",
-    unsafe_allow_html=True,
-)
+# --- AFTER LOGIN HEADER & NAVIGATION (INTEGRATED INTO LOGO COLUMN) ---
+logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1.1, 1.1, 1.1], gap="small")
 
-top_comm, top_space, top_c1, top_c2, top_c3 = st.columns([2.2, 0.4, 1.3, 1.3, 1.3], gap="small")
-with top_comm:
+with logo_col:
     st.markdown(
-        f"<span style='color: #64748b; font-weight:600;'>Welcome,</span> <span style='color: #2563eb; font-weight:800;'>{st.session_state.logged_in_user}</span> 👋",
+        """
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.04);">
+            <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #6b1d4f; text-transform: uppercase; margin: 0; line-height: 1.1;">ANUAARI MATERIALS</div>
+            <div style="font-size: 14px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px;">aari work supplies</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
-with top_space:
-    st.empty()
-with top_c1:
+
+with nav_col1:
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True) # vertical alignment spacing
     if st.button("Home", use_container_width=True):
         st.session_state.current_view = "Home"
         st.rerun()
-with top_c2:
+
+with nav_col2:
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     cart_count = len(st.session_state.cart)
     if st.button(f"Cart ({cart_count})", use_container_width=True):
         st.session_state.current_view = "Cart"
         st.rerun()
-with top_c3:
+
+with nav_col3:
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     if st.button("Logout", use_container_width=True):
         st.session_state.clear()
         st.rerun()
@@ -265,11 +236,11 @@ if not inv_df.empty:
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
 
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
-                "name": str(row.iloc[2]).strip(),           # Column C: Item Name
-                "category": str(row.iloc[1]).strip(),       # Column B: Category
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
+                "name": str(row.iloc[2]).strip(),           # Column C: Item Name[cite: 3]
+                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
                 "image": img_val,                           # Column F: Image Filename
                 "stock": "In Stock",
@@ -340,7 +311,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW (WITHOUT CATEGORY BANNER LABEL) ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
