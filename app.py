@@ -34,10 +34,10 @@ st.markdown(
         div[data-testid="stDecoration"] {display: none !important;}
 
         .block-container {
-            padding-top: 1rem !important;
+            padding-top: 0.8rem !important;
             padding-bottom: 2rem !important;
-            padding-left: 1.5rem !important;
-            padding-right: 1.5rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
             max-width: 100% !important;
         }
 
@@ -58,21 +58,15 @@ st.markdown(
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             border-radius: 16px !important;
-            padding: 12px !important;
+            padding: 10px !important;
             box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 25px rgba(107, 29, 79, 0.1) !important;
-            border-color: #e8d0e4 !important;
+            margin-bottom: 10px;
         }
 
         /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100%;
-            height: 150px;
+            height: 140px;
             object-fit: contain;
             border-radius: 8px;
             cursor: pointer;
@@ -133,7 +127,7 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Buttons Styling */
+        /* Buttons Styling - Touch Friendly for Mobile */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
@@ -141,10 +135,10 @@ st.markdown(
             font-weight: 700 !important;
             font-size: 13px !important;
             border-radius: 12px !important;
-            padding: 0.4rem 0.8rem !important;
+            padding: 0.5rem 0.8rem !important;
             width: 100% !important;
             box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
-            transition: all 0.2s ease;
+            min-height: 40px !important;
         }
         div.stButton > button:hover {
             background: linear-gradient(135deg, #53143c 0%, #3a0d29 100%) !important;
@@ -156,16 +150,24 @@ st.markdown(
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 3rem;
+            padding-top: 2rem;
         }
         .login-card {
             width: 100%;
             max-width: 420px;
-            padding: 30px;
+            padding: 20px;
             border-radius: 20px;
             background: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .block-container {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
         }
     </style>
     """,
@@ -221,16 +223,16 @@ if not st.session_state.logged_in_user:
     st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
     st.markdown(
         """
-        <div style="background: #ffffff; padding: 24px; border-radius: 16px; text-align: center; border: 1px solid #f3e8f1; box-shadow: 0 6px 20px rgba(107,29,79,0.04); margin-bottom: 20px; max-width: 420px; margin-left: auto; margin-right: auto;">
+        <div style="background: #ffffff; padding: 20px; border-radius: 16px; text-align: center; border: 1px solid #f3e8f1; box-shadow: 0 6px 20px rgba(107,29,79,0.04); margin-bottom: 20px; width: 100%; max-width: 420px; margin-left: auto; margin-right: auto;">
             <div style="display: inline-block; background: rgba(107,29,79,0.1); color: #6b1d4f; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Exclusive Store</div>
-            <div style="font-size: 24px; font-weight: 900; letter-spacing: 0.5px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
+            <div style="font-size: 22px; font-weight: 900; letter-spacing: 0.5px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
             <div style="font-size: 13px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px; margin-top: 4px;">aari work supplies</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    _, login_col, _ = st.columns([1, 1.8, 1])
+    _, login_col, _ = st.columns([0.1, 2.8, 0.1])
 
     with login_col:
         with st.form("customer_login_form", clear_on_submit=False):
@@ -253,14 +255,13 @@ if not st.session_state.logged_in_user:
 
 
 # --- HEADER & NAVIGATION BAR ---
-logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.2, 1, 1, 1], gap="small")
+logo_col, nav_col1, nav_col2, nav_col3 = st.columns([2.5, 1, 1, 0.8], gap="small")
 
 with logo_col:
     st.markdown(
         f"""
-        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
-            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
-            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
+        <div style="background: #ffffff; padding: 8px 12px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
+            <span style="font-size: 15px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -278,11 +279,11 @@ with nav_col2:
         st.rerun()
 
 with nav_col3:
-    if st.button("🚪 Logout", use_container_width=True):
+    if st.button("🚪", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
-st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 12px 0 14px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
 
 # Load Inventory Directly from Google Sheets
@@ -383,15 +384,11 @@ if st.session_state.current_view == "Home":
         st.session_state.selected_category = categories[0]
 
     # Category Selection Header & Tabs
-    cat_top_col1, cat_top_col2 = st.columns([3, 1])
-    with cat_top_col1:
-        st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>📁 Master Categories</span>", unsafe_allow_html=True)
-    with cat_top_col2:
-        st.markdown(f"<div style='text-align: right; font-size: 12px; font-weight: 600; color: #64748b;'>Welcome, {st.session_state.logged_in_user}</div>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>📁 Master Categories</span>", unsafe_allow_html=True)
 
-    for i in range(0, len(categories), 5):
-        cat_cols = st.columns(5, gap="small")
-        cat_batch = categories[i : i + 5]
+    for i in range(0, len(categories), 3):
+        cat_cols = st.columns(3, gap="small")
+        cat_batch = categories[i : i + 3]
         
         for idx, cat in enumerate(cat_batch):
             with cat_cols[idx]:
@@ -402,25 +399,25 @@ if st.session_state.current_view == "Home":
                     st.session_state.selected_category = cat
                     st.rerun()
 
-    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
     # Product Section Header
     current_cat = st.session_state.get("selected_category", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
-    grid_head_col1, grid_head_col2 = st.columns([3, 1])
+    grid_head_col1, grid_head_col2 = st.columns([2, 1])
     with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 18px; font-weight: 900; color: #0f172a;'>{current_cat}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{current_cat}</h3>", unsafe_allow_html=True)
     with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-    # 4-Column Product Grid
+    # Responsive 2-Column Grid for Mobile Friendly Viewing (expands automatically on tablets/desktops)
     if filtered_items:
-        for i in range(0, len(filtered_items), 4):
-            cols = st.columns(4, gap="medium")
-            batch = filtered_items[i : i + 4]
+        for i in range(0, len(filtered_items), 2):
+            cols = st.columns(2, gap="small")
+            batch = filtered_items[i : i + 2]
             
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
@@ -430,37 +427,34 @@ if st.session_state.current_view == "Home":
                         desc_text = prod.get('description', '')
                         img_src = get_image_src(img_path)
 
-                        card_col_img, card_col_desc = st.columns([1, 1], gap="small")
-
-                        with card_col_img:
-                            if img_src:
-                                # Clickable image that expands to lightbox without extra buttons
-                                st.markdown(
-                                    f"""
-                                    <a href="#modal_{global_idx}">
-                                        <img src="{img_src}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
-                                    </a>
-                                    <div id="modal_{global_idx}" class="lightbox-overlay" onclick="location.href='#';">
-                                        <a href="#" class="close-hint">&times;</a>
-                                        <img src="{img_src}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True,
-                                )
-                            else:
-                                st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
-
-                        with card_col_desc:
+                        # Compact Image Display
+                        if img_src:
                             st.markdown(
-                                f"<div style='font-size: 11px; font-weight: 600; color: #475569; padding: 2px 0px; height: 150px; overflow-y: auto; line-height: 1.4;'>"
-                                f"<strong>Details:</strong><br>{desc_text if desc_text else 'No additional details available.'}"
-                                f"</div>",
+                                f"""
+                                <a href="#modal_{global_idx}">
+                                    <img src="{img_src}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
+                                </a>
+                                <div id="modal_{global_idx}" class="lightbox-overlay" onclick="location.href='#';">
+                                    <a href="#" class="close-hint">&times;</a>
+                                    <img src="{img_src}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
+                                </div>
+                                """,
                                 unsafe_allow_html=True,
                             )
+                        else:
+                            st.markdown("<div style='text-align:center; padding:40px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
+
+                        # Description Text Below Image
+                        st.markdown(
+                            f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 4px 0px; max-height: 80px; overflow-y: auto; line-height: 1.3;'>"
+                            f"<strong>Details:</strong> {desc_text if desc_text else 'No additional details.'}"
+                            f"</div>",
+                            unsafe_allow_html=True,
+                        )
                         
                         # Product Name
                         st.markdown(
-                            f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
+                            f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True,
@@ -468,13 +462,13 @@ if st.session_state.current_view == "Home":
 
                         # Pricing Section
                         st.markdown(
-                            f"<div style='font-weight: 800; font-size: 14px; color: #dc2626; margin-bottom: 8px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
+                            f"<div style='font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 6px;'>"
+                            f"Rs. {prod['price']} <span style='font-size: 10px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
                             f"</div>", 
                             unsafe_allow_html=True,
                         )
 
-                        # Color Dropdown Options Parser (Supports comma, backslash, ampersand)
+                        # Color Dropdown Options Parser
                         raw_colors = prod.get('colors', '')
                         for sep in ['\\', ',', '&']:
                             raw_colors = raw_colors.replace(sep, '|')
@@ -506,7 +500,7 @@ if st.session_state.current_view == "Home":
 
                         with q_col2:
                             st.markdown(
-                                f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>",
+                                f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>",
                                 unsafe_allow_html=True,
                             )
 
@@ -515,7 +509,7 @@ if st.session_state.current_view == "Home":
                                 st.session_state.cart[item_key] = current_qty + 1
                                 st.rerun()
 
-                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+                        st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
             
         st.markdown("<br>", unsafe_allow_html=True)
     else:
@@ -526,9 +520,9 @@ else:
     st.subheader("🛒 Shopping Cart & Secure Checkout")
     if st.session_state.cart:
         for item_desc, qty in list(st.session_state.cart.items()):
-            col_item, col_rem = st.columns([4, 1])
+            col_item, col_rem = st.columns([3, 1])
             with col_item:
-                st.markdown(f"• **{item_desc}** — Quantity: **{qty} Units**")
+                st.markdown(f"• **{item_desc}** — Qty: **{qty}**")
             with col_rem:
                 if st.button("Remove", key=f"rem_{item_desc}"):
                     del st.session_state.cart[item_desc]
