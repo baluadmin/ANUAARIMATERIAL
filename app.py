@@ -182,7 +182,7 @@ logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1.1, 1.1, 1.1], gap="s
 with logo_col:
     st.markdown(
         """
-        <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%; padding: 12px 16px; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.04);">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); padding: 12px 16px; border-radius: 12px; border: 2px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.04);">
             <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #6b1d4f; text-transform: uppercase; margin: 0; line-height: 1.1;">ANUAARI MATERIALS</div>
             <div style="font-size: 14px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px;">aari work supplies</div>
         </div>
@@ -191,7 +191,7 @@ with logo_col:
     )
 
 with nav_col1:
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True) # vertical alignment spacing
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     if st.button("Home", use_container_width=True):
         st.session_state.current_view = "Home"
         st.rerun()
@@ -234,13 +234,18 @@ if not inv_df.empty:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
+            cat_val = str(row.iloc[1]).strip()
+            
+            # Clean up NaN category values from sheet
+            if not cat_val or cat_val.lower() == "nan":
+                cat_val = "General"
 
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
-                "name": str(row.iloc[2]).strip(),           # Column C: Item Name[cite: 3]
-                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
+                "name": str(row.iloc[2]).strip(),           # Column C: Item Name
+                "category": cat_val,                        # Column B: Category
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
                 "image": img_val,                           # Column F: Image Filename
                 "stock": "In Stock",
@@ -250,7 +255,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "AAI", "category": "AAI", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "AAI", "category": "General", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "image": "", "stock": "In Stock"}
     ]
 
 
@@ -289,25 +294,27 @@ if st.session_state.current_view == "Home":
     
     categories = list(set([p["category"] for p in product_records if p["category"]]))
     if not categories:
-        categories = ["AAI"]
+        categories = ["General"]
         
     if st.session_state.selected_menu not in categories:
         st.session_state.selected_menu = categories[0]
 
-    # --- COLUMN-WISE MASTER CATEGORIES HEADER ---
+    # --- MULTI-ROW MASTER CATEGORIES HEADER (5 PER ROW) ---
     st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Master Categories</span>", unsafe_allow_html=True)
     
-    cat_cols = st.columns(len(categories) if len(categories) > 0 else 1, gap="small")
-    
-    for idx, cat in enumerate(categories):
-        with cat_cols[idx]:
-            is_selected = (st.session_state.selected_menu == cat)
-            button_label = f"📂 {cat}" if is_selected else cat
-            
-            if st.button(button_label, key=f"cat_col_btn_{cat}", use_container_width=True):
-                st.session_state.selected_menu = cat
-                st.session_state.product_page = 0
-                st.rerun()
+    for i in range(0, len(categories), 5):
+        cat_cols = st.columns(5, gap="small")
+        cat_batch = categories[i : i + 5]
+        
+        for idx, cat in enumerate(cat_batch):
+            with cat_cols[idx]:
+                is_selected = (st.session_state.selected_menu == cat)
+                button_label = f"📂 {cat}" if is_selected else cat
+                
+                if st.button(button_label, key=f"cat_col_btn_{i}_{idx}", use_container_width=True):
+                    st.session_state.selected_menu = cat
+                    st.session_state.product_page = 0
+                    st.rerun()
 
     st.markdown("---")
 
