@@ -43,7 +43,7 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Remove inner container padding around the image for full-bleed display */
+        /* Full Screen Edge-to-Edge Product Image Styling */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin-left: -1rem !important;
             margin-right: -1rem !important;
@@ -51,7 +51,6 @@ st.markdown(
             width: calc(100% + 2rem) !important;
         }
 
-        /* Full Screen Edge-to-Edge Product Image Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
             height: 240px !important;
@@ -321,7 +320,7 @@ if st.session_state.current_view == "Home":
         for idx, cat in enumerate(cat_batch):
             with cat_cols[idx]:
                 is_selected = (st.session_state.selected_menu == cat)
-                button_label = f"📂 {cat}" if is_selected else cat
+                button_label = f"📁 {cat}" if is_selected else cat
                 
                 if st.button(button_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
                     st.session_state.selected_menu = cat
@@ -353,7 +352,7 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name Only & Price
+                        # Product Name Only & Price (Matching Reference Storefront)
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
