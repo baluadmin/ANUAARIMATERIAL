@@ -8,12 +8,12 @@ from datetime import datetime
 
 st.set_page_config(page_title="ANUAARIMATERIAL Store", page_icon="🧵", layout="wide")
 
-# --- HARDCODED CONFIGURATION (No sidebar typing needed) ---
+# --- HARDCODED CONFIGURATION ---
 GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
 
-# Published Public CSV Links for your Google Sheet tabs
-INVENTORY_CSV_URL = "YOUR_PUBLISHED_INVENTORY_CSV_LINK_HERE"
-LOGIN_CSV_URL = "YOUR_PUBLISHED_LOGIN_CSV_LINK_HERE"
+# Direct CSV Export Links generated from your Google Sheet ID
+INVENTORY_CSV_URL = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=need+inventory+model+for+this+ANUAARI"
+LOGIN_CSV_URL = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=LOGIN"
 
 # Google Service Account Credentials for writing orders directly to sheet
 GOOGLE_CREDS_JSON = {
@@ -44,6 +44,8 @@ if not st.session_state.logged_in:
         try:
             df_login = pd.read_csv(LOGIN_CSV_URL)
             df_login.columns = df_login.columns.str.strip()
+            
+            # Match phone number against MOBILE NUMBER column
             match = df_login[df_login['MOBILE NUMBER'].astype(str).str.contains(phone_input)]
             if not match.empty and phone_input:
                 st.session_state.logged_in = True
@@ -74,23 +76,26 @@ else:
         st.markdown("---")
         st.header("🛍️ Product Inventory & Order Placement")
 
-        for i in range(0, len(df_inv), 3):
-            cols = st.columns(3)
-            for j in range(3):
-                if i + j < len(df_inv):
-                    item = df_inv.iloc[i + j]
-                    with cols[j]:
-                        with st.container(border=True):
-                            st.subheader(item.get("Item_ID", "Item"))
-                            st.write(f"**Category:** {item.get('Category', '')}")
-                            st.write(f"**Subcategory:** {item.get('Subcategory', '')}")
-                            st.write(f"**Price:** ₹{item.get('Price (INR)', 0)}")
-                            st.write(f"**Colors:** {item.get('Color Options', '')}")
-                            st.success(item.get("Stock Status", "In Stock"))
-                            
-                            item_id = item.get("Item_ID", "")
-                            if st.button(f"Buy Now ({item_id})", key=f"buy_{i+j}"):
-                                st.session_state.checkout_item = item_id
+        if df_inv.empty:
+            st.warning("No items found in your inventory sheet. Add products to your 'need inventory model for this ANUAARI' tab.")
+        else:
+            for i in range(0, len(df_inv), 3):
+                cols = st.columns(3)
+                for j in range(3):
+                    if i + j < len(df_inv):
+                        item = df_inv.iloc[i + j]
+                        with cols[j]:
+                            with st.container(border=True):
+                                st.subheader(item.get("Item_ID", "Item"))
+                                st.write(f"**Category:** {item.get('Category', '')}")
+                                st.write(f"**Subcategory:** {item.get('Subcategory', '')}")
+                                st.write(f"**Price:** ₹{item.get('Price (INR)', 0)}")
+                                st.write(f"**Colors:** {item.get('Color Options', '')}")
+                                st.success(item.get("Stock Status", "In Stock"))
+                                
+                                item_id = item.get("Item_ID", "")
+                                if st.button(f"Buy Now ({item_id})", key=f"buy_{i+j}"):
+                                    st.session_state.checkout_item = item_id
 
         # --- CHECKOUT FORM TO SHEET ---
         if "checkout_item" in st.session_state:
@@ -134,4 +139,4 @@ else:
                         st.error(f"Failed to save order to Google Sheet: {e}")
 
     except Exception as e:
-        st.warning(f"⚠️ Could not load inventory. Check your public CSV URLs. Error: {e}")
+        st.warning(f"⚠️ Could not load inventory. Make sure your Google Sheet is shared with 'Anyone with the link can view'. Error: {e}")
