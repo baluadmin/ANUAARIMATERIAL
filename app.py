@@ -79,13 +79,14 @@ st.markdown(
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
+            background-color: #ffffff !important;
         }
 
-        /* Centered Full-Width Image Styling */
+        /* Full Screen Uncropped Image Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 230px !important;
-            object-fit: cover !important;
+            height: 240px !important;
+            object-fit: contain !important;
             object-position: center center !important;
             border-top-left-radius: 12px !important;
             border-top-right-radius: 12px !important;
@@ -94,6 +95,7 @@ st.markdown(
             display: block !important;
             margin-left: auto !important;
             margin-right: auto !important;
+            background-color: #ffffff !important;
         }
 
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
@@ -391,7 +393,7 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Centered Full-Width Image Display
+                        # Full Screen Uncropped Centered Image Display
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
