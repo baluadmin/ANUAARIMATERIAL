@@ -43,12 +43,16 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Full Screen Product Image Styling */
+        /* Full Width Edge-to-Edge Product Image Styling */
+        [data-testid="stImage"] {
+            width: 100% !important;
+        }
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 230px !important;
+            height: 240px !important;
             object-fit: cover !important;
-            border-radius: 12px !important;
+            border-radius: 10px !important;
+            display: block !important;
         }
 
         /* E-Commerce Catalog Pill Button Styling */
@@ -332,7 +336,7 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Full Screen Single Image Display
+                        # Full Screen Edge-to-Edge Image Display
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
