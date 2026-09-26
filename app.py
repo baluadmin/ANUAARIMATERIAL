@@ -43,10 +43,10 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Uniform Product Image Styling */
+        /* Dynamic Full/Thumbnail Product Image Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 180px !important;
+            height: 220px !important;
             object-fit: cover !important;
             border-radius: 8px !important;
         }
@@ -336,7 +336,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW WITH DYNAMIC IMAGE RENDERING ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW WITH ADAPTIVE IMAGE RENDERING ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -349,15 +349,13 @@ if st.session_state.current_view == "Home":
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
                     with st.container(border=True):
-                        # 1. Dynamic Image Rendering (1 Full Image vs Multi-Image Grid)
+                        # 1. Image Rendering (Full width if 1 image, Grid if multiple)
                         img_list = prod.get('images', [])
                         
                         try:
                             if len(img_list) == 1:
-                                # Show 1 image full width
                                 st.image(img_list[0], use_container_width=True)
                             elif len(img_list) > 1:
-                                # Show multiple images in a compact 2-column thumbnail grid
                                 for row_start in range(0, min(len(img_list), 4), 2):
                                     sub_cols = st.columns(2, gap="small")
                                     for sub_i, img_src in enumerate(img_list[row_start : row_start + 2]):
