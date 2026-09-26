@@ -330,7 +330,7 @@ if st.session_state.current_view == "Home":
                     st.session_state.product_page = 0
                     st.rerun()
 
-    # 2. Product Items & Subcategory View
+    # 2. Product Items & All Subcategories View
     with col_items:
         current_cat = st.session_state.get("selected_menu", categories[0])
         st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Selected Category:</span> <span style='color: #0f172a; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
@@ -339,17 +339,14 @@ if st.session_state.current_view == "Home":
             filtered_items = [p for p in product_records if p["category"] == current_cat]
 
             if filtered_items:
-                subcats = list(set([p["subcategory"] for p in filtered_items if p["subcategory"]]))
-                if subcats:
-                    selected_subcat = st.selectbox("Filter Sub-Category", ["All Subcategories"] + subcats)
-                    if selected_subcat != "All Subcategories":
-                        filtered_items = [p for p in filtered_items if p["subcategory"] == selected_subcat]
-
                 st.markdown("---")
 
                 for idx, prod in enumerate(filtered_items):
-                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']} <span style='color: #64748b; font-size: 13px;'>({prod.get('subcategory', '')})</span></div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Colors: {prod['colors']}</div>", unsafe_allow_html=True)
+                    subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
+                    color_display = f" | Colors: {prod['colors']}" if prod.get('colors') else ""
+                    
+                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']}{color_display} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
 
                     if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
                         st.session_state.cart.append({"product": f"{prod['id']} - {prod['name']} ({prod['colors']})", "quantity": "1 Units"})
