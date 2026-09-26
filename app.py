@@ -7,9 +7,9 @@ import pandas as pd
 import requests
 import streamlit as st
 
-# 1. Page Configuration & Enterprise Catalog Styling
+# 1. Page Configuration & Professional Styling
 st.set_page_config(
-    page_title="ANUAARIMATERIALS E-Commerce Store",
+    page_title="ANUAARIMATERIALS | Aari & Craft Supplies",
     page_icon="🧵",
     layout="wide",
 )
@@ -36,15 +36,28 @@ st.markdown(
         div[data-testid="stDecoration"] {display: none !important;}
 
         .block-container {
-            padding-top: 1rem !important;
+            padding-top: 0.5rem !important;
             padding-bottom: 2rem !important;
             padding-left: 1.5rem !important;
             padding-right: 1.5rem !important;
             max-width: 100% !important;
         }
 
-        /* --- PROFESSIONAL E-COMMERCE CARD STYLING --- */
-        /* Target Streamlit container to make it look like a clean e-commerce card */
+        /* Top Announcement Bar */
+        .top-promo-bar {
+            background: #1e3a8a;
+            color: #ffffff;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* Card Container (Edge-to-Edge Top Image) */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -59,7 +72,6 @@ st.markdown(
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
         }
 
-        /* Full-bleed edge-to-edge image styling at the top of the card */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
             padding: 0 !important;
@@ -77,13 +89,12 @@ st.markdown(
             display: block !important;
         }
 
-        /* Add padding back for the text elements inside the card */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
             padding-left: 12px !important;
             padding-right: 12px !important;
         }
 
-        /* Pill-Shaped Action Button */
+        /* Storefront Blue Pill Buttons */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: #2b3a97 !important;
             color: #ffffff !important;
@@ -134,10 +145,9 @@ if "current_view" not in st.session_state:
 if "selected_menu" not in st.session_state:
     st.session_state.selected_menu = None
 
-# Google Apps Script Web App Endpoint URL
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
 
-# Database Setup
+# Database Connection
 db_path = "./chroma_db_anuaari"
 try:
     chroma_client = chromadb.PersistentClient(path=db_path)
@@ -206,6 +216,17 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
+# --- ANNOUNCEMENT BANNER ---
+st.markdown(
+    """
+    <div class="top-promo-bar">
+        <span>🎉 Free Shipping across India on orders above ₹999 | COD Available</span>
+        <span>📞 WhatsApp Support: +91 98404 50113</span>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 # --- HEADER & NAVIGATION BAR ---
 logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
 
@@ -239,7 +260,7 @@ with nav_col3:
 st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
 
-# Load Inventory Directly from Google Sheets CSV Link
+# Load Inventory Directly from Google Sheets
 @st.cache_data(ttl=2)
 def load_inventory_from_sheet():
     sheet_csv_url = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=need+inventory+model+for+this+ANUAARI"
@@ -264,7 +285,6 @@ if not inv_df.empty:
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
 
-            # Grab primary image from Column F (index 5)
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
             loc_path = f"images/{img_val}"
             if img_val and img_val.lower() != "nan":
@@ -295,7 +315,7 @@ if not product_records:
     ]
 
 
-def process_cart_checkout(address: str, secondary_phone: str, description: str) -> str:
+def process_cart_checkout(address: str, payment_method: str, secondary_phone: str, description: str) -> str:
     if not st.session_state.cart:
         return "Your cart is empty."
     customer_name = st.session_state.logged_in_user
@@ -311,6 +331,7 @@ def process_cart_checkout(address: str, secondary_phone: str, description: str) 
             "Primary_Phone": primary_phone,
             "Items": cart_summary,
             "Address": address,
+            "Payment_Method": payment_method,
             "Secondary_Phone": secondary_phone,
             "Description": description,
         }
@@ -319,10 +340,10 @@ def process_cart_checkout(address: str, secondary_phone: str, description: str) 
         print(f"Order sheet error: {e}")
 
     st.session_state.cart = []
-    return f"Order placed successfully for: {cart_summary}."
+    return f"Order placed successfully ({payment_method}) for: {cart_summary}."
 
 
-# --- VIEW SWITCHING ---
+# --- STOREFRONT CATALOG VIEW ---
 if st.session_state.current_view == "Home":
     categories = list(set([p["category"] for p in product_records if p["category"]]))
     if not categories:
@@ -331,8 +352,7 @@ if st.session_state.current_view == "Home":
     if st.session_state.selected_menu not in categories:
         st.session_state.selected_menu = categories[0]
 
-    # --- CATEGORY PILLS BAR ---
-    st.markdown("<span style='color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;'>Categories</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #475569; font-weight: 700; font-size: 13px; text-transform: uppercase;'>Master Categories</span>", unsafe_allow_html=True)
     
     for i in range(0, len(categories), 5):
         cat_cols = st.columns(5, gap="small")
@@ -349,7 +369,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
-    # --- 4-COLUMN CATALOG GRID ---
+    # 4-Column Product Grid
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -364,7 +384,7 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Full-Bleed Edge-to-Edge Image Display
+                        # Edge-to-Edge Image
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
@@ -373,7 +393,7 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Title & Price Layout (Matching reference design)
+                        # Product Title
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
@@ -381,9 +401,10 @@ if st.session_state.current_view == "Home":
                             unsafe_allow_html=True
                         )
 
+                        # Pricing + In Stock Status Tag
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
-                            f"Rs. {prod['price']}"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 2px;'>"
+                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #16a34a; font-weight: 700; margin-left: 6px;'>● In Stock</span>"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
@@ -401,8 +422,7 @@ if st.session_state.current_view == "Home":
                                 label_visibility="collapsed"
                             )
 
-                        # Add to Cart Button (With bottom spacing)
-                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+                        # Action Button
                         btn_label = "Select Options" if color_list else "Add To Cart"
                         if st.button(btn_label, key=f"cart_{global_idx}", use_container_width=True):
                             item_desc = f"{prod['id']} - {prod['name']} ({selected_color})"
@@ -416,8 +436,8 @@ if st.session_state.current_view == "Home":
         st.info("No items found in this category.")
 
 else:
-    # --- CART & CHECKOUT VIEW ---
-    st.subheader("🛒 Shopping Cart & Checkout")
+    # --- CART & CHECKOUT VIEW (WITH COD SUPPORT) ---
+    st.subheader("🛒 Shopping Cart & Secure Checkout")
     if st.session_state.cart:
         for c_idx, item in enumerate(st.session_state.cart):
             col_item, col_rem = st.columns([4, 1])
@@ -430,13 +450,14 @@ else:
 
         st.markdown("---")
         with st.form("checkout_form"):
-            address = st.text_area("Delivery Address:")
+            address = st.text_area("Delivery Address (with Pincode):")
             sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
-            notes = st.text_area("Custom Description / Instructions:")
+            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (GPay / PhonePe / UPI)"], horizontal=True)
+            notes = st.text_area("Custom Instructions / Notes:")
 
             if st.form_submit_button("Complete Order"):
                 if address and len(sec_phone) == 10:
-                    res_msg = process_cart_checkout(address, sec_phone, notes)
+                    res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
                     st.session_state.current_view = "Home"
                     st.rerun()
