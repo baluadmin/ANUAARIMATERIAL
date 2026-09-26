@@ -75,17 +75,17 @@ st.markdown(
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
             padding: 0 !important;
-            width: 100% !important;
+x            width: 100% !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
             background-color: #ffffff !important;
         }
 
-        /* Full Screen Uncropped Image Styling */
+        /* Optimized for 1500x1500 Full Screen Uncropped Images */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 240px !important;
+            height: 280px !important;
             object-fit: contain !important;
             object-position: center center !important;
             border-top-left-radius: 12px !important;
@@ -393,14 +393,14 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Full Screen Uncropped Centered Image Display
+                        # Optimized 1500x1500 Centered Image Display
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
                             else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
+                                st.markdown("<div style='text-align:center; padding:80px 0; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
                         except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='text-align:center; padding:80px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
                         # Product Title
                         st.markdown(
