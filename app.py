@@ -171,21 +171,9 @@ if not st.session_state.logged_in_user:
     _, login_col, _ = st.columns([1, 1.8, 1])
 
     with login_col:
-        st.markdown(
-            """
-            <div class="login-card">
-                <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-align: center;">Customer Sign In</div>
-                <div style="font-size: 12px; color: #64748b; font-weight: 500; margin-bottom: 16px; text-align: center;">
-                    Enter your name and mobile number to browse inventory
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
         with st.form("customer_login_form", clear_on_submit=False):
-            cust_name = st.text_input("Customer Name:", placeholder="e.g. Anusha")
-            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="9840450113")
+            cust_name = st.text_input("Customer Name:", placeholder="")
+            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="")
             cust_phone = "".join([char for char in raw_phone if char.isdigit()])
 
             login_btn = st.form_submit_button("Enter Store", use_container_width=True)
