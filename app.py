@@ -99,18 +99,6 @@
         <!-- Main Storefront App View -->
         <div id="storeView" class="hidden flex-1 flex flex-col">
             
-            <!-- Top Announcement Bar -->
-            <div class="bg-gradient-to-r from-plum to-plum-dark text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center shadow-sm">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-gift text-gold animate-bounce"></i>
-                    <span>Free Shipping across India on orders above ₹999 | COD Available</span>
-                </div>
-                <div class="hidden sm:flex items-center gap-2">
-                    <i class="fa-solid fa-phone text-gold"></i>
-                    <span>WhatsApp Support: +91 98404 50113</span>
-                </div>
-            </div>
-
             <!-- Header Navigation -->
             <header class="bg-white border-b border-plum-border sticky top-0 z-30 px-4 lg:px-8 py-3.5 shadow-xs">
                 <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
