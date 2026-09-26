@@ -263,7 +263,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Sample Item", "category": "General", "price": "10", "colors": "red, blue", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Sample Item", "category": "General", "price": "130.00", "colors": "red, blue", "image": "", "stock": "In Stock"}
     ]
 
 
@@ -345,14 +345,15 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name Only & Price
+                        # Product Name (Clean multi-line display matching reference)[cite: 12]
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 38px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
+                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
+                        # Catalog Pricing Style (Red current price)[cite: 12]
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 8px;'>"
                             f"Rs. {prod['price']}"
@@ -373,7 +374,7 @@ if st.session_state.current_view == "Home":
                                 label_visibility="collapsed"
                             )
 
-                        # Add to Cart Button
+                        # Add to Cart Button (Pill shaped navy blue matching reference)[cite: 12]
                         btn_label = "Select Options" if color_list else "Add To Cart"
                         if st.button(btn_label, key=f"cart_{global_idx}", use_container_width=True):
                             item_desc = f"{prod['id']} - {prod['name']} ({selected_color})"
