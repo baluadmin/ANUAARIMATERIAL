@@ -20,7 +20,7 @@ st.markdown(
 
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: 14px !important;
+            font-size: 13px !important;
             color: #2d1524 !important;
         }
 
@@ -37,8 +37,8 @@ st.markdown(
         .block-container {
             padding-top: 1rem !important;
             padding-bottom: 2rem !important;
-            padding-left: 1.5rem !important;
-            padding-right: 1.5rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
             max-width: 100% !important;
         }
 
@@ -54,29 +54,29 @@ st.markdown(
             border-radius: 3px;
         }
 
-        /* Product Card Styling */
+        /* Product Card Styling for 3 Columns */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
-            border-radius: 16px !important;
+            border-radius: 14px !important;
             padding: 8px !important;
-            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
+            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.04) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 25px rgba(107, 29, 79, 0.1) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(107, 29, 79, 0.08) !important;
             border-color: #e8d0e4 !important;
         }
 
-        /* Direct Clickable Zoom Image - Full Width, No Margins */
+        /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100% !important;
-            height: 150px !important;
+            height: 120px !important;
             object-fit: cover !important;
-            border-radius: 8px !important;
+            border-radius: 6px !important;
             cursor: pointer;
             transition: transform 0.2s ease, opacity 0.2s ease;
             display: block !important;
@@ -142,11 +142,11 @@ st.markdown(
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
-            font-size: 13px !important;
-            border-radius: 12px !important;
-            padding: 0.5rem 1rem !important;
+            font-size: 12px !important;
+            border-radius: 10px !important;
+            padding: 0.3rem 0.5rem !important;
             width: 100% !important;
-            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
+            box-shadow: 0 3px 8px rgba(107, 29, 79, 0.15) !important;
             transition: all 0.2s ease;
         }
         div.stButton > button:hover {
@@ -390,9 +390,10 @@ def render_product_grid(items):
         st.info("No items found.")
         return
 
-    for i in range(0, len(items), 2):
-        cols = st.columns(2, gap="medium")
-        batch = items[i : i + 2]
+    # 3-Column Grid Loop
+    for i in range(0, len(items), 3):
+        cols = st.columns(3, gap="small")
+        batch = items[i : i + 3]
         
         for col_idx, prod in enumerate(batch):
             with cols[col_idx]:
@@ -401,6 +402,7 @@ def render_product_grid(items):
                     img_src = get_image_src(prod.get('image', ''))
                     desc_text = prod.get('description', '')
 
+                    # Image and Description stacked or side-by-side cleanly in 3-col
                     card_col_img, card_col_desc = st.columns([1, 1], gap="small")
                     with card_col_img:
                         if img_src:
@@ -416,24 +418,24 @@ def render_product_grid(items):
                                 """, unsafe_allow_html=True
                             )
                         else:
-                            st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:10px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
                     with card_col_desc:
                         st.markdown(
-                            f"<div style='font-size: 11px; font-weight: 600; color: #475569; padding: 2px 0px; height: 150px; overflow-y: auto; line-height: 1.4;'>"
-                            f"<strong>Details:</strong><br>{desc_text if desc_text else 'No additional details available.'}"
+                            f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 0px; height: 120px; overflow-y: auto; line-height: 1.3;'>"
+                            f"<strong>Details:</strong><br>{desc_text if desc_text else 'No details available.'}"
                             f"</div>", unsafe_allow_html=True
                         )
                     
                     st.markdown(
-                        f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
+                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 6px; line-height: 1.2;'>"
                         f"{prod['name']}"
                         f"</div>", unsafe_allow_html=True
                     )
 
                     st.markdown(
-                        f"<div style='font-weight: 800; font-size: 14px; color: #dc2626; margin-bottom: 8px;'>"
-                        f"Rs. {prod['price']} <span style='font-size: 11px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
+                        f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; margin-bottom: 6px;'>"
+                        f"Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
                         f"</div>", unsafe_allow_html=True
                     )
 
@@ -456,13 +458,13 @@ def render_product_grid(items):
                                 if st.session_state.cart[item_key] == 0: del st.session_state.cart[item_key]
                                 st.rerun()
                     with q_col2:
-                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
                     with q_col3:
                         if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
                             st.session_state.cart[item_key] = current_qty + 1
                             st.rerun()
 
-                    st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
 # --- ROUTING LOGIC ---
@@ -474,10 +476,10 @@ if st.session_state.current_view == "Home":
 
     grid_head_col1, grid_head_col2 = st.columns([3, 1])
     with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 18px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
     with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
     render_product_grid(filtered_items)
 
@@ -485,7 +487,7 @@ if st.session_state.current_view == "Home":
 elif st.session_state.current_view == "Categories":
     categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
     
-    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
     
     for i in range(0, len(categories), 3):
         cat_cols = st.columns(3, gap="small")
@@ -498,13 +500,13 @@ elif st.session_state.current_view == "Categories":
                     st.session_state.selected_subcategory = None
                     st.rerun()
 
-    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
     if st.session_state.selected_category:
         subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
         
         if subcats:
-            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 12px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
             for i in range(0, len(subcats), 3):
                 subcat_cols = st.columns(3, gap="small")
                 for idx, subcat in enumerate(subcats[i : i + 3]):
@@ -514,7 +516,7 @@ elif st.session_state.current_view == "Categories":
                         if st.button(sub_label, key=f"sub_btn_{i}_{idx}", use_container_width=True):
                             st.session_state.selected_subcategory = subcat
                             st.rerun()
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
         if st.session_state.selected_subcategory:
             filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == st.session_state.selected_subcategory]
@@ -525,10 +527,10 @@ elif st.session_state.current_view == "Categories":
 
         grid_head_col1, grid_head_col2 = st.columns([3, 1])
         with grid_head_col1:
-            st.markdown(f"<h3 style='margin: 0; font-size: 18px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
         with grid_head_col2:
-            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
         render_product_grid(filtered_items)
 
