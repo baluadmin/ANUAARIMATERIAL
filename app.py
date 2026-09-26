@@ -33,26 +33,11 @@ st.markdown(
         div[data-testid="stDecoration"] {display: none !important;}
 
         .block-container {
-            padding-top: 0.5rem !important;
+            padding-top: 1.5rem !important;
             padding-bottom: 2rem !important;
             padding-left: 1.5rem !important;
             padding-right: 1.5rem !important;
             max-width: 100% !important;
-        }
-
-        /* Top Announcement Bar - Elegant Plum Theme */
-        .top-promo-bar {
-            background: linear-gradient(135deg, #6b1d4f 0%, #4a1135 100%);
-            color: #ffffff;
-            padding: 8px 16px;
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.15);
         }
 
         /* --- REDESIGNED PRODUCT CARD STYLING --- */
@@ -207,17 +192,6 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- ANNOUNCEMENT BANNER ---
-st.markdown(
-    """
-    <div class="top-promo-bar">
-        <span>🎉 Free Shipping across India on orders above ₹999 | COD Available</span>
-        <span>📞 WhatsApp Support: +91 98404 50113</span>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
 # --- HEADER & NAVIGATION BAR ---
 logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
 
@@ -302,7 +276,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "General", "price": "90.00", "colors": "red, blue", "image": "", "stock": "In Stock"}
+        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "General", "price": "90.00", "colors": "red \ blue \ green", "image": "", "stock": "In Stock"}
     ]
 
 
@@ -400,9 +374,11 @@ if st.session_state.current_view == "Home":
                             unsafe_allow_html=True
                         )
 
-                        # Color Dropdown Options
+                        # Color / Option Dropdown Splitter (supports backslash, comma, ampersand)
                         raw_colors = prod.get('colors', '')
-                        color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
+                        for sep in ['\\', ',', '&']:
+                            raw_colors = raw_colors.replace(sep, '|')
+                        color_list = [c.strip() for c in raw_colors.split('|') if c.strip()]
                         selected_color = color_list[0] if color_list else "Standard"
 
                         if color_list:
