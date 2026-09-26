@@ -57,7 +57,7 @@ st.markdown(
             margin-bottom: 12px;
         }
 
-        /* Card Container (Edge-to-Edge Top Image) */
+        /* Card Container Styling */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -76,17 +76,24 @@ st.markdown(
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
         }
 
+        /* Centered Full-Width Image Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 220px !important;
+            height: 230px !important;
             object-fit: cover !important;
+            object-position: center center !important;
             border-top-left-radius: 12px !important;
             border-top-right-radius: 12px !important;
             border-bottom-left-radius: 0px !important;
             border-bottom-right-radius: 0px !important;
             display: block !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
         }
 
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
@@ -384,7 +391,7 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Edge-to-Edge Image
+                        # Centered Full-Width Image Display
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
