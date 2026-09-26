@@ -20,7 +20,7 @@ st.markdown(
 
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: 13px !important;
+            font-size: 14px !important;
             color: #2d1524 !important;
         }
 
@@ -43,15 +43,15 @@ st.markdown(
         }
 
         .custom-scrollbar::-webkit-scrollbar {
-            height: 6px;
-            width: 6px;
+            height: 4px;
+            width: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #cbd5e1;
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
         /* Product Card Styling for 3 Columns */
@@ -59,7 +59,7 @@ st.markdown(
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             border-radius: 14px !important;
-            padding: 8px !important;
+            padding: 10px !important;
             box-shadow: 0 4px 12px rgba(107, 29, 79, 0.04) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 8px;
@@ -74,7 +74,7 @@ st.markdown(
         /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100% !important;
-            height: 95px !important;
+            height: 105px !important;
             object-fit: cover !important;
             border-radius: 6px !important;
             cursor: pointer;
@@ -142,7 +142,7 @@ st.markdown(
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
-            font-size: 11px !important;
+            font-size: 12px !important;
             border-radius: 6px !important;
             padding: 0.15rem 0.3rem !important;
             width: 100% !important;
@@ -420,24 +420,24 @@ def render_product_grid(items):
                                     """, unsafe_allow_html=True
                                 )
                     else:
-                        st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:10px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
-                    # Details text below the images
+                    # Details text set to 2-line height with increased font size (12px)
                     st.markdown(
-                        f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 4px 0px; height: 80px; overflow-y: auto; line-height: 1.3;'>"
+                        f"<div style='font-size: 12px; font-weight: 600; color: #475569; padding: 4px 0px; height: 38px; overflow-y: auto; line-height: 1.3;'>"
                         f"<strong>Details:</strong> {desc_text if desc_text else 'No details available.'}"
                         f"</div>", unsafe_allow_html=True
                     )
                     
                     st.markdown(
-                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 30px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
+                        f"<div style='font-weight: 700; font-size: 13px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
                         f"{prod['name']}"
                         f"</div>", unsafe_allow_html=True
                     )
 
                     st.markdown(
-                        f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; margin-bottom: 4px;'>"
-                        f"Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
+                        f"<div style='font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 4px;'>"
+                        f"Rs. {prod['price']} <span style='font-size: 10px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
                         f"</div>", unsafe_allow_html=True
                     )
 
@@ -460,7 +460,7 @@ def render_product_grid(items):
                                 if st.session_state.cart[item_key] == 0: del st.session_state.cart[item_key]
                                 st.rerun()
                     with q_col2:
-                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
                     with q_col3:
                         if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
                             st.session_state.cart[item_key] = current_qty + 1
