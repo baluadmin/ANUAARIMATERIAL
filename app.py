@@ -43,15 +43,23 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Full Width Edge-to-Edge Product Image Styling */
-        [data-testid="stImage"] {
-            width: 100% !important;
+        /* Remove inner container padding around the image for full-bleed display */
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
+            margin-left: -1rem !important;
+            margin-right: -1rem !important;
+            margin-top: -1rem !important;
+            width: calc(100% + 2rem) !important;
         }
+
+        /* Full Screen Edge-to-Edge Product Image Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
             height: 240px !important;
             object-fit: cover !important;
-            border-radius: 10px !important;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+            border-bottom-left-radius: 0px !important;
+            border-bottom-right-radius: 0px !important;
             display: block !important;
         }
 
@@ -313,7 +321,7 @@ if st.session_state.current_view == "Home":
         for idx, cat in enumerate(cat_batch):
             with cat_cols[idx]:
                 is_selected = (st.session_state.selected_menu == cat)
-                button_label = f"📁 {cat}" if is_selected else cat
+                button_label = f"📂 {cat}" if is_selected else cat
                 
                 if st.button(button_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
                     st.session_state.selected_menu = cat
@@ -345,15 +353,14 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name (Clean multi-line display matching reference)[cite: 12]
+                        # Product Name Only & Price
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
+                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # Catalog Pricing Style (Red current price)[cite: 12]
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 8px;'>"
                             f"Rs. {prod['price']}"
@@ -374,7 +381,7 @@ if st.session_state.current_view == "Home":
                                 label_visibility="collapsed"
                             )
 
-                        # Add to Cart Button (Pill shaped navy blue matching reference)[cite: 12]
+                        # Add to Cart Button
                         btn_label = "Select Options" if color_list else "Add To Cart"
                         if st.button(btn_label, key=f"cart_{global_idx}", use_container_width=True):
                             item_desc = f"{prod['id']} - {prod['name']} ({selected_color})"
