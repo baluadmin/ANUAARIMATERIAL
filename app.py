@@ -26,7 +26,7 @@ st.markdown(
         }
 
         .stApp {
-            background-color: #ffffff !important; 
+            background-color: #f8fafc !important; 
         }
 
         #MainMenu, header, footer {visibility: hidden; display: none !important;}
@@ -36,10 +36,10 @@ st.markdown(
         div[data-testid="stDecoration"] {display: none !important;}
 
         .block-container {
-            padding-top: 1rem !important;
+            padding-top: 0.5rem !important;
             padding-bottom: 2rem !important;
-            padding-left: 2rem !important;
-            padding-right: 2rem !important;
+            padding-left: 1.5rem !important;
+            padding-right: 1.5rem !important;
             max-width: 100% !important;
         }
 
@@ -47,58 +47,70 @@ st.markdown(
         .top-promo-bar {
             background: #1e3a8a;
             color: #ffffff;
-            padding: 8px 16px;
-            font-size: 13px;
+            padding: 6px 12px;
+            font-size: 12px;
             font-weight: 700;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            border-radius: 8px;
+            margin-bottom: 12px;
         }
 
-        /* --- BORDERLESS PROFESSIONAL PRODUCT CARD --- */
+        /* --- EXACT REFERENCE CARD STYLING --- */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
-            border: none !important;
-            box-shadow: none !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
             padding: 0px !important;
-            margin-bottom: 1.5rem !important;
+            overflow: hidden !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
         }
 
-        /* Clean Image Container Header */
+        /* Light-grey image container header matching reference site */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
-            padding: 0px !important;
+            padding: 12px 0px !important;
             width: 100% !important;
-            background-color: #f8fafc !important;
-            border-radius: 8px !important;
-            overflow: hidden !important;
+            background-color: #f1f5f9 !important;
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
         }
 
+        /* Uncropped Full View Centered Image */
         [data-testid="stImage"] img {
             width: 100% !important;
             height: 220px !important;
-            object-fit: cover !important;
-            border-radius: 8px !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            background-color: #f1f5f9 !important;
             display: block !important;
+        }
+
+        /* Inner Content Padding */
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
+            padding-left: 14px !important;
+            padding-right: 14px !important;
         }
 
         /* Storefront Blue Pill Buttons */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: #1e3a8a !important;
+            background: #2b3a97 !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
             font-size: 13px !important;
             border-radius: 20px !important;
-            padding: 0.5rem 1rem !important;
+            padding: 0.45rem 0.75rem !important;
             width: 100% !important;
             display: block !important;
-            box-shadow: 0 2px 4px rgba(30, 58, 138, 0.1) !important;
+            box-shadow: 0 2px 5px rgba(43, 58, 151, 0.15) !important;
         }
         div.stButton > button:hover {
             background: #1e2975 !important;
@@ -139,9 +151,6 @@ if "selected_menu" not in st.session_state:
     st.session_state.selected_menu = None
 
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
-
-# Ensure local images directory exists
-os.makedirs("images", exist_ok=True)
 
 # Database Connection
 db_path = "./chroma_db_anuaari"
@@ -194,8 +203,8 @@ if not st.session_state.logged_in_user:
         )
 
         with st.form("customer_login_form", clear_on_submit=False):
-            cust_name = st.text_input("Customer Name:", placeholder="e.g. Balu")
-            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="7788995566")
+            cust_name = st.text_input("Customer Name:", placeholder="e.g. Anusha")
+            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="9840450113")
             cust_phone = "".join([char for char in raw_phone if char.isdigit()])
 
             login_btn = st.form_submit_button("Enter Store", use_container_width=True)
@@ -211,12 +220,6 @@ if not st.session_state.logged_in_user:
                     st.warning("Please provide your name and an exact 10-digit mobile number.")
     st.stop()
 
-# Check if logged in user is admin (Balu / 7788995566)
-is_admin = (
-    st.session_state.logged_in_user 
-    and st.session_state.logged_in_user.strip().lower() == "balu" 
-    and st.session_state.user_phone == "7788995566"
-)
 
 # --- ANNOUNCEMENT BANNER ---
 st.markdown(
@@ -230,10 +233,7 @@ st.markdown(
 )
 
 # --- HEADER & NAVIGATION BAR ---
-if is_admin:
-    logo_col, nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([2.5, 1, 1, 1, 1], gap="small")
-else:
-    logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
+logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
 
 with logo_col:
     st.markdown(
@@ -257,22 +257,12 @@ with nav_col2:
         st.session_state.current_view = "Cart"
         st.rerun()
 
-if is_admin:
-    with nav_col3:
-        if st.button("Admin Panel", use_container_width=True):
-            st.session_state.current_view = "Admin"
-            st.rerun()
-    with nav_col4:
-        if st.button("Logout", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
-else:
-    with nav_col3:
-        if st.button("Logout", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
+with nav_col3:
+    if st.button("Logout", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
 
-st.markdown("<hr style='margin: 14px 0 20px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
 
 # Load Inventory Directly from Google Sheets
@@ -358,54 +348,8 @@ def process_cart_checkout(address: str, payment_method: str, secondary_phone: st
     return f"Order placed successfully ({payment_method}) for: {cart_summary}."
 
 
-# --- VIEW ROUTING ---
-if st.session_state.current_view == "Admin" and is_admin:
-    st.subheader("🛠️ Store Admin Dashboard")
-    st.markdown("Upload product images and manage inventory updates synced directly with your Google Sheet.")
-
-    tab1, tab2 = st.tabs(["📁 Upload Product Images", "📝 Add / Update Product Data"])
-
-    with tab1:
-        st.markdown("### Upload Image to Local Store (`images/` folder)")
-        uploaded_file = st.file_uploader("Choose an image file (PNG, JPG)", type=["png", "jpg", "jpeg"])
-        if uploaded_file is not None:
-            file_path = os.path.join("images", uploaded_file.name)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            st.success(f"Image successfully saved as `{uploaded_file.name}`! Use this filename in your Google Sheet inventory.")
-            st.image(file_path, width=200)
-
-    with tab2:
-        st.markdown("### Add New Product to Google Sheets")
-        with st.form("admin_product_form"):
-            p_id = st.text_input("Product ID:", placeholder="e.g. AB0100")
-            p_cat = st.text_input("Category:", placeholder="e.g. Beads")
-            p_name = st.text_input("Product Name:", placeholder="e.g. 4mm Bunch Beads")
-            p_price = st.text_input("Price (Rs.):", placeholder="90.00")
-            p_colors = st.text_input("Colors (comma separated):", placeholder="red, blue, green")
-            p_img = st.text_input("Image Filename:", placeholder="e.g. beads_red.jpg")
-
-            submit_prod = st.form_submit_button("Submit Product to Sheet")
-            if submit_prod:
-                if p_id and p_name and p_price:
-                    try:
-                        payload = {
-                            "Type": "AddProduct",
-                            "Product_ID": p_id,
-                            "Category": p_cat,
-                            "Name": p_name,
-                            "Price": p_price,
-                            "Colors": p_colors,
-                            "Image": p_img
-                        }
-                        requests.post(GOOGLE_SCRIPT_URL, json=payload)
-                        st.success("Product payload sent successfully to Google Sheet!")
-                    except Exception as ex:
-                        st.error(f"Error submitting product: {ex}")
-                else:
-                    st.warning("Please fill out Product ID, Name, and Price.")
-
-elif st.session_state.current_view == "Home":
+# --- STOREFRONT CATALOG VIEW ---
+if st.session_state.current_view == "Home":
     categories = list(set([p["category"] for p in product_records if p["category"]]))
     if not categories:
         categories = ["General"]
@@ -428,9 +372,9 @@ elif st.session_state.current_view == "Home":
                     st.session_state.selected_menu = cat
                     st.rerun()
 
-    st.markdown("<hr style='margin: 14px 0 20px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
-    # 4-Column Product Grid (Borderless professional layout)
+    # 4-Column Product Grid
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -441,30 +385,30 @@ elif st.session_state.current_view == "Home":
             
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
-                    with st.container():
+                    with st.container(border=True):
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Clean Image Display
+                        # Image Container with Badges Overlay
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
                             else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; background:#f8fafc; border-radius:8px; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
+                                st.markdown("<div style='text-align:center; padding:70px 0; background:#f1f5f9; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
                         except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; background:#f8fafc; border-radius:8px; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='text-align:center; padding:70px 0; background:#f1f5f9; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name
+                        # Product Name Only
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 42px; overflow: hidden; margin-top: 10px; line-height: 1.3;'>"
+                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # Professional Pricing Display (Red Selling Price + Strikethrough)
+                        # Pricing (Current Red Price + Strikethrough Regular Price)
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 10px;'>"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
                             f"Rs. {prod['price']} <span style='font-size: 12px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
                             f"</div>", 
                             unsafe_allow_html=True
@@ -490,7 +434,7 @@ elif st.session_state.current_view == "Home":
                             st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
                             st.success("Added to cart!")
                             st.rerun()
-                        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+                        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     else:
