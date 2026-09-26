@@ -265,12 +265,12 @@ if not inv_df.empty:
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
 
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
-                "name": str(row.iloc[2]).strip(),           # Column C: Item Name[cite: 3]
-                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E[cite: 3]
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
+                "name": str(row.iloc[2]).strip(),           # Column C: Item Name
+                "category": str(row.iloc[1]).strip(),       # Column B: Category
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
+                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
                 "image": img_val,                           # Column F: Image Filename
                 "stock": "In Stock",
             })
@@ -340,7 +340,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH BULLETPROOF IMAGE LOADING ---
+    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH FULL-WIDTH IMAGE SCALING ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
     
@@ -351,7 +351,7 @@ if st.session_state.current_view == "Home":
             st.markdown("---")
 
             for idx, prod in enumerate(filtered_items):
-                col_img, col_info = st.columns([1, 3], gap="medium")
+                col_img, col_info = st.columns([1, 2.5], gap="medium")
                 
                 with col_img:
                     img_path = prod.get('image', '')
@@ -359,11 +359,11 @@ if st.session_state.current_view == "Home":
                     
                     try:
                         if img_path and os.path.exists(img_path):
-                            st.image(img_path, width=120)
+                            st.image(img_path, use_container_width=True)
                         elif local_path1 and os.path.exists(local_path1):
-                            st.image(local_path1, width=120)
+                            st.image(local_path1, use_container_width=True)
                         elif img_path and img_path.startswith('http'):
-                            st.image(img_path, width=120)
+                            st.image(img_path, use_container_width=True)
                         else:
                             st.markdown("🖼️ *No Image*")
                     except Exception:
@@ -375,7 +375,7 @@ if st.session_state.current_view == "Home":
                     st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
                     st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
 
-                    # Parse multiple colors from Google Sheet Column E[cite: 3]
+                    # Parse multiple colors from Google Sheet Column E
                     raw_colors = prod.get('colors', '')
                     color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
                     
