@@ -138,6 +138,8 @@ if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = None
+if "zoomed_image" not in st.session_state:
+    st.session_state.zoomed_image = None
 
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
 
@@ -152,6 +154,20 @@ def log_login_to_sheet(name, phone):
         requests.post(GOOGLE_SCRIPT_URL, json=payload)
     except Exception as e:
         print(f"Login sheet error: {e}")
+
+
+# --- ZOOM MODAL VIEW ---
+if st.session_state.zoomed_image:
+    st.markdown("### 🔍 Image Preview & Zoom")
+    try:
+        st.image(st.session_state.zoomed_image, use_container_width=True)
+    except Exception:
+        st.info("Unable to display high-resolution preview for this image.")
+    
+    if st.button("❌ Close Preview", use_container_width=True):
+        st.session_state.zoomed_image = None
+        st.rerun()
+    st.stop()
 
 
 # --- LOGIN SCREEN ---
@@ -367,13 +383,15 @@ if st.session_state.current_view == "Home":
                         img_path = prod.get('image', '')
                         desc_text = prod.get('description', '')
 
-                        # Split card inner content into Image (left) and Description (right) without any container box
                         card_col_img, card_col_desc = st.columns([1, 1], gap="small")
 
                         with card_col_img:
                             try:
                                 if img_path:
                                     st.image(img_path, use_container_width=True)
+                                    if st.button("🔍 Zoom", key=f"zoom_{global_idx}", use_container_width=True):
+                                        st.session_state.zoomed_image = img_path
+                                        st.rerun()
                                 else:
                                     st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
                             except Exception:
