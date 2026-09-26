@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
-# 1. Streamlit Page Configuration & Enterprise Styling
+# 1. Page Configuration & Enterprise Catalog Styling
 st.set_page_config(
     page_title="ANUAARIMATERIALS E-Commerce Store",
     page_icon="🧵",
@@ -43,17 +43,32 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Full Screen Edge-to-Edge Product Image Styling */
+        /* --- PROFESSIONAL E-COMMERCE CARD STYLING --- */
+        /* Target Streamlit container to make it look like a clean e-commerce card */
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
+            background-color: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            padding: 0px !important;
+            overflow: hidden !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Full-bleed edge-to-edge image styling at the top of the card */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
-            margin-left: -1rem !important;
-            margin-right: -1rem !important;
-            margin-top: -1rem !important;
-            width: calc(100% + 2rem) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
         }
 
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 240px !important;
+            height: 220px !important;
             object-fit: cover !important;
             border-top-left-radius: 12px !important;
             border-top-right-radius: 12px !important;
@@ -62,7 +77,13 @@ st.markdown(
             display: block !important;
         }
 
-        /* E-Commerce Catalog Pill Button Styling */
+        /* Add padding back for the text elements inside the card */
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+
+        /* Pill-Shaped Action Button */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: #2b3a97 !important;
             color: #ffffff !important;
@@ -343,7 +364,7 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Full Screen Edge-to-Edge Image Display
+                        # Full-Bleed Edge-to-Edge Image Display
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
@@ -352,7 +373,7 @@ if st.session_state.current_view == "Home":
                         except Exception:
                             st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Name Only & Price (Matching Reference Storefront)
+                        # Product Title & Price Layout (Matching reference design)
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
@@ -361,7 +382,7 @@ if st.session_state.current_view == "Home":
                         )
 
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 8px;'>"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
                             f"Rs. {prod['price']}"
                             f"</div>", 
                             unsafe_allow_html=True
@@ -380,13 +401,15 @@ if st.session_state.current_view == "Home":
                                 label_visibility="collapsed"
                             )
 
-                        # Add to Cart Button
+                        # Add to Cart Button (With bottom spacing)
+                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
                         btn_label = "Select Options" if color_list else "Add To Cart"
                         if st.button(btn_label, key=f"cart_{global_idx}", use_container_width=True):
                             item_desc = f"{prod['id']} - {prod['name']} ({selected_color})"
                             st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
                             st.success("Added to cart!")
                             st.rerun()
+                        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
     else:
