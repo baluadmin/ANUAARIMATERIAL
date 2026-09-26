@@ -59,7 +59,7 @@ st.markdown(
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             border-radius: 16px !important;
-            padding: 14px !important;
+            padding: 8px !important;
             box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 12px;
@@ -71,19 +71,20 @@ st.markdown(
             border-color: #e8d0e4 !important;
         }
 
-        /* Direct Clickable Zoom Image */
+        /* Direct Clickable Zoom Image - Full Width, No Margins */
         .zoom-thumb {
-            width: 100%;
-            height: 150px;
-            object-fit: contain;
-            border-radius: 8px;
+            width: 100% !important;
+            height: 150px !important;
+            object-fit: cover !important;
+            border-radius: 8px !important;
             cursor: pointer;
             transition: transform 0.2s ease, opacity 0.2s ease;
-            display: block;
+            display: block !important;
+            margin: 0 !important;
         }
         .zoom-thumb:hover {
             opacity: 0.85;
-            transform: scale(1.03);
+            transform: scale(1.02);
         }
 
         /* Lightbox Overlay */
