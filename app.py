@@ -1,447 +1,640 @@
-from datetime import datetime
-import os
-import pandas as pd
-import requests
-import streamlit as st
-
-# 1. Page Configuration & Professional Styling
-st.set_page_config(
-    page_title="ANUAARI MATERIALS | Aari & Craft Supplies",
-    page_icon="🧵",
-    layout="wide",
-)
-
-st.markdown(
-    """
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANUAARI MATERIALS | Aari & Craft Supplies</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        plum: {
+                            DEFAULT: '#6b1d4f',
+                            dark: '#53143c',
+                            light: '#8a2b64',
+                            surface: '#faf7f9',
+                            border: '#f3e8f1'
+                        },
+                        gold: '#d97706'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-        html, body, [class*="css"] {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: 14px !important;
-            color: #2d1524 !important;
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #faf7f9;
+            color: #2d1524;
         }
-
-        .stApp {
-            background-color: #faf7f9 !important; 
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
         }
-
-        #MainMenu, header, footer {visibility: hidden; display: none !important;}
-        div[data-testid="stToolbar"], section[data-testid="stStatusWidget"] {display: none !important;}
-        .stAppDeployButton {display: none !important; visibility: hidden !important;}
-        header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
-        div[data-testid="stDecoration"] {display: none !important;}
-
-        .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 2rem !important;
-            padding-left: 1.5rem !important;
-            padding-right: 1.5rem !important;
-            max-width: 100% !important;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
         }
-
-        /* Product Card Styling */
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
-            background-color: #ffffff !important;
-            border: 1px solid #f3e8f1 !important;
-            border-radius: 16px !important;
-            padding: 14px !important;
-            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.04) !important;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .product-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
+        .product-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 25px rgba(107, 29, 79, 0.1) !important;
             border-color: #e8d0e4 !important;
         }
-
-        /* Image Frame */
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
-            margin: 0 !important;
-            padding: 8px !important;
-            width: 100% !important;
-            background-color: #fcf9fb !important;
-            border-radius: 12px !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-        }
-
-        [data-testid="stImage"] img {
-            width: 100% !important;
-            height: 190px !important;
-            object-fit: contain !important;
-            object-position: center center !important;
-            border-radius: 8px !important;
-            display: block !important;
-        }
-
-        /* Buttons Styling */
-        div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
-            color: #ffffff !important;
-            border: none !important;
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            border-radius: 12px !important;
-            padding: 0.5rem 1rem !important;
-            width: 100% !important;
-            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.2) !important;
-            transition: all 0.2s ease;
-        }
-        div.stButton > button:hover {
-            background: linear-gradient(135deg, #53143c 0%, #3a0d29 100%) !important;
-            opacity: 0.95;
-        }
-
-        .login-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding-top: 3rem;
-        }
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 30px;
-            border-radius: 20px;
-            background: #ffffff !important;
-            border: 1px solid #f3e8f1 !important;
-            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
-        }
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+</head>
+<body class="h-full flex flex-col antialiased">
 
-# Initialize Session States
-if "logged_in_user" not in st.session_state:
-    st.session_state.logged_in_user = None
-if "user_phone" not in st.session_state:
-    st.session_state.user_phone = None
-if "cart" not in st.session_state:
-    st.session_state.cart = []
-if "current_view" not in st.session_state:
-    st.session_state.current_view = "Home"
-if "selected_category" not in st.session_state:
-    st.session_state.selected_category = None
+    <div id="app" class="flex-1 flex flex-col min-h-screen">
+        
+        <!-- Login Screen Overlay -->
+        <div id="loginModal" class="fixed inset-0 z-50 bg-plum/20 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl border border-plum-border shadow-2xl w-full max-w-md p-8 transform transition-all">
+                <div class="text-center mb-6">
+                    <div class="inline-block bg-plum/10 text-plum px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest mb-3">
+                        Exclusive Store
+                    </div>
+                    <h1 class="text-2xl font-black text-plum tracking-tight uppercase">ANUAARI MATERIALS</h1>
+                    <p class="text-xs font-bold text-gold italic lowercase mt-1">aari work supplies</p>
+                </div>
+                
+                <div class="bg-plum-surface p-4 rounded-xl border border-plum-border mb-6 text-center">
+                    <h2 class="text-base font-bold text-gray-900">Customer Sign In</h2>
+                    <p class="text-xs text-gray-600 mt-0.5">Enter your name and mobile number to browse inventory</p>
+                </div>
 
-GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
-
-
-def log_login_to_sheet(name, phone):
-    try:
-        payload = {
-            "Type": "Login",
-            "Customer_Name": name,
-            "Primary_Phone": phone,
-        }
-        requests.post(GOOGLE_SCRIPT_URL, json=payload)
-    except Exception as e:
-        print(f"Login sheet error: {e}")
-
-
-# --- LOGIN SCREEN ---
-if not st.session_state.logged_in_user:
-    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
-    st.markdown(
-        """
-        <div style="background: #ffffff; padding: 24px; border-radius: 16px; text-align: center; border: 1px solid #f3e8f1; box-shadow: 0 6px 20px rgba(107,29,79,0.04); margin-bottom: 20px; max-width: 420px; margin-left: auto; margin-right: auto;">
-            <div style="display: inline-block; background: rgba(107,29,79,0.1); color: #6b1d4f; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-extrabold: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Exclusive Store</div>
-            <div style="font-size: 24px; font-weight: 900; letter-spacing: 0.5px; color: #6b1d4f; text-transform: uppercase; margin: 0;">ANUAARI MATERIALS</div>
-            <div style="font-size: 13px; font-weight: 700; color: #d97706; text-transform: lowercase; font-style: italic; letter-spacing: 0.5px; margin-top: 4px;">aari work supplies</div>
+                <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Customer Name</label>
+                        <input type="text" id="custName" required placeholder="e.g. Anusha" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-plum text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-1">10-Digit Mobile Number</label>
+                        <input type="tel" id="custPhone" required maxlength="10" placeholder="9840450113" 
+                            class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-plum text-sm">
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-plum to-plum-dark text-white font-bold rounded-xl shadow-lg shadow-plum/20 hover:opacity-95 transition text-sm uppercase tracking-wider">
+                        Enter Store
+                    </button>
+                </form>
+            </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
-    _, login_col, _ = st.columns([1, 1.8, 1])
-
-    with login_col:
-        st.markdown(
-            """
-            <div class="login-card">
-                <div style="font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-align: center;">Customer Sign In</div>
-                <div style="font-size: 12px; color: #64748b; font-weight: 500; margin-bottom: 16px; text-align: center;">
-                    Enter your name and mobile number to browse inventory
+        <!-- Main Storefront App View -->
+        <div id="storeView" class="hidden flex-1 flex flex-col">
+            
+            <!-- Top Announcement Bar -->
+            <div class="bg-gradient-to-r from-plum to-plum-dark text-white px-4 py-2.5 text-xs font-bold flex justify-between items-center shadow-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-gift text-gold animate-bounce"></i>
+                    <span>Free Shipping across India on orders above ₹999 | COD Available</span>
+                </div>
+                <div class="hidden sm:flex items-center gap-2">
+                    <i class="fa-solid fa-phone text-gold"></i>
+                    <span>WhatsApp Support: +91 98404 50113</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
 
-        with st.form("customer_login_form", clear_on_submit=False):
-            cust_name = st.text_input("Customer Name:", placeholder="e.g. Anusha")
-            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="9840450113")
-            cust_phone = "".join([char for char in raw_phone if char.isdigit()])
+            <!-- Header Navigation -->
+            <header class="bg-white border-b border-plum-border sticky top-0 z-30 px-4 lg:px-8 py-3.5 shadow-xs">
+                <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-plum-surface px-4 py-2 rounded-xl border border-plum-border">
+                            <span class="text-lg font-black text-plum uppercase tracking-wide">ANUAARI MATERIALS</span>
+                            <span class="text-xs font-bold text-gold italic ml-2">aari supplies</span>
+                        </div>
+                    </div>
 
-            login_btn = st.form_submit_button("Enter Store", use_container_width=True)
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <button onclick="switchView('Home')" id="navHomeBtn" class="px-4 py-2 rounded-xl text-sm font-bold bg-plum text-white transition shadow-sm">
+                            <i class="fa-solid fa-store mr-1.5"></i> Home
+                        </button>
+                        <button onclick="switchView('Cart')" id="navCartBtn" class="px-4 py-2 rounded-xl text-sm font-bold bg-plum-surface text-plum border border-plum-border hover:bg-plum/10 transition relative">
+                            <i class="fa-solid fa-cart-shopping mr-1.5"></i> Cart <span id="cartBadge" class="ml-1 bg-gold text-white text-xs px-2 py-0.5 rounded-full">0</span>
+                        </button>
+                        <button onclick="handleLogout()" class="px-3 py-2 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 transition border border-red-200">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-            if login_btn:
-                if cust_name.strip() and len(cust_phone) == 10:
-                    st.session_state.logged_in_user = cust_name.strip()
-                    st.session_state.user_phone = cust_phone.strip()
-                    log_login_to_sheet(cust_name.strip(), cust_phone.strip())
-                    st.success("Login Successful!")
-                    st.rerun()
-                else:
-                    st.warning("Please provide your name and an exact 10-digit mobile number.")
-    st.stop()
-
-
-# --- HEADER & NAVIGATION BAR ---
-logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.2, 1, 1, 1], gap="small")
-
-with logo_col:
-    st.markdown(
-        f"""
-        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
-            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
-            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with nav_col1:
-    if st.button("🏠 Home", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.rerun()
-
-with nav_col2:
-    cart_count = len(st.session_state.cart)
-    if st.button(f"🛒 Cart ({cart_count})", use_container_width=True):
-        st.session_state.current_view = "Cart"
-        st.rerun()
-
-with nav_col3:
-    if st.button("🚪 Logout", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
-
-st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
-
-
-# Load Inventory Directly from Google Sheets
-@st.cache_data(ttl=2)
-def load_inventory_from_sheet():
-    sheet_csv_url = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=need+inventory+model+for+this+ANUAARI"
-    try:
-        df = pd.read_csv(sheet_csv_url)
-        df.to_csv("inventory.csv", index=False)
-        return df
-    except Exception as e:
-        if os.path.exists("inventory.csv"):
-            return pd.read_csv("inventory.csv")
-        return pd.DataFrame()
-
-
-inv_df = load_inventory_from_sheet()
-
-product_records = []
-if not inv_df.empty:
-    try:
-        inv_df.columns = inv_df.columns.astype(str).str.strip()
-        for _, row in inv_df.iterrows():
-            cat_val = str(row.iloc[1]).strip()
-            if not cat_val or cat_val.lower() == "nan":
-                cat_val = "General"
-
-            img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
-            loc_path = f"images/{img_val}"
-            if img_val and img_val.lower() != "nan":
-                if os.path.exists(img_val):
-                    main_img = img_val
-                elif os.path.exists(loc_path):
-                    main_img = loc_path
-                else:
-                    main_img = img_val
-            else:
-                main_img = ""
-
-            product_records.append({
-                "id": str(row.iloc[0]).strip(),
-                "name": str(row.iloc[2]).strip(),
-                "category": cat_val,
-                "price": str(row.iloc[3]).strip(),
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
-                "image": main_img,
-                "stock": "In Stock",
-            })
-    except Exception:
-        product_records = []
-
-if not product_records:
-    product_records = [
-        {"id": "AB0001", "name": "Hanging Beads Oval Shape Readymade Hook Glassy Color", "category": "Beads", "price": "90.00", "colors": "Red, Blue, Green", "image": "", "stock": "In Stock"}
-    ]
-
-
-def process_cart_checkout(address: str, payment_method: str, secondary_phone: str, description: str) -> str:
-    if not st.session_state.cart:
-        return "Your cart is empty."
-    customer_name = st.session_state.logged_in_user
-    primary_phone = st.session_state.user_phone
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cart_summary = ", ".join([f"{item['quantity']} of {item['product']}" for item in st.session_state.cart])
-
-    try:
-        order_data = {
-            "Type": "Order",
-            "Timestamp": timestamp,
-            "Customer_Name": customer_name,
-            "Primary_Phone": primary_phone,
-            "Items": cart_summary,
-            "Address": address,
-            "Payment_Method": payment_method,
-            "Secondary_Phone": secondary_phone,
-            "Description": description,
-        }
-        requests.post(GOOGLE_SCRIPT_URL, json=order_data)
-    except Exception as e:
-        print(f"Order sheet error: {e}")
-
-    st.session_state.cart = []
-    return f"Order placed successfully ({payment_method}) for: {cart_summary}."
-
-
-# --- STOREFRONT CATALOG VIEW ---
-if st.session_state.current_view == "Home":
-    categories = list(set([p["category"] for p in product_records if p["category"]]))
-    if not categories:
-        categories = ["General"]
-        
-    if st.session_state.selected_category not in categories:
-        st.session_state.selected_category = categories[0]
-
-    # Category Selection Header & Tabs
-    cat_top_col1, cat_top_col2 = st.columns([3, 1])
-    with cat_top_col1:
-        st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>📁 Master Categories</span>", unsafe_allow_html=True)
-    with cat_top_col2:
-        st.markdown(f"<div style='text-align: right; font-size: 12px; font-weight: 600; color: #64748b;'>Welcome, {st.session_state.logged_in_user}</div>", unsafe_allow_html=True)
-
-    for i in range(0, len(categories), 5):
-        cat_cols = st.columns(5, gap="small")
-        cat_batch = categories[i : i + 5]
-        
-        for idx, cat in enumerate(cat_batch):
-            with cat_cols[idx]:
-                is_selected = (st.session_state.selected_category == cat)
-                button_label = f"📂 {cat}" if is_selected else cat
+            <!-- Main Content Area -->
+            <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
                 
-                if st.button(button_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
-                    st.session_state.selected_category = cat
-                    st.rerun()
+                <!-- HOME CATALOG VIEW -->
+                <div id="homeSection" class="space-y-6">
+                    <!-- Category Tabs -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-black uppercase text-plum tracking-wider flex items-center gap-1.5">
+                                <i class="fa-solid fa-folder-open text-gold"></i> Master Categories
+                            </h3>
+                            <span id="welcomeUserDisplay" class="text-xs font-semibold text-gray-500"></span>
+                        </div>
+                        <div id="categoryContainer" class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                            <!-- Dynamically injected categories -->
+                        </div>
+                    </div>
 
-    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+                    <hr class="border-plum-border">
 
-    # Product Section Header
-    current_cat = st.session_state.get("selected_category", categories[0])
-    filtered_items = [p for p in product_records if p["category"] == current_cat]
+                    <!-- Product Grid Header -->
+                    <div class="flex items-center justify-between">
+                        <h2 id="currentCategoryTitle" class="text-lg font-black text-gray-900">All Products</h2>
+                        <span id="productCountBadge" class="text-xs font-bold bg-plum/10 text-plum px-3 py-1 rounded-full">0 items</span>
+                    </div>
 
-    grid_head_col1, grid_head_col2 = st.columns([3, 1])
-    with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 18px; font-weight: 900; color: #0f172a;'>{current_cat}</h3>", unsafe_allow_html=True)
-    with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 12px; padding: 4px 12px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+                    <!-- Products Grid -->
+                    <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <!-- Dynamically injected products -->
+                    </div>
+                </div>
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-
-    # 4-Column Product Grid
-    if filtered_items:
-        for i in range(0, len(filtered_items), 4):
-            cols = st.columns(4, gap="medium")
-            batch = filtered_items[i : i + 4]
-            
-            for col_idx, prod in enumerate(batch):
-                with cols[col_idx]:
-                    with st.container(border=True):
-                        global_idx = i + col_idx
-                        img_path = prod.get('image', '')
-
-                        # Image Container
-                        try:
-                            if img_path:
-                                st.image(img_path, use_container_width=True)
-                            else:
-                                st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#94a3b8; font-size:12px; font-weight:700; border-radius:8px;'>No Image Available</div>", unsafe_allow_html=True)
-                        except Exception:
-                            st.markdown("<div style='text-align:center; padding:70px 0; background:#fcf9fb; color:#94a3b8; font-size:12px; font-weight:700; border-radius:8px;'>Image Error</div>", unsafe_allow_html=True)
+                <!-- CART & CHECKOUT VIEW -->
+                <div id="cartSection" class="hidden space-y-6 max-w-3xl mx-auto">
+                    <div class="bg-white p-6 rounded-2xl border border-plum-border shadow-xs">
+                        <h2 class="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping text-plum"></i> Shopping Cart & Secure Checkout
+                        </h2>
                         
-                        # Product Name
-                        st.markdown(
-                            f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 10px; line-height: 1.3;'>"
-                            f"{prod['name']}"
-                            f"</div>", 
-                            unsafe_allow_html=True
-                        )
+                        <div id="cartItemsList" class="divide-y divide-gray-100 mb-6">
+                            <!-- Cart items populated dynamically -->
+                        </div>
 
-                        # Pricing Section
-                        st.markdown(
-                            f"<div style='font-weight: 800; font-size: 14px; color: #dc2626; margin-bottom: 8px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 11px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
-                            f"</div>", 
-                            unsafe_allow_html=True
-                        )
+                        <div id="emptyCartState" class="text-center py-12 hidden">
+                            <div class="w-16 h-16 bg-plum-surface text-plum rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                                <i class="fa-solid fa-basket-shopping"></i>
+                            </div>
+                            <p class="text-gray-600 font-semibold">Your cart is empty.</p>
+                            <button onclick="switchView('Home')" class="mt-4 px-6 py-2.5 bg-plum text-white font-bold rounded-xl text-sm">
+                                Browse Store Products
+                            </button>
+                        </div>
 
-                        # Color Dropdown Options Parser (Supports comma, backslash, ampersand)
-                        raw_colors = prod.get('colors', '')
-                        for sep in ['\\', ',', '&']:
-                            raw_colors = raw_colors.replace(sep, '|')
-                        color_list = [c.strip() for c in raw_colors.split('|') if c.strip()]
-                        selected_color = color_list[0] if color_list else "Standard"
+                        <div id="checkoutFormWrapper" class="hidden border-t border-plum-border pt-6">
+                            <form onsubmit="handleCheckout(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Delivery Address (with Pincode):</label>
+                                    <textarea id="checkoutAddress" required rows="3" placeholder="Door No, Street, City, State - Pincode"
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-plum text-sm"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Alternative Contact Number:</label>
+                                    <input type="tel" id="checkoutSecPhone" required maxlength="10" placeholder="10-digit mobile number"
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-plum text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Select Payment Method:</label>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-plum-surface transition">
+                                            <input type="radio" name="paymentMethod" value="Cash on Delivery (COD)" checked class="text-plum focus:ring-plum">
+                                            <span class="text-sm font-bold text-gray-800">Cash on Delivery (COD)</span>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-plum-surface transition">
+                                            <input type="radio" name="paymentMethod" value="Prepaid (GPay / PhonePe / UPI)" class="text-plum focus:ring-plum">
+                                            <span class="text-sm font-bold text-gray-800">Prepaid (UPI / Cards)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Custom Instructions / Notes:</label>
+                                    <input type="text" id="checkoutNotes" placeholder="Any special requests or delivery notes"
+                                        class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-plum text-sm">
+                                </div>
+                                <button type="submit" class="w-full py-4 bg-gradient-to-r from-plum to-plum-dark text-white font-bold rounded-xl shadow-lg shadow-plum/20 hover:opacity-95 transition uppercase tracking-wider text-sm">
+                                    Complete Order Now
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
-                        if color_list:
-                            selected_color = st.selectbox(
-                                "Options", 
-                                color_list, 
-                                key=f"color_{global_idx}", 
-                                label_visibility="collapsed"
-                            )
+            </main>
 
-                        # Action Button
-                        btn_label = "Select & Add" if color_list else "Add To Cart"
-                        if st.button(f"🛒 {btn_label}", key=f"cart_{global_idx}", use_container_width=True):
-                            item_desc = f"{prod['name']} ({selected_color})"
-                            st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
-                            st.success("Added to cart!")
-                            st.rerun()
-                        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            <!-- Footer -->
+            <footer class="bg-white border-t border-plum-border py-4 px-6 text-center text-xs text-gray-500">
+                &copy; 2026 ANUAARI MATERIALS. All rights reserved. Handcrafted with precision for Aari artisans.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Toast Notification Modal/Alert Box -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-gray-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-bold">
+        <i class="fa-solid fa-circle-check text-green-400 text-lg"></i>
+        <span id="toastMessage">Success message</span>
+    </div>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec";
+        
+        // Application State
+        let state = {
+            user: localStorage.getItem('anuaari_user') || null,
+            phone: localStorage.getItem('anuaari_phone') || null,
+            currentView: 'Home',
+            selectedCategory: null,
+            cart: JSON.parse(localStorage.getItem('anuaari_cart')) || [],
+            products: [],
+            categories: []
+        };
+
+        // Fallback sample data in case sheet is offline
+        const fallbackProducts = [
+            { id: "AB0001", name: "Hanging Beads Oval Shape Readymade Hook Glassy Color", category: "Beads", price: "90.00", colors: "Red, Blue, Green, Gold", image: "", stock: "In Stock" },
+            { id: "AB0002", name: "Zari Thread Metallic Gold & Silver Zari Roll", category: "Threads", price: "120.00", colors: "Gold, Silver, Antique Gold", image: "", stock: "In Stock" },
+            { id: "AB0003", name: "Aari Embroidery Needle Holder Wooden Handle Set", category: "Tools & Hooks", price: "150.00", colors: "Standard", image: "", stock: "In Stock" },
+            { id: "AB0004", name: "Kundan Stone Oval Mirror Flatback Acrylic", category: "Stones & Mirrors", price: "75.00", colors: "Multicolor, Clear Crystal", image: "", stock: "In Stock" },
+            { id: "AB0005", name: "Silk Thread Lacquered Multibox Combo", category: "Threads", price: "350.00", colors: "Assorted Shades", image: "", stock: "In Stock" },
+            { id: "AB0006", name: "Golden Spring Wire (Passing) - 1 Bunch", category: "Wires", price: "110.00", colors: "Gold, Silver", image: "", stock: "In Stock" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (state.user) {
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('storeView').classList.remove('hidden');
+                document.getElementById('welcomeUserDisplay').innerText = `Welcome, ${state.user}`;
+            }
+            fetchInventory();
+            updateCartBadge();
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('custName').value.trim();
+            const rawPhone = document.getElementById('custPhone').value.trim();
+            const phone = rawPhone.replace(/\D/g, '');
+
+            if (!name || phone.length !== 10) {
+                showToast("Please provide your name and an exact 10-digit mobile number.", "error");
+                return;
+            }
+
+            state.user = name;
+            state.phone = phone;
+            localStorage.setItem('anuaari_user', name);
+            localStorage.setItem('anuaari_phone', phone);
+
+            // Log login to Google Sheets in background
+            try {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ Type: "Login", Customer_Name: name, Primary_Phone: phone })
+                });
+            } catch (err) { console.error(err); }
+
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('storeView').classList.remove('hidden');
+            document.getElementById('welcomeUserDisplay').innerText = `Welcome, ${name}`;
             
-        st.markdown("<br>", unsafe_allow_html=True)
-    else:
-        st.info("No items found in this category.")
+            showToast("Login Successful! Welcome to ANUAARI MATERIALS.");
+            renderStore();
+        }
 
-else:
-    # --- CART & CHECKOUT VIEW ---
-    st.subheader("🛒 Shopping Cart & Secure Checkout")
-    if st.session_state.cart:
-        for c_idx, item in enumerate(st.session_state.cart):
-            col_item, col_rem = st.columns([4, 1])
-            with col_item:
-                st.markdown(f"• **{item['product']}** ({item['quantity']})")
-            with col_rem:
-                if st.button("Remove", key=f"rem_{c_idx}"):
-                    st.session_state.cart.pop(c_idx)
-                    st.rerun()
+        function handleLogout() {
+            localStorage.clear();
+            location.reload();
+        }
 
-        st.markdown("---")
-        with st.form("checkout_form"):
-            address = st.text_area("Delivery Address (with Pincode):")
-            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
-            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
-            notes = st.text_area("Custom Instructions / Notes:")
+        async function fetchInventory() {
+            const sheetCsvUrl = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=need+inventory+model+for+this+ANUAARI";
+            try {
+                const response = await fetch(sheetCsvUrl);
+                const csvText = await response.text();
+                parseCSV(csvText);
+            } catch (err) {
+                console.warn("Using offline fallback inventory due to network error:", err);
+                state.products = fallbackProducts;
+                processCategories();
+                renderStore();
+            }
+        }
 
-            if st.form_submit_button("Complete Order Now"):
-                if address and len(sec_phone) == 10:
-                    res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
-                    st.success(res_msg)
-                    st.session_state.current_view = "Home"
-                    st.rerun()
-                else:
-                    st.warning("Please provide a valid address and a 10-digit alternative phone number.")
-    else:
-        st.info("Your cart is empty. Click Home to browse products.")
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+            if (lines.length <= 1) {
+                state.products = fallbackProducts;
+                processCategories();
+                renderStore();
+                return;
+            }
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                // Simple CSV row parser handling quotes
+                const row = [];
+                let inQuotes = false;
+                let currentVal = '';
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(currentVal.trim());
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                row.push(currentVal.trim());
+
+                if (row.length >= 4) {
+                    let cat = row[1] ? row[1].replace(/^"|"$/g, '') : "General";
+                    if (!cat || cat.toLowerCase() === 'nan') cat = "General";
+                    
+                    let img = row[5] ? row[5].replace(/^"|"$/g, '') : "";
+                    let colors = row[4] ? row[4].replace(/^"|"$/g, '') : "";
+
+                    result.push({
+                        id: row[0] ? row[0].replace(/^"|"$/g, '') : `PROD${i}`,
+                        category: cat,
+                        name: row[2] ? row[2].replace(/^"|"$/g, '') : "Craft Item",
+                        price: row[3] ? row[3].replace(/^"|"$/g, '') : "99.00",
+                        colors: colors,
+                        image: img,
+                        stock: "In Stock"
+                    });
+                }
+            }
+
+            state.products = result.length > 0 ? result : fallbackProducts;
+            processCategories();
+            renderStore();
+        }
+
+        function processCategories() {
+            const cats = [...new Set(state.products.map(p => p.category))];
+            state.categories = cats.length > 0 ? cats : ["General"];
+            if (!state.selectedCategory || !state.categories.includes(state.selectedCategory)) {
+                state.selectedCategory = state.categories[0];
+            }
+        }
+
+        function switchView(viewName) {
+            state.currentView = viewName;
+            const homeSec = document.getElementById('homeSection');
+            const cartSec = document.getElementById('cartSection');
+            const homeBtn = document.getElementById('navHomeBtn');
+            const cartBtn = document.getElementById('navCartBtn');
+
+            if (viewName === 'Home') {
+                homeSec.classList.remove('hidden');
+                cartSec.classList.add('hidden');
+                homeBtn.className = "px-4 py-2 rounded-xl text-sm font-bold bg-plum text-white transition shadow-sm";
+                cartBtn.className = "px-4 py-2 rounded-xl text-sm font-bold bg-plum-surface text-plum border border-plum-border hover:bg-plum/10 transition relative";
+                renderStore();
+            } else {
+                homeSec.classList.add('hidden');
+                cartSec.classList.remove('hidden');
+                cartBtn.className = "px-4 py-2 rounded-xl text-sm font-bold bg-plum text-white transition shadow-sm";
+                homeBtn.className = "px-4 py-2 rounded-xl text-sm font-bold bg-plum-surface text-plum border border-plum-border hover:bg-plum/10 transition relative";
+                renderCart();
+            }
+        }
+
+        function renderStore() {
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = '';
+
+            state.categories.forEach(cat => {
+                const isSelected = state.selectedCategory === cat;
+                const btn = document.createElement('button');
+                btn.className = `px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider whitespace-nowrap transition shadow-xs ${
+                    isSelected 
+                        ? 'bg-plum text-white shadow-plum/20' 
+                        : 'bg-white text-gray-700 border border-plum-border hover:bg-plum-surface'
+                }`;
+                btn.innerHTML = isSelected ? `<i class="fa-solid fa-folder-open mr-1.5 text-gold"></i> ${cat}` : cat;
+                btn.onclick = () => {
+                    state.selectedCategory = cat;
+                    renderStore();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+
+            const filtered = state.products.filter(p => p.category === state.selectedCategory);
+            document.getElementById('currentCategoryTitle').innerText = state.selectedCategory;
+            document.getElementById('productCountBadge').innerText = `${filtered.length} items`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-16 text-gray-500 font-semibold bg-white rounded-2xl border border-plum-border">No items found in this category.</div>`;
+                return;
+            }
+
+            filtered.forEach((prod, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-plum-border p-4 product-card flex flex-col justify-between shadow-xs";
+
+                // Image container
+                const imgContainer = document.createElement('div');
+                imgContainer.className = "w-full h-48 bg-[#fcf9fb] rounded-xl flex items-center justify-center p-2 mb-3 overflow-hidden relative";
+                
+                if (prod.image && prod.image.toLowerCase() !== 'nan') {
+                    const img = document.createElement('img');
+                    img.src = prod.image;
+                    img.alt = prod.name;
+                    img.className = "w-full h-full object-contain object-center rounded-lg";
+                    img.onerror = () => {
+                        imgContainer.innerHTML = `<div class="text-xs font-bold text-gray-400">Image Preview</div>`;
+                    };
+                    imgContainer.appendChild(img);
+                } else {
+                    imgContainer.innerHTML = `<div class="text-xs font-bold text-gray-400">No Image Available</div>`;
+                }
+
+                // Title
+                const title = document.createElement('div');
+                title.className = "font-bold text-xs text-gray-900 h-10 overflow-hidden leading-snug mb-2";
+                title.innerText = prod.name;
+
+                // Price
+                const priceDiv = document.createElement('div');
+                priceDiv.className = "font-extrabold text-sm text-red-600 mb-3 flex items-center gap-2";
+                priceDiv.innerHTML = `Rs. ${prod.price} <span class="text-[10px] text-gray-400 line-through font-semibold">Rs. 160.00</span>`;
+
+                // Color options select if available
+                let colorSelectHTML = '';
+                const colors = prod.colors ? prod.colors.split(',').map(c => c.trim()).filter(Boolean) : [];
+                if (colors.length > 0) {
+                    colorSelectHTML = `
+                        <div class="mb-3">
+                            <select id="colorSel_${idx}" class="w-full px-3 py-2 text-xs font-semibold rounded-xl border border-gray-200 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-plum">
+                                ${colors.map(c => `<option value="${c}">${c}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+
+                // Add to Cart Button
+                const btnText = colors.length > 0 ? "Select & Add" : "Add To Cart";
+                const btn = document.createElement('button');
+                btn.className = "w-full py-2.5 bg-gradient-to-r from-plum to-plum-dark text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-sm hover:opacity-95 transition";
+                btn.innerHTML = `<i class="fa-solid fa-cart-plus mr-1"></i> ${btnText}`;
+                btn.onclick = () => {
+                    let selectedColor = colors.length > 0 ? document.getElementById(`colorSel_${idx}`).value : "Standard";
+                    addToCart(prod.name, selectedColor, prod.price);
+                };
+
+                card.appendChild(imgContainer);
+                card.appendChild(title);
+                card.appendChild(priceDiv);
+                if (colors.length > 0) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = colorSelectHTML;
+                    card.appendChild(tempDiv.firstElementChild);
+                }
+                card.appendChild(btn);
+
+                grid.appendChild(card);
+            });
+        }
+
+        function addToCart(productName, color, price) {
+            const itemDesc = `${productName} (${color})`;
+            state.cart.push({ product: itemDesc, price: price, quantity: "1 Units" });
+            localStorage.setItem('anuaari_cart', JSON.stringify(state.cart));
+            updateCartBadge();
+            showToast("Added to cart successfully!");
+        }
+
+        function updateCartBadge() {
+            document.getElementById('cartBadge').innerText = state.cart.length;
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cartItemsList');
+            const emptyState = document.getElementById('emptyCartState');
+            const checkoutWrapper = document.getElementById('checkoutFormWrapper');
+            list.innerHTML = '';
+
+            if (state.cart.length === 0) {
+                emptyState.classList.remove('hidden');
+                checkoutWrapper.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            checkoutWrapper.classList.remove('hidden');
+
+            state.cart.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = "py-3 flex items-center justify-between gap-4";
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-plum/10 text-plum flex items-center justify-center font-bold text-xs">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-900">${item.product}</p>
+                            <p class="text-[11px] text-gray-500 font-semibold">Qty: 1 Unit</p>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="text-xs font-bold text-red-600 hover:text-red-800 px-3 py-1.5 rounded-lg hover:bg-red-50 transition">
+                        <i class="fa-solid fa-trash mr-1"></i> Remove
+                    </button>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function removeFromCart(index) {
+            state.cart.splice(index, 1);
+            localStorage.setItem('anuaari_cart', JSON.stringify(state.cart));
+            updateCartBadge();
+            renderCart();
+            showToast("Item removed from cart.");
+        }
+
+        function handleCheckout(e) {
+            e.preventDefault();
+            if (state.cart.length === 0) {
+                showToast("Your cart is empty.", "error");
+                return;
+            }
+
+            const address = document.getElementById('checkoutAddress').value.trim();
+            const secPhone = document.getElementById('checkoutSecPhone').value.trim();
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const notes = document.getElementById('checkoutNotes').value.trim();
+
+            if (!address || secPhone.length !== 10) {
+                showToast("Please provide a valid address and 10-digit alternative number.", "error");
+                return;
+            }
+
+            const cartSummary = state.cart.map(i => i.product).join(', ');
+            const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+            const orderPayload = {
+                Type: "Order",
+                Timestamp: timestamp,
+                Customer_Name: state.user,
+                Primary_Phone: state.phone,
+                Items: cartSummary,
+                Address: address,
+                Payment_Method: paymentMethod,
+                Secondary_Phone: secPhone,
+                Description: notes
+            };
+
+            // Post order to Google Sheets
+            try {
+                fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderPayload)
+                });
+            } catch (err) { console.error(err); }
+
+            state.cart = [];
+            localStorage.setItem('anuaari_cart', JSON.stringify(state.cart));
+            updateCartBadge();
+
+            showToast(`Order placed successfully (${paymentMethod})!`);
+            switchView('Home');
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toastNotification');
+            const msgEl = document.getElementById('toastMessage');
+            msgEl.innerText = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
