@@ -262,12 +262,12 @@ if not inv_df.empty:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
             product_records.append({
-                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
-                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name[cite: 3]
-                "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
-                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
-                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options[cite: 3]
+                "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
+                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name
+                "category": str(row.iloc[1]).strip(),       # Column B: Category
+                "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
+                "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
+                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options
                 "stock": "In Stock",
             })
     except Exception:
@@ -311,50 +311,55 @@ def process_cart_checkout(address: str, secondary_phone: str, description: str) 
 
 # --- VIEW SWITCHING: HOME VS CART ---
 if st.session_state.current_view == "Home":
-    col_menu, col_items = st.columns([1, 3], gap="medium")
-
-    # 1. Master Categories Menu Sidebar
-    with col_menu:
-        st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Master Categories</span>", unsafe_allow_html=True)
-        with st.container(height=650, border=True):
-            categories = list(set([p["category"] for p in product_records if p["category"]]))
-            if not categories:
-                categories = ["AAI"]
-                
-            if st.session_state.selected_menu not in categories:
-                st.session_state.selected_menu = categories[0]
-
-            for cat in categories:
-                if st.button(cat, key=f"menu_btn_{cat}", use_container_width=True):
-                    st.session_state.selected_menu = cat
-                    st.session_state.product_page = 0
-                    st.rerun()
-
-    # 2. Product Items & All Subcategories View
-    with col_items:
-        current_cat = st.session_state.get("selected_menu", categories[0])
-        st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Selected Category:</span> <span style='color: #0f172a; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
+    
+    categories = list(set([p["category"] for p in product_records if p["category"]]))
+    if not categories:
+        categories = ["AAI"]
         
-        with st.container(height=650, border=True):
-            filtered_items = [p for p in product_records if p["category"] == current_cat]
+    if st.session_state.selected_menu not in categories:
+        st.session_state.selected_menu = categories[0]
 
-            if filtered_items:
-                st.markdown("---")
+    # --- COLUMN-WISE MASTER CATEGORIES HEADER ---
+    st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Master Categories</span>", unsafe_allow_html=True)
+    
+    cat_cols = st.columns(len(categories) if len(categories) > 0 else 1, gap="small")
+    
+    for idx, cat in enumerate(categories):
+        with cat_cols[idx]:
+            is_selected = (st.session_state.selected_menu == cat)
+            button_label = f"📂 {cat}" if is_selected else cat
+            
+            if st.button(button_label, key=f"cat_col_btn_{cat}", use_container_width=True):
+                st.session_state.selected_menu = cat
+                st.session_state.product_page = 0
+                st.rerun()
 
-                for idx, prod in enumerate(filtered_items):
-                    subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
-                    color_display = f" | Colors: {prod['colors']}" if prod.get('colors') else ""
-                    
-                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']}{color_display} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
-                    if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
-                        st.session_state.cart.append({"product": f"{prod['id']} - {prod['name']} ({prod['colors']})", "quantity": "1 Units"})
-                        st.success("Added to cart!")
-                        st.rerun()
-                    st.markdown("<hr style='margin: 6px 0;'>", unsafe_allow_html=True)
-            else:
-                st.info("No items found in this master category.")
+    # --- FULL-WIDTH PRODUCT ITEMS VIEW ---
+    current_cat = st.session_state.get("selected_menu", categories[0])
+    st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
+    
+    with st.container(border=True):
+        filtered_items = [p for p in product_records if p["category"] == current_cat]
+
+        if filtered_items:
+            st.markdown("---")
+
+            for idx, prod in enumerate(filtered_items):
+                subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
+                color_display = f" | Colors: {prod['colors']}" if prod.get('colors') else ""
+                
+                st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']}{color_display} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
+
+                if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
+                    st.session_state.cart.append({"product": f"{prod['id']} - {prod['name']} ({prod['colors']})", "quantity": "1 Units"})
+                    st.success("Added to cart!")
+                    st.rerun()
+                st.markdown("<hr style='margin: 6px 0;'>", unsafe_allow_html=True)
+        else:
+            st.info("No items found in this master category.")
 
 else:
     # --- CART & CHECKOUT VIEW ---
