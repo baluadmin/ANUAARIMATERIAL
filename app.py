@@ -57,7 +57,7 @@ st.markdown(
             margin-bottom: 12px;
         }
 
-        /* Card Container Styling */
+        /* --- EXACT REFERENCE CARD STYLING --- */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -72,7 +72,7 @@ st.markdown(
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
         }
 
-        /* Light-grey image container header */
+        /* Light-grey image container header matching reference site */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
             padding: 12px 0px !important;
@@ -83,6 +83,7 @@ st.markdown(
             align-items: center !important;
         }
 
+        /* Uncropped Full View Centered Image */
         [data-testid="stImage"] img {
             width: 100% !important;
             height: 220px !important;
@@ -92,6 +93,7 @@ st.markdown(
             display: block !important;
         }
 
+        /* Inner Content Padding */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
             padding-left: 14px !important;
             padding-right: 14px !important;
@@ -150,9 +152,6 @@ if "selected_menu" not in st.session_state:
 
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
 
-# Ensure local images directory exists
-os.makedirs("images", exist_ok=True)
-
 # Database Connection
 db_path = "./chroma_db_anuaari"
 try:
@@ -204,8 +203,8 @@ if not st.session_state.logged_in_user:
         )
 
         with st.form("customer_login_form", clear_on_submit=False):
-            cust_name = st.text_input("Customer Name:", placeholder="e.g. Balu")
-            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="7788995566")
+            cust_name = st.text_input("Customer Name:", placeholder="e.g. Anusha")
+            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="9840450113")
             cust_phone = "".join([char for char in raw_phone if char.isdigit()])
 
             login_btn = st.form_submit_button("Enter Store", use_container_width=True)
@@ -221,12 +220,6 @@ if not st.session_state.logged_in_user:
                     st.warning("Please provide your name and an exact 10-digit mobile number.")
     st.stop()
 
-# Check if logged in user is admin (Balu / 7788995566)
-is_admin = (
-    st.session_state.logged_in_user 
-    and st.session_state.logged_in_user.strip().lower() == "balu" 
-    and st.session_state.user_phone == "7788995566"
-)
 
 # --- ANNOUNCEMENT BANNER ---
 st.markdown(
@@ -240,10 +233,7 @@ st.markdown(
 )
 
 # --- HEADER & NAVIGATION BAR ---
-if is_admin:
-    logo_col, nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([2.5, 1, 1, 1, 1], gap="small")
-else:
-    logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
+logo_col, nav_col1, nav_col2, nav_col3 = st.columns([3.5, 1, 1, 1], gap="small")
 
 with logo_col:
     st.markdown(
@@ -267,20 +257,10 @@ with nav_col2:
         st.session_state.current_view = "Cart"
         st.rerun()
 
-if is_admin:
-    with nav_col3:
-        if st.button("Admin Panel", use_container_width=True):
-            st.session_state.current_view = "Admin"
-            st.rerun()
-    with nav_col4:
-        if st.button("Logout", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
-else:
-    with nav_col3:
-        if st.button("Logout", use_container_width=True):
-            st.session_state.clear()
-            st.rerun()
+with nav_col3:
+    if st.button("Logout", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
 
 st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
@@ -368,54 +348,8 @@ def process_cart_checkout(address: str, payment_method: str, secondary_phone: st
     return f"Order placed successfully ({payment_method}) for: {cart_summary}."
 
 
-# --- VIEW ROUTING ---
-if st.session_state.current_view == "Admin" and is_admin:
-    st.subheader("🛠️ Store Admin Dashboard")
-    st.markdown("Upload product images and manage inventory updates synced directly with your Google Sheet.")
-
-    tab1, tab2 = st.tabs(["📁 Upload Product Images", "📝 Add / Update Product Data"])
-
-    with tab1:
-        st.markdown("### Upload Image to Local Store (`images/` folder)")
-        uploaded_file = st.file_uploader("Choose an image file (PNG, JPG)", type=["png", "jpg", "jpeg"])
-        if uploaded_file is not None:
-            file_path = os.path.join("images", uploaded_file.name)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            st.success(f"Image successfully saved as `{uploaded_file.name}`! Use this filename in your Google Sheet inventory.")
-            st.image(file_path, width=200)
-
-    with tab2:
-        st.markdown("### Add New Product to Google Sheets")
-        with st.form("admin_product_form"):
-            p_id = st.text_input("Product ID:", placeholder="e.g. AB0100")
-            p_cat = st.text_input("Category:", placeholder="e.g. Beads")
-            p_name = st.text_input("Product Name:", placeholder="e.g. 4mm Bunch Beads")
-            p_price = st.text_input("Price (Rs.):", placeholder="90.00")
-            p_colors = st.text_input("Colors (comma separated):", placeholder="red, blue, green")
-            p_img = st.text_input("Image Filename:", placeholder="e.g. beads_red.jpg")
-
-            submit_prod = st.form_submit_button("Submit Product to Sheet")
-            if submit_prod:
-                if p_id and p_name and p_price:
-                    try:
-                        payload = {
-                            "Type": "AddProduct",
-                            "Product_ID": p_id,
-                            "Category": p_cat,
-                            "Name": p_name,
-                            "Price": p_price,
-                            "Colors": p_colors,
-                            "Image": p_img
-                        }
-                        requests.post(GOOGLE_SCRIPT_URL, json=payload)
-                        st.success("Product payload sent successfully to Google Sheet!")
-                    except Exception as ex:
-                        st.error(f"Error submitting product: {ex}")
-                else:
-                    st.warning("Please fill out Product ID, Name, and Price.")
-
-elif st.session_state.current_view == "Home":
+# --- STOREFRONT CATALOG VIEW ---
+if st.session_state.current_view == "Home":
     categories = list(set([p["category"] for p in product_records if p["category"]]))
     if not categories:
         categories = ["General"]
@@ -455,7 +389,7 @@ elif st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Image Display
+                        # Image Container with Badges Overlay
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
@@ -472,7 +406,7 @@ elif st.session_state.current_view == "Home":
                             unsafe_allow_html=True
                         )
 
-                        # Pricing
+                        # Pricing (Current Red Price + Strikethrough Regular Price)
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 12px;'>"
                             f"Rs. {prod['price']} <span style='font-size: 12px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
