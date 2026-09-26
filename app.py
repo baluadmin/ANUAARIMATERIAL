@@ -1,10 +1,11 @@
 from datetime import datetime
+import base64
 import os
 import pandas as pd
 import requests
 import streamlit as st
 
-# 1. Page Configuration & Professional Styling
+# 1. Page Configuration & Styling
 st.set_page_config(
     page_title="ANUAARI MATERIALS | Aari & Craft Supplies",
     page_icon="🧵",
@@ -68,24 +69,68 @@ st.markdown(
             border-color: #e8d0e4 !important;
         }
 
-        /* Image Frame */
-        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
-            margin: 0 !important;
-            padding: 0px !important;
-            width: 100% !important;
-            background-color: transparent !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
+        /* Direct Clickable Zoom Image */
+        .zoom-thumb {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            display: block;
+        }
+        .zoom-thumb:hover {
+            opacity: 0.85;
+            transform: scale(1.03);
         }
 
-        [data-testid="stImage"] img {
-            width: 100% !important;
-            height: 150px !important;
-            object-fit: contain !important;
-            object-position: center center !important;
-            border-radius: 8px !important;
-            display: block !important;
+        /* Lightbox Overlay */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            z-index: 999999;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(20, 5, 15, 0.85);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .lightbox-overlay:target {
+            display: flex;
+        }
+        .lightbox-img {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: zoomIn 0.25s ease-out;
+            cursor: default;
+        }
+        .close-hint {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+            text-decoration: none;
+            background: rgba(0,0,0,0.4);
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         /* Buttons Styling */
@@ -138,8 +183,6 @@ if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = None
-if "zoomed_image" not in st.session_state:
-    st.session_state.zoomed_image = None
 
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
 
@@ -156,18 +199,21 @@ def log_login_to_sheet(name, phone):
         print(f"Login sheet error: {e}")
 
 
-# --- ZOOM MODAL VIEW ---
-if st.session_state.zoomed_image:
-    st.markdown("### 🔍 Image Preview & Zoom")
-    try:
-        st.image(st.session_state.zoomed_image, use_container_width=True)
-    except Exception:
-        st.info("Unable to display high-resolution preview for this image.")
-    
-    if st.button("❌ Close Preview", use_container_width=True):
-        st.session_state.zoomed_image = None
-        st.rerun()
-    st.stop()
+def get_image_src(image_path):
+    if not image_path:
+        return ""
+    if image_path.startswith("http://") or image_path.startswith("https://"):
+        return image_path
+    if os.path.exists(image_path):
+        try:
+            with open(image_path, "rb") as img_f:
+                b64 = base64.b64encode(img_f.read()).decode("utf-8")
+                ext = image_path.split(".")[-1].lower()
+                mime = "image/png" if ext == "png" else "image/jpeg"
+                return f"data:{mime};base64,{b64}"
+        except Exception:
+            return ""
+    return image_path
 
 
 # --- LOGIN SCREEN ---
@@ -382,27 +428,34 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
                         desc_text = prod.get('description', '')
+                        img_src = get_image_src(img_path)
 
                         card_col_img, card_col_desc = st.columns([1, 1], gap="small")
 
                         with card_col_img:
-                            try:
-                                if img_path:
-                                    st.image(img_path, use_container_width=True)
-                                    if st.button("🔍 Zoom", key=f"zoom_{global_idx}", use_container_width=True):
-                                        st.session_state.zoomed_image = img_path
-                                        st.rerun()
-                                else:
-                                    st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
-                            except Exception:
-                                st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>Error</div>", unsafe_allow_html=True)
+                            if img_src:
+                                # Clickable image that expands to lightbox without extra buttons
+                                st.markdown(
+                                    f"""
+                                    <a href="#modal_{global_idx}">
+                                        <img src="{img_src}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
+                                    </a>
+                                    <div id="modal_{global_idx}" class="lightbox-overlay" onclick="location.href='#';">
+                                        <a href="#" class="close-hint">&times;</a>
+                                        <img src="{img_src}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True,
+                                )
+                            else:
+                                st.markdown("<div style='text-align:center; padding:50px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
                         with card_col_desc:
                             st.markdown(
                                 f"<div style='font-size: 11px; font-weight: 600; color: #475569; padding: 2px 0px; height: 150px; overflow-y: auto; line-height: 1.4;'>"
                                 f"<strong>Details:</strong><br>{desc_text if desc_text else 'No additional details available.'}"
                                 f"</div>",
-                                unsafe_allow_html=True
+                                unsafe_allow_html=True,
                             )
                         
                         # Product Name
@@ -410,7 +463,7 @@ if st.session_state.current_view == "Home":
                             f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 38px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
                             f"{prod['name']}"
                             f"</div>", 
-                            unsafe_allow_html=True
+                            unsafe_allow_html=True,
                         )
 
                         # Pricing Section
@@ -418,7 +471,7 @@ if st.session_state.current_view == "Home":
                             f"<div style='font-weight: 800; font-size: 14px; color: #dc2626; margin-bottom: 8px;'>"
                             f"Rs. {prod['price']} <span style='font-size: 11px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 4px;'>Rs. 160.00</span>"
                             f"</div>", 
-                            unsafe_allow_html=True
+                            unsafe_allow_html=True,
                         )
 
                         # Color Dropdown Options Parser (Supports comma, backslash, ampersand)
@@ -433,7 +486,7 @@ if st.session_state.current_view == "Home":
                                 "Options", 
                                 color_list, 
                                 key=f"color_{global_idx}", 
-                                label_visibility="collapsed"
+                                label_visibility="collapsed",
                             )
 
                         # Item Key for Cart Storage
@@ -454,7 +507,7 @@ if st.session_state.current_view == "Home":
                         with q_col2:
                             st.markdown(
                                 f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 6px; color: #6b1d4f;'>{current_qty}</div>",
-                                unsafe_allow_html=True
+                                unsafe_allow_html=True,
                             )
 
                         with q_col3:
