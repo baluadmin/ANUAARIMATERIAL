@@ -275,7 +275,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "AAI", "category": "AAI", "subcategory": "AAI", "price": "10", "colors": "red", "stock": "In Stock"}
+        {"id": "AB0001", "name": "AAI", "category": "AAI", "subcategory": "AAI", "price": "10", "colors": "red, dull gold", "stock": "In Stock"}
     ]
 
 
@@ -336,7 +336,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- FULL-WIDTH PRODUCT ITEMS VIEW ---
+    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH COLOR SWATCH SELECTION ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
     
@@ -348,16 +348,34 @@ if st.session_state.current_view == "Home":
 
             for idx, prod in enumerate(filtered_items):
                 subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
-                color_display = f" | Colors: {prod['colors']}" if prod.get('colors') else ""
                 
                 st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
-                st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']}{color_display} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
+
+                # Parse multiple colors from Google Sheet Column E (comma or ampersand separated)
+                raw_colors = prod.get('colors', '')
+                color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
+                
+                selected_color = color_list[0] if color_list else "Standard"
+
+                if color_list:
+                    st.markdown("<div style='font-size: 13px; font-weight: 700; color: #475569; margin-top: 6px;'>Select Color Option:</div>", unsafe_allow_html=True)
+                    selected_color = st.radio(
+                        "Choose Color", 
+                        color_list, 
+                        key=f"color_radio_{current_cat}_{idx}", 
+                        horizontal=True, 
+                        label_visibility="collapsed"
+                    )
+                    st.markdown(f"<div style='font-size: 13px; color: #0284c7; font-weight: 600; margin-bottom: 6px;'>Selected Color: <b>{selected_color}</b></div>", unsafe_allow_html=True)
 
                 if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
-                    st.session_state.cart.append({"product": f"{prod['id']} - {prod['name']} ({prod['colors']})", "quantity": "1 Units"})
-                    st.success("Added to cart!")
+                    item_desc = f"{prod['id']} - {prod['name']} (Color: {selected_color})"
+                    st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
+                    st.success(f"Added {selected_color} variant to cart!")
                     st.rerun()
-                st.markdown("<hr style='margin: 6px 0;'>", unsafe_allow_html=True)
+                    
+                st.markdown("<hr style='margin: 8px 0;'>", unsafe_allow_html=True)
         else:
             st.info("No items found in this master category.")
 
