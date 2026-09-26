@@ -43,7 +43,7 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Custom Brand Logo Banner without footer info */
+        /* Custom Brand Logo Banner */
         .anuaari-logo-container {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             padding: 16px;
@@ -320,13 +320,25 @@ if st.session_state.current_view == "Home":
     if st.session_state.selected_menu not in categories:
         st.session_state.selected_menu = categories[0]
 
-    # --- COLUMN-WISE MASTER CATEGORIES HEADER ---
+    # --- COLUMN-WISE MASTER CATEGORIES HEADER WITH GITHUB IMAGES ---
     st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>Master Categories</span>", unsafe_allow_html=True)
+    
+    # Map your category names to your GitHub raw image links here
+    category_images = {
+        "Beads": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/beads.jpg",
+        "Stones": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/stones.jpg",
+        "Threads": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/images/threads.jpg",
+    }
     
     cat_cols = st.columns(len(categories) if len(categories) > 0 else 1, gap="small")
     
     for idx, cat in enumerate(categories):
         with cat_cols[idx]:
+            # Display GitHub category image if mapped
+            cat_img = category_images.get(cat, "")
+            if cat_img:
+                st.image(cat_img, use_column_width=True)
+
             is_selected = (st.session_state.selected_menu == cat)
             button_label = f"📂 {cat}" if is_selected else cat
             
