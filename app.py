@@ -21,8 +21,8 @@ st.markdown(
 
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: 14px !important;
-            color: #1e293b !important;
+            font-size: 15px !important;
+            color: #0f172a !important;
         }
 
         .stApp {
@@ -43,17 +43,17 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Catalog Product Image Card Styling */
+        /* Uniform Product Image Container Styling */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 210px !important;
+            height: 160px !important;
             object-fit: cover !important;
-            border-radius: 12px !important;
+            border-radius: 8px !important;
         }
 
-        /* E-Commerce Catalog Pill Button Styling */
+        /* Storefront Card Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: #2b3a97 !important;
+            background: #1e3a8a !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
@@ -62,10 +62,10 @@ st.markdown(
             padding: 0.45rem 0.75rem !important;
             width: 100% !important;
             display: block !important;
-            box-shadow: 0 2px 5px rgba(43, 58, 151, 0.2) !important;
+            box-shadow: 0 2px 5px rgba(30, 58, 138, 0.2) !important;
         }
         div.stButton > button:hover {
-            background: #1e2975 !important;
+            background: #1d4ed8 !important;
             color: #ffffff !important;
         }
 
@@ -104,8 +104,10 @@ if "current_view" not in st.session_state:
     st.session_state.current_view = "Home"
 if "selected_menu" not in st.session_state:
     st.session_state.selected_menu = None
-if "img_indices" not in st.session_state:
-    st.session_state.img_indices = {}
+if "product_page" not in st.session_state:
+    st.session_state.product_page = 0
+if "quantities" not in st.session_state:
+    st.session_state.quantities = {}
 
 # Google Apps Script Web App Endpoint URL
 GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
@@ -243,18 +245,19 @@ if not inv_df.empty:
             if not cat_val or cat_val.lower() == "nan":
                 cat_val = "General"
 
-            # Gather all non-empty image columns starting from Column F (index 5 onwards)
+            # Gather all available image columns starting from Column F (index 5 onwards)
             img_list = []
             for col_idx in range(5, len(row)):
                 val = str(row.iloc[col_idx]).strip()
                 if val and val.lower() != "nan":
+                    # Check local folder path or URL
                     loc_path = f"images/{val}"
                     if os.path.exists(val):
                         img_list.append(val)
                     elif os.path.exists(loc_path):
                         img_list.append(loc_path)
                     else:
-                        img_list.append(val)
+                        img_list.append(val) # URL or default string
 
             product_records.append({
                 "id": str(row.iloc[0]).strip(),             # Column A: Item_ID
@@ -263,7 +266,7 @@ if not inv_df.empty:
                 "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory
                 "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
-                "images": img_list,                         # List of all uploaded images
+                "images": img_list,                         # List of all images from Column F onwards
                 "stock": "In Stock",
             })
     except Exception:
@@ -334,7 +337,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- 4-COLUMN STOREFRONT GRID VIEW WITH IMAGE CAROUSEL (PREV / NEXT) ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW WITH MULTI-IMAGE SUPPORT ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     filtered_items = [p for p in product_records if p["category"] == current_cat]
 
@@ -347,35 +350,18 @@ if st.session_state.current_view == "Home":
             for col_idx, prod in enumerate(batch):
                 with cols[col_idx]:
                     with st.container(border=True):
-                        global_idx = i + col_idx
+                        # 1. Image Gallery Rendering
                         img_list = prod.get('images', [])
                         
-                        # Initialize active image index for this specific product
-                        if global_idx not in st.session_state.img_indices:
-                            st.session_state.img_indices[global_idx] = 0
-
-                        # Ensure index is within valid bounds
-                        if st.session_state.img_indices[global_idx] >= len(img_list):
-                            st.session_state.img_indices[global_idx] = 0
-
                         try:
-                            if len(img_list) > 0:
-                                curr_img_idx = st.session_state.img_indices[global_idx]
-                                st.image(img_list[curr_img_idx], use_container_width=True)
-
-                                # Show Left/Right slider buttons only if there is more than 1 image
-                                if len(img_list) > 1:
-                                    btn_left, btn_indicator, btn_right = st.columns([1, 1.5, 1])
-                                    with btn_left:
-                                        if st.button("◀", key=f"prev_img_{current_cat}_{global_idx}", use_container_width=True):
-                                            st.session_state.img_indices[global_idx] = (curr_img_idx - 1) % len(img_list)
-                                            st.rerun()
-                                    with btn_indicator:
-                                        st.markdown(f"<div style='text-align: center; font-size: 11px; color: #64748b; padding-top: 6px;'>{curr_img_idx + 1}/{len(img_list)}</div>", unsafe_allow_html=True)
-                                    with btn_right:
-                                        if st.button("▶", key=f"next_img_{current_cat}_{global_idx}", use_container_width=True):
-                                            st.session_state.img_indices[global_idx] = (curr_img_idx + 1) % len(img_list)
-                                            st.rerun()
+                            if len(img_list) > 1:
+                                # If multiple images exist, render them as a thumbnail row or gallery carousel
+                                img_cols = st.columns(len(img_list), gap="small")
+                                for img_i, img_src in enumerate(img_list):
+                                    with img_cols[img_i]:
+                                        st.image(img_src, use_container_width=True)
+                            elif len(img_list) == 1:
+                                st.image(img_list[0], use_container_width=True)
                             else:
                                 st.markdown("🖼️ *No Image*")
                         except Exception:
@@ -383,15 +369,15 @@ if st.session_state.current_view == "Home":
                         
                         # 2. Centered Product Title
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 8px; line-height: 1.3;'>"
-                            f"{prod['name']}"
+                            f"<div style='text-align: center; font-weight: 700; font-size: 13px; color: #0f172a; height: 42px; overflow: hidden; margin-top: 6px;'>"
+                            f"{prod['id']} - {prod['name']}"
                             f"</div>", 
                             unsafe_allow_html=True
                         )
 
-                        # 3. Centered Red Pricing
+                        # 3. Centered Price
                         st.markdown(
-                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #dc2626; margin-bottom: 10px;'>"
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #1e3a8a; margin-bottom: 8px;'>"
                             f"Rs. {prod['price']}"
                             f"</div>", 
                             unsafe_allow_html=True
@@ -411,6 +397,7 @@ if st.session_state.current_view == "Home":
                             )
 
                         # 5. Rounded Add to Cart Button
+                        global_idx = i + col_idx
                         button_text = "Select Options" if color_list else "Add To Cart"
                         
                         if st.button(button_text, key=f"add_cart_{current_cat}_{global_idx}", use_container_width=True):
