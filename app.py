@@ -74,7 +74,7 @@ st.markdown(
         /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100% !important;
-            height: 120px !important;
+            height: 100px !important;
             object-fit: cover !important;
             border-radius: 6px !important;
             cursor: pointer;
@@ -205,13 +205,18 @@ def log_login_to_sheet(name, phone):
 def get_image_src(image_path):
     if not image_path:
         return ""
+    image_path = image_path.strip()
     if image_path.startswith("http://") or image_path.startswith("https://"):
         return image_path
-    if os.path.exists(image_path):
+    
+    loc_path = f"images/{image_path}"
+    target_path = image_path if os.path.exists(image_path) else (loc_path if os.path.exists(loc_path) else "")
+    
+    if target_path:
         try:
-            with open(image_path, "rb") as img_f:
+            with open(target_path, "rb") as img_f:
                 b64 = base64.b64encode(img_f.read()).decode("utf-8")
-                ext = image_path.split(".")[-1].lower()
+                ext = target_path.split(".")[-1].lower()
                 mime = "image/png" if ext == "png" else "image/jpeg"
                 return f"data:{mime};base64,{b64}"
         except Exception:
@@ -331,17 +336,6 @@ if not inv_df.empty:
             if desc_val.lower() == "nan":
                 desc_val = ""
 
-            loc_path = f"images/{img_val}"
-            if img_val and img_val.lower() != "nan":
-                if os.path.exists(img_val):
-                    main_img = img_val
-                elif os.path.exists(loc_path):
-                    main_img = loc_path
-                else:
-                    main_img = img_val
-            else:
-                main_img = ""
-
             product_records.append({
                 "id": str(row.iloc[0]).strip(),
                 "name": subcat_val if subcat_val else "Craft Item",
@@ -349,7 +343,7 @@ if not inv_df.empty:
                 "subcategory": subcat_val,
                 "price": str(row.iloc[3]).strip() if len(row) > 3 else "0.0",
                 "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "",
-                "image": main_img,
+                "images": img_val,
                 "description": desc_val,
             })
     except Exception:
@@ -357,7 +351,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "image": "", "description": "High quality beads."}
+        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "images": "bunch beads 1.JPG \\ bunch beads 2.JPG \\ bunch beads 3.JPG", "description": "High quality beads."}
     ]
 
 
@@ -399,36 +393,43 @@ def render_product_grid(items):
             with cols[col_idx]:
                 with st.container(border=True):
                     u_key = prod['id']
-                    img_src = get_image_src(prod.get('image', ''))
+                    raw_imgs = prod.get('images', '')
+                    
+                    # Split multiple image links separated by backslash or comma
+                    for sep in ['\\', ',']:
+                        raw_imgs = raw_imgs.replace(sep, '|')
+                    img_list = [get_image_src(img.strip()) for img in raw_imgs.split('|') if img.strip() and img.strip().lower() != 'nan']
+
                     desc_text = prod.get('description', '')
 
-                    # Image and Description stacked or side-by-side cleanly in 3-col
-                    card_col_img, card_col_desc = st.columns([1, 1], gap="small")
-                    with card_col_img:
-                        if img_src:
-                            st.markdown(
-                                f"""
-                                <a href="#modal_{u_key}">
-                                    <img src="{img_src}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
-                                </a>
-                                <div id="modal_{u_key}" class="lightbox-overlay" onclick="location.href='#';">
-                                    <a href="#" class="close-hint">&times;</a>
-                                    <img src="{img_src}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
-                                </div>
-                                """, unsafe_allow_html=True
-                            )
-                        else:
-                            st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:10px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
+                    # Render up to 3 images side-by-side cleanly
+                    if len(img_list) > 0:
+                        img_cols = st.columns(len(img_list), gap="xs")
+                        for img_i, img_url in enumerate(img_list):
+                            with img_cols[img_i]:
+                                st.markdown(
+                                    f"""
+                                    <a href="#modal_{u_key}_{img_i}">
+                                        <img src="{img_url}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
+                                    </a>
+                                    <div id="modal_{u_key}_{img_i}" class="lightbox-overlay" onclick="location.href='#';">
+                                        <a href="#" class="close-hint">&times;</a>
+                                        <img src="{img_url}" class="lightbox-img" alt="{prod['name']}" onclick="event.stopPropagation();" />
+                                    </div>
+                                    """, unsafe_allow_html=True
+                                )
+                    else:
+                        st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:10px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
-                    with card_col_desc:
-                        st.markdown(
-                            f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 0px; height: 120px; overflow-y: auto; line-height: 1.3;'>"
-                            f"<strong>Details:</strong><br>{desc_text if desc_text else 'No details available.'}"
-                            f"</div>", unsafe_allow_html=True
-                        )
+                    # Details text below the images
+                    st.markdown(
+                        f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 4px 0px; height: 90px; overflow-y: auto; line-height: 1.3;'>"
+                        f"<strong>Details:</strong> {desc_text if desc_text else 'No details available.'}"
+                        f"</div>", unsafe_allow_html=True
+                    )
                     
                     st.markdown(
-                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 6px; line-height: 1.2;'>"
+                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
                         f"{prod['name']}"
                         f"</div>", unsafe_allow_html=True
                     )
