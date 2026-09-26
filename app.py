@@ -4,7 +4,6 @@ import os
 import re
 import chromadb
 from google import genai
-from google.genai import types
 import pandas as pd
 import requests
 import streamlit as st
@@ -125,23 +124,17 @@ if "product_page" not in st.session_state:
     st.session_state.product_page = 0
 if "quantities" not in st.session_state:
     st.session_state.quantities = {}
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "submitted_user_prompt" not in st.session_state:
-    st.session_state.submitted_user_prompt = ""
 
-# Google Apps Script Web App Endpoint URL (Matches your Apps Script code logic for "LOGIN" and "ANUAAARI Orders")
-GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"
+# Google Apps Script Web App Endpoint URL
+GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tCSX7eFwAG52IinpEhQtlxhmVaOtpbc1J83zJZIhs9XRDRCezCZA/exec"
 
-# Database & Gemini API Setup
+# Database Setup
 db_path = "./chroma_db_anuaari"
 try:
-    api_key_input = st.secrets.get("GOOGLE_API_KEY", "YOUR_GEMINI_API_KEY_HERE")
-    client = genai.Client(api_key=api_key_input)
     chroma_client = chromadb.PersistentClient(path=db_path)
     collection = chroma_client.get_or_create_collection(name="anuaari_inventory_library")
 except Exception as e:
-    st.error(f"Error connecting to Database or API Key missing: {e}")
+    st.error(f"Error connecting to Database: {e}")
     st.stop()
 
 
@@ -203,7 +196,6 @@ if not st.session_state.logged_in_user:
                     st.session_state.logged_in_user = cust_name.strip()
                     st.session_state.user_phone = cust_phone.strip()
                     
-                    # Log login to Google Sheet 'LOGIN' tab via Apps Script
                     log_login_to_sheet(cust_name.strip(), cust_phone.strip())
 
                     st.success("✅ Login Successful!")
@@ -288,24 +280,6 @@ if not product_records:
     ]
 
 
-# --- AI TOOLS DEFINITIONS ---
-def search_knowledge_base(query: str) -> str:
-    """Search inventory data, stock details, and products from the store database."""
-    try:
-        results = collection.query(query_texts=[query], n_results=3)
-        if results["documents"] and len(results["documents"][0]) > 0:
-            return "\n\n".join(results["documents"][0])
-        return "No relevant items found in inventory."
-    except Exception as e:
-        return f"Error during search: {e}"
-
-
-def add_to_cart(product_name: str, quantity: str = "1 Units") -> str:
-    """Add a product into the shopping cart."""
-    st.session_state.cart.append({"product": product_name, "quantity": str(quantity)})
-    return f"Added '{product_name}' (Qty: {quantity}) to cart successfully!"
-
-
 def process_cart_checkout(address: str, secondary_phone: str, description: str) -> str:
     """Checkout all items in the cart and send order data to Google Sheet 'ANUAAARI Orders' tab via Apps Script."""
     if not st.session_state.cart:
@@ -336,9 +310,9 @@ def process_cart_checkout(address: str, secondary_phone: str, description: str) 
     return f"Checkout complete! Order placed successfully for: {cart_summary}."
 
 
-# --- VIEW SWITCHING: HOME VS CART ---
+# --- VIEW SWITCHING: HOME VS CART (Clean 2-Column Full-Width Layout) ---
 if st.session_state.current_view == "Home":
-    col_menu, col_items, col_ai = st.columns([0.8, 1.8, 1.4], gap="small")
+    col_menu, col_items = st.columns([1, 3], gap="medium")
 
     # 1. Categories Menu
     with col_menu:
@@ -376,28 +350,6 @@ if st.session_state.current_view == "Home":
                     st.markdown("<hr style='margin: 6px 0;'>", unsafe_allow_html=True)
             else:
                 st.info("No items found in this category.")
-
-    # 3. AI Shopping Assistant
-    with col_ai:
-        st.markdown("<span style='color: #0f172a; font-weight: 800; font-size: 16px;'>AI Craft Assistant</span>", unsafe_allow_html=True)
-        user_prompt = st.text_input("Ask AI:", placeholder="Search beads, threads...", key="ai_input")
-
-        if user_prompt:
-            with st.spinner("Thinking..."):
-                try:
-                    response = client.models.generate_content(
-                        model="gemini-3.8-flash",
-                        contents=user_prompt,
-                    )
-                    st.session_state.messages.append({"role": "user", "content": user_prompt})
-                    st.session_state.messages.append({"role": "assistant", "content": response.text})
-                except Exception as e:
-                    st.error(f"AI Error: {e}")
-
-        with st.container(height=600, border=True):
-            for message in reversed(st.session_state.messages):
-                with st.chat_message(message["role"]):
-                    st.markdown(message["content"])
 
 else:
     # --- CART & CHECKOUT VIEW ---
