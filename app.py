@@ -263,22 +263,15 @@ if not inv_df.empty:
         inv_df.columns = inv_df.columns.astype(str).str.strip()
         for _, row in inv_df.iterrows():
             img_val = str(row.iloc[5]).strip() if len(row) > 5 and pd.notna(row.iloc[5]) else ""
-            
-            # Format GitHub Raw Image URL automatically
-            if img_val and not img_val.startswith("http"):
-                formatted_img_name = img_val.replace(" ", "%20")
-                img_url = f"https://raw.githubusercontent.com/baluadmin/ANUAARIMATERIAL/main/images/{formatted_img_name}"
-            else:
-                img_url = img_val
 
             product_records.append({
                 "id": str(row.iloc[0]).strip(),             # Column A: Item_ID[cite: 3]
-                "name": str(row.iloc[2]).strip(),           # Column C: Subcategory / Item Name[cite: 3]
+                "name": str(row.iloc[2]).strip(),           # Column C: Item Name[cite: 3]
                 "category": str(row.iloc[1]).strip(),       # Column B: Category[cite: 3]
                 "subcategory": str(row.iloc[2]).strip(),    # Column C: Subcategory[cite: 3]
                 "price": str(row.iloc[3]).strip(),          # Column D: Price (INR)[cite: 3]
-                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E: Color Options[cite: 3]
-                "image": img_url,                           # Column F: GitHub Image Link[cite: 4]
+                "colors": str(row.iloc[4]).strip() if len(row) > 4 and pd.notna(row.iloc[4]) else "", # Column E[cite: 3]
+                "image": img_val,                           # Column F: Image Filename
                 "stock": "In Stock",
             })
     except Exception:
@@ -347,7 +340,7 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH IMAGES & COLOR SWATCHES ---
+    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH BULLETPROOF IMAGE LOADING ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
     
@@ -361,13 +354,22 @@ if st.session_state.current_view == "Home":
                 col_img, col_info = st.columns([1, 3], gap="medium")
                 
                 with col_img:
-                    if prod.get('image') and prod['image'].startswith('http'):
+                    img_path = prod.get('image', '')
+                    
+                    # Bulletproof local & remote image fallback loader
+                    local_path1 = f"images/{img_path}" if img_path else ""
+                    
+                    if img_path and os.path.exists(img_path):
+                        st.image(img_path, use_column_width=True)
+                    elif local_path1 and os.path.exists(local_path1):
+                        st.image(local_path1, use_column_width=True)
+                    elif img_path and img_path.startswith('http'):
                         try:
-                            st.image(prod['image'], use_column_width=True)
+                            st.image(img_path, use_column_width=True)
                         except Exception:
-                            st.markdown("🖼️ *Image loading error*")
+                            st.markdown("🖼️ *Preview unavailable*")
                     else:
-                        st.markdown("🖼️ *No Image*")
+                        st.markdown("🖼️ *No Image Available*")
                 
                 with col_info:
                     subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
@@ -375,7 +377,7 @@ if st.session_state.current_view == "Home":
                     st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
                     st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
 
-                    # Parse multiple colors from Google Sheet Column E
+                    # Parse multiple colors from Google Sheet Column E[cite: 3]
                     raw_colors = prod.get('colors', '')
                     color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
                     
