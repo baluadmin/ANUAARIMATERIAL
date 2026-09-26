@@ -57,7 +57,7 @@ st.markdown(
             margin-bottom: 12px;
         }
 
-        /* Card Container Styling */
+        /* --- TRUE FULL-BLEED EDGE-TO-EDGE CARD STYLING --- */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -65,42 +65,37 @@ st.markdown(
             padding: 0px !important;
             overflow: hidden !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
-            transition: all 0.2s ease-in-out;
         }
         
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
         }
 
+        /* Force image wrapper to touch card boundaries completely */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] div[data-testid="stImage"] {
             margin: 0 !important;
             padding: 0 !important;
-x            width: 100% !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            background-color: #ffffff !important;
+            width: 100% !important;
         }
 
-        /* Optimized for 1500x1500 Full Screen Uncropped Images */
+        /* True Full Screen Edge-to-Edge Image */
         [data-testid="stImage"] img {
             width: 100% !important;
-            height: 280px !important;
-            object-fit: contain !important;
+            height: 260px !important;
+            object-fit: cover !important;
             object-position: center center !important;
             border-top-left-radius: 12px !important;
             border-top-right-radius: 12px !important;
             border-bottom-left-radius: 0px !important;
             border-bottom-right-radius: 0px !important;
             display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            background-color: #ffffff !important;
+            margin: 0 !important;
         }
 
+        /* Add inner padding back for text/buttons below the image */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] > div:not([data-testid="stImage"]) {
-            padding-left: 12px !important;
-            padding-right: 12px !important;
+            padding-left: 14px !important;
+            padding-right: 14px !important;
         }
 
         /* Storefront Blue Pill Buttons */
@@ -393,16 +388,16 @@ if st.session_state.current_view == "Home":
                         global_idx = i + col_idx
                         img_path = prod.get('image', '')
 
-                        # Optimized 1500x1500 Centered Image Display
+                        # Full-Bleed Edge-to-Edge Image Display
                         try:
                             if img_path:
                                 st.image(img_path, use_container_width=True)
                             else:
-                                st.markdown("<div style='text-align:center; padding:80px 0; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
+                                st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>No Image</div>", unsafe_allow_html=True)
                         except Exception:
-                            st.markdown("<div style='text-align:center; padding:80px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
+                            st.markdown("<div style='text-align:center; padding:70px 0; color:#94a3b8;'>Image Error</div>", unsafe_allow_html=True)
                         
-                        # Product Title
+                        # Product Name Only (Product ID completely removed)
                         st.markdown(
                             f"<div style='text-align: center; font-weight: 600; font-size: 13px; color: #1e293b; height: 44px; overflow: hidden; margin-top: 12px; line-height: 1.3;'>"
                             f"{prod['name']}"
