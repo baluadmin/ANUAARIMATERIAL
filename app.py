@@ -72,22 +72,22 @@ st.markdown(
             margin-bottom: 2px;
         }
 
+        /* Storefront Card Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
-            background: #ffffff !important;
-            color: #0f172a !important;
-            border: 1.5px solid #cbd5e1 !important;
+            background: #1e3a8a !important; /* Professional E-Commerce Navy / Blue */
+            color: #ffffff !important;
+            border: none !important;
             font-weight: 700 !important;
-            font-size: 14px !important;
-            border-radius: 8px !important;
+            font-size: 13px !important;
+            border-radius: 20px !important;
             padding: 0.45rem 0.75rem !important;
             width: 100% !important;
             display: block !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 2px 5px rgba(30, 58, 138, 0.2) !important;
         }
-        div.stButton > button:hover, div[data-testid="stFormSubmitButton"] > button:hover {
-            background: #2563eb !important;
+        div.stButton > button:hover {
+            background: #1d4ed8 !important;
             color: #ffffff !important;
-            border-color: #1d4ed8 !important;
         }
 
         .login-wrapper {
@@ -340,67 +340,81 @@ if st.session_state.current_view == "Home":
 
     st.markdown("---")
 
-    # --- FULL-WIDTH PRODUCT ITEMS VIEW WITH FULL-WIDTH IMAGE SCALING ---
+    # --- 4-COLUMN STOREFRONT GRID VIEW (MATCHING REFERENCE) ---
     current_cat = st.session_state.get("selected_menu", categories[0])
     st.markdown(f"<span style='color: #64748b; font-weight: 700;'>Showing Items for Category:</span> <span style='color: #2563eb; font-weight: 800; font-size: 16px;'>{current_cat}</span>", unsafe_allow_html=True)
     
-    with st.container(border=True):
-        filtered_items = [p for p in product_records if p["category"] == current_cat]
+    filtered_items = [p for p in product_records if p["category"] == current_cat]
 
-        if filtered_items:
-            st.markdown("---")
+    if filtered_items:
+        st.markdown("---")
 
-            for idx, prod in enumerate(filtered_items):
-                col_img, col_info = st.columns([1, 2.5], gap="medium")
-                
-                with col_img:
-                    img_path = prod.get('image', '')
-                    local_path1 = f"images/{img_path}" if img_path else ""
-                    
-                    try:
-                        if img_path and os.path.exists(img_path):
-                            st.image(img_path, use_container_width=True)
-                        elif local_path1 and os.path.exists(local_path1):
-                            st.image(local_path1, use_container_width=True)
-                        elif img_path and img_path.startswith('http'):
-                            st.image(img_path, use_container_width=True)
-                        else:
-                            st.markdown("🖼️ *No Image*")
-                    except Exception:
-                        st.markdown("🖼️ *Image Unavailable*")
-                
-                with col_info:
-                    subcat_display = f" | Subcategory: {prod['subcategory']}" if prod.get('subcategory') else ""
-                    
-                    st.markdown(f"<div style='font-weight: 800; font-size: 15px;'>{prod['id']} - {prod['name']}{subcat_display}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='color: #2563eb; font-weight: 800; font-size: 15px;'>₹{prod['price']} | Stock: {prod['stock']}</div>", unsafe_allow_html=True)
-
-                    # Parse multiple colors from Google Sheet Column E
-                    raw_colors = prod.get('colors', '')
-                    color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
-                    
-                    selected_color = color_list[0] if color_list else "Standard"
-
-                    if color_list:
-                        st.markdown("<div style='font-size: 13px; font-weight: 700; color: #475569; margin-top: 6px;'>Select Color Option:</div>", unsafe_allow_html=True)
-                        selected_color = st.radio(
-                            "Choose Color", 
-                            color_list, 
-                            key=f"color_radio_{current_cat}_{idx}", 
-                            horizontal=True, 
-                            label_visibility="collapsed"
-                        )
-                        st.markdown(f"<div style='font-size: 13px; color: #0284c7; font-weight: 600; margin-bottom: 6px;'>Selected Color: <b>{selected_color}</b></div>", unsafe_allow_html=True)
-
-                    if st.button("Add to Cart", key=f"add_cart_{current_cat}_{idx}", use_container_width=True):
-                        item_desc = f"{prod['id']} - {prod['name']} (Color: {selected_color})"
-                        st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
-                        st.success(f"Added {selected_color} variant to cart!")
-                        st.rerun()
+        # Chunk items into rows of 4 products per row
+        for i in range(0, len(filtered_items), 4):
+            cols = st.columns(4, gap="medium")
+            batch = filtered_items[i : i + 4]
+            
+            for col_idx, prod in enumerate(batch):
+                with cols[col_idx]:
+                    with st.container(border=True):
+                        # 1. Product Image
+                        img_path = prod.get('image', '')
+                        local_path1 = f"images/{img_path}" if img_path else ""
                         
-                st.markdown("<hr style='margin: 12px 0;'>", unsafe_allow_html=True)
-        else:
-            st.info("No items found in this master category.")
+                        try:
+                            if img_path and os.path.exists(img_path):
+                                st.image(img_path, use_container_width=True)
+                            elif local_path1 and os.path.exists(local_path1):
+                                st.image(local_path1, use_container_width=True)
+                            elif img_path and img_path.startswith('http'):
+                                st.image(img_path, use_container_width=True)
+                            else:
+                                st.markdown("🖼️ *No Image*")
+                        except Exception:
+                            st.markdown("🖼️ *Image Unavailable*")
+                        
+                        # 2. Centered Product Title
+                        st.markdown(
+                            f"<div style='text-align: center; font-weight: 700; font-size: 13px; color: #0f172a; height: 42px; overflow: hidden; margin-top: 6px;'>"
+                            f"{prod['id']} - {prod['name']}"
+                            f"</div>", 
+                            unsafe_allow_html=True
+                        )
+
+                        # 3. Centered Price
+                        st.markdown(
+                            f"<div style='text-align: center; font-weight: 800; font-size: 15px; color: #1e3a8a; margin-bottom: 8px;'>"
+                            f"Rs. {prod['price']}"
+                            f"</div>", 
+                            unsafe_allow_html=True
+                        )
+
+                        # 4. Color Option Selector if available
+                        raw_colors = prod.get('colors', '')
+                        color_list = [c.strip() for c in raw_colors.replace('&', ',').split(',') if c.strip()]
+                        selected_color = color_list[0] if color_list else "Standard"
+
+                        if color_list:
+                            selected_color = st.selectbox(
+                                "Options", 
+                                color_list, 
+                                key=f"color_select_{current_cat}_{i}_{col_idx}", 
+                                label_visibility="collapsed"
+                            )
+
+                        # 5. Rounded Add to Cart Button
+                        global_idx = i + col_idx
+                        button_text = "Select Options" if color_list else "Add To Cart"
+                        
+                        if st.button(button_text, key=f"add_cart_{current_cat}_{global_idx}", use_container_width=True):
+                            item_desc = f"{prod['id']} - {prod['name']} ({selected_color})"
+                            st.session_state.cart.append({"product": item_desc, "quantity": "1 Units"})
+                            st.success(f"Added!")
+                            st.rerun()
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+    else:
+        st.info("No items found in this master category.")
 
 else:
     # --- CART & CHECKOUT VIEW ---
