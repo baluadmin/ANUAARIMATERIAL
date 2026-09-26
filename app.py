@@ -74,7 +74,7 @@ st.markdown(
         /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100% !important;
-            height: 100px !important;
+            height: 95px !important;
             object-fit: cover !important;
             border-radius: 6px !important;
             cursor: pointer;
@@ -136,17 +136,18 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Buttons Styling */
+        /* Compact Buttons Styling for Plus/Minus */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
-            font-size: 12px !important;
-            border-radius: 10px !important;
-            padding: 0.3rem 0.5rem !important;
+            font-size: 11px !important;
+            border-radius: 6px !important;
+            padding: 0.15rem 0.3rem !important;
             width: 100% !important;
-            box-shadow: 0 3px 8px rgba(107, 29, 79, 0.15) !important;
+            min-height: 28px !important;
+            box-shadow: 0 2px 5px rgba(107, 29, 79, 0.15) !important;
             transition: all 0.2s ease;
         }
         div.stButton > button:hover {
@@ -423,19 +424,19 @@ def render_product_grid(items):
 
                     # Details text below the images
                     st.markdown(
-                        f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 4px 0px; height: 90px; overflow-y: auto; line-height: 1.3;'>"
+                        f"<div style='font-size: 10px; font-weight: 600; color: #475569; padding: 4px 0px; height: 80px; overflow-y: auto; line-height: 1.3;'>"
                         f"<strong>Details:</strong> {desc_text if desc_text else 'No details available.'}"
                         f"</div>", unsafe_allow_html=True
                     )
                     
                     st.markdown(
-                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
+                        f"<div style='font-weight: 700; font-size: 11px; color: #0f172a; height: 30px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
                         f"{prod['name']}"
                         f"</div>", unsafe_allow_html=True
                     )
 
                     st.markdown(
-                        f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; margin-bottom: 6px;'>"
+                        f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; margin-bottom: 4px;'>"
                         f"Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
                         f"</div>", unsafe_allow_html=True
                     )
