@@ -42,6 +42,18 @@ st.markdown(
             max-width: 100% !important;
         }
 
+        /* --- STICKY TOP NAVIGATION BAR --- */
+        .sticky-nav-container {
+            position: sticky;
+            top: 0px;
+            z-index: 99999;
+            background-color: #faf7f9;
+            padding-top: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #f0e1ec;
+            margin-bottom: 10px;
+        }
+
         /* --- FORCE DESKTOP BROWSER GRID LAYOUT ON MOBILE --- */
         @media screen and (max-width: 768px) {
             div[data-testid="stHorizontalBlock"] {
@@ -239,7 +251,8 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- CLEAN TOP NAVIGATION BAR (Logout Button Removed) ---
+# --- STICKY TOP NAVIGATION BAR ---
+st.markdown('<div class="sticky-nav-container">', unsafe_allow_html=True)
 nav_col1, nav_col_cat, nav_col2 = st.columns(3, gap="small")
 
 with nav_col1:
@@ -260,8 +273,7 @@ with nav_col2:
     if st.button(f"🛒 Cart({total_cart_items})", use_container_width=True):
         st.session_state.current_view = "Cart"
         st.rerun()
-
-st.markdown("<hr style='margin: 6px 0 10px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # Load Inventory Directly from Google Sheets
