@@ -558,12 +558,12 @@ elif st.session_state.current_view == "Cart":
                 if address and len(sec_phone) == 10:
                     res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
-                    st.session_state.current_view = "Home"
+                    st.session_state.current_view = "Categories"
                     st.rerun()
                 else:
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
-        st.info("Your cart is empty. Click Home or Category to browse products.")
+        st.info("Your cart is empty. Click Categories to browse products.")
 
 
 # --- FIXED BOTTOM NAVIGATION BAR ---
