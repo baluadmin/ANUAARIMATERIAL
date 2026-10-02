@@ -375,12 +375,12 @@ def render_product_grid(items):
                     selected_color = color_list[0] if color_list else "Standard"
 
                     if color_list:
-                        selected_color = st.selectbox("Options", color_list, key=f"color_{u_key}", label_visibility="collapsed")
+                        selected_color = st.selectbox("Options", color_list, key=f"color_{u_key}_{i}_{col_idx}", label_visibility="collapsed")
 
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    # --- PRICE & QUANTITY CONTROLS ON THE EXACT SAME LINE ---
+                    # --- PRICE & QUANTITY CONTROLS WITH UNIQUE KEYS ---
                     price_html = f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; padding-top: 4px;'>Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600;'>Rs. 160</span></div>"
                     
                     p_col, q_col = st.columns([1, 1.8], gap="small")
@@ -389,7 +389,7 @@ def render_product_grid(items):
                     with q_col:
                         q1, q2, q3 = st.columns([1, 1, 1], gap="small")
                         with q1:
-                            if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
+                            if st.button("➖", key=f"minus_{u_key}_{selected_color}_{i}_{col_idx}", use_container_width=True):
                                 if current_qty > 0:
                                     st.session_state.cart[item_key] = current_qty - 1
                                     if st.session_state.cart[item_key] == 0: 
@@ -398,7 +398,7 @@ def render_product_grid(items):
                         with q2:
                             st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
                         with q3:
-                            if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
+                            if st.button("➕", key=f"plus_{u_key}_{selected_color}_{i}_{col_idx}", use_container_width=True):
                                 st.session_state.cart[item_key] = current_qty + 1
                                 st.rerun()
 
@@ -437,6 +437,19 @@ def show_cart_modal():
                     st.warning("Please provide a valid delivery address and an exact 10-digit alternative phone number.")
     else:
         st.info("Your cart is empty. Add products to view them here.")
+
+
+# --- BOTTOM FLOATING WHITE CART BAR ---
+total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+
+st.markdown('<div class="floating-cart-wrapper">', unsafe_allow_html=True)
+col_lbl, col_btn = st.columns([1.5, 1], gap="small")
+with col_lbl:
+    st.markdown(f"<div style='font-weight: 800; font-size: 12px; color: #6b1d4f; padding-top: 6px; padding-left: 6px;'>🛒 Cart ({total_cart_items} Items)</div>", unsafe_allow_html=True)
+with col_btn:
+    if st.button("View Cart", use_container_width=True, key="open_cart_popup"):
+        show_cart_modal()
+st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --- MAIN STORE TABS ---
