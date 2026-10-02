@@ -42,12 +42,29 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Positioned right next to the bottom-right badge icons */
-        div[data-testid="stVerticalBlock"]:has(button[key="floating_cart_trigger"]) {
+        /* Fixed HTML Floating Cart Button right next to bottom-right corner badge icons */
+        .html-floating-cart {
             position: fixed !important;
             bottom: 15px !important;
-            right: 80px !important;
-            z-index: 999999 !important;
+            right: 85px !important;
+            z-index: 9999999 !important;
+            background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
+            color: #ffffff !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-weight: 800 !important;
+            font-size: 13px !important;
+            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.4) !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            transition: transform 0.2s ease !important;
+            border: 2px solid #ffffff !important;
+        }
+        .html-floating-cart:hover {
+            transform: scale(1.05) !important;
+            color: #ffffff !important;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -177,7 +194,7 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Compact Buttons Styling for Plus/Minus & Floating Cart */
+        /* Compact Buttons Styling for Plus/Minus */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
@@ -335,58 +352,21 @@ with nav_col3:
 st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
 
-# --- FLOATING QUICK CART BUTTON & POPUP DIALOG ---
+# --- HTML FIXED FLOATING CART BUTTON (Pinned right next to bottom-right corner badges) ---
 total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
 
-@st.dialog("🛒 Quick Cart & Checkout")
-def open_quick_cart_dialog():
-    if st.session_state.cart:
-        for item_desc, qty in list(st.session_state.cart.items()):
-            col_item, col_rem = st.columns([4, 1])
-            with col_item:
-                st.markdown(f"• **{item_desc}** — **{qty} Units**")
-            with col_rem:
-                if st.button("❌", key=f"dialog_rem_{item_desc}"):
-                    del st.session_state.cart[item_desc]
-                    st.rerun()
+st.markdown(
+    f"""
+    <a href="?view=cart" target="_self" class="html-floating-cart">
+        🛒 Cart ({total_cart_items})
+    </a>
+    """,
+    unsafe_allow_html=True
+)
 
-        st.markdown("---")
-        with st.form("dialog_checkout_form"):
-            address = st.text_area("Delivery Address (with Pincode):")
-            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
-            payment_option = st.radio("Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
-            notes = st.text_area("Notes:")
-
-            if st.form_submit_button("Complete Order Now", use_container_width=True):
-                if address and len(sec_phone) == 10:
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    cart_summary = ", ".join([f"{qty} Units of {item}" for item, qty in st.session_state.cart.items()])
-                    try:
-                        order_data = {
-                            "Type": "Order",
-                            "Timestamp": timestamp,
-                            "Customer_Name": st.session_state.logged_in_user,
-                            "Primary_Phone": st.session_state.user_phone,
-                            "Items": cart_summary,
-                            "Address": address,
-                            "Payment_Method": payment_option,
-                            "Secondary_Phone": sec_phone,
-                            "Description": notes,
-                        }
-                        requests.post(GOOGLE_SCRIPT_URL, json=order_data)
-                    except Exception:
-                        pass
-                    st.session_state.cart = {}
-                    st.success(f"Order placed successfully ({payment_option})!")
-                    st.rerun()
-                else:
-                    st.warning("Please provide a valid address and a 10-digit alternative phone number.")
-    else:
-        st.info("Your cart is empty.")
-
-# Render Floating Action Button pinned next to the bottom-right icons
-if st.button(f"🛒 ({total_cart_items})", key="floating_cart_trigger", help="Open Quick Cart"):
-    open_quick_cart_dialog()
+# Handle click from the floating HTML link to switch view to Cart
+if "view=cart" in str(st.query_params):
+    st.session_state.current_view = "Cart"
 
 
 # Load Inventory Directly from Google Sheets
