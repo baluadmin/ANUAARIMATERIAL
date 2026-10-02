@@ -141,23 +141,20 @@ st.markdown(
             box-shadow: 0 1px 3px rgba(107, 29, 79, 0.15) !important;
         }
 
-        /* --- WHITE BOTTOM FLOATING CART BUTTON STYLING --- */
+        /* --- WHITE BOTTOM FLOATING CART BAR STYLING --- */
         .floating-cart-wrapper {
             position: fixed;
-            bottom: 15px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 99999999;
             width: 92%;
             max-width: 450px;
             background: #ffffff;
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 30px;
             box-shadow: 0 8px 25px rgba(107, 29, 79, 0.2);
             border: 1px solid #f3e8f1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
         .login-wrapper {
@@ -458,7 +455,7 @@ def show_cart_modal():
         st.info("Your cart is empty. Add products to view them here.")
 
 
-# --- BOTTOM FLOATING WHITE CART BUTTON ---
+# --- BOTTOM FLOATING WHITE CART BAR ---
 total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
 
 st.markdown('<div class="floating-cart-wrapper">', unsafe_allow_html=True)
@@ -472,7 +469,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --- MAIN STORE TABS ---
-tab1, tab2 = st.tabs(["🔥 Products", "🗂️ Categories"])
+tab1, tab2 = st.tabs(["🔥 Products", "🗂️️ Categories"])
 
 with tab1:
     filtered_items = list(product_records)
