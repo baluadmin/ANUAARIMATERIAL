@@ -36,7 +36,7 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 5rem !important;
+            padding-bottom: 2rem !important;
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
             max-width: 100% !important;
@@ -139,22 +139,6 @@ st.markdown(
             width: 100% !important;
             min-height: 22px !important;
             box-shadow: 0 1px 3px rgba(107, 29, 79, 0.15) !important;
-        }
-
-        /* --- WHITE BOTTOM FLOATING CART BAR STYLING --- */
-        .floating-cart-wrapper {
-            position: fixed;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 99999999;
-            width: 92%;
-            max-width: 450px;
-            background: #ffffff;
-            padding: 8px 12px;
-            border-radius: 30px;
-            box-shadow: 0 8px 25px rgba(107, 29, 79, 0.2);
-            border: 1px solid #f3e8f1;
         }
 
         .login-wrapper {
@@ -453,19 +437,6 @@ def show_cart_modal():
                     st.warning("Please provide a valid delivery address and an exact 10-digit alternative phone number.")
     else:
         st.info("Your cart is empty. Add products to view them here.")
-
-
-# --- BOTTOM FLOATING WHITE CART BAR ---
-total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-
-st.markdown('<div class="floating-cart-wrapper">', unsafe_allow_html=True)
-col_lbl, col_btn = st.columns([1.5, 1], gap="small")
-with col_lbl:
-    st.markdown(f"<div style='font-weight: 800; font-size: 12px; color: #6b1d4f; padding-top: 6px; padding-left: 6px;'>🛒 Cart ({total_cart_items} Items)</div>", unsafe_allow_html=True)
-with col_btn:
-    if st.button("View Cart", use_container_width=True, key="open_cart_popup"):
-        show_cart_modal()
-st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --- MAIN STORE TABS ---
