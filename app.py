@@ -322,8 +322,6 @@ with nav_col3:
         st.session_state.clear()
         st.rerun()
 
-st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
-
 
 # Load Inventory Directly from Google Sheets
 @st.cache_data(ttl=2)
