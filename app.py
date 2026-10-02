@@ -36,7 +36,7 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 2rem !important;
+            padding-bottom: 5rem !important;
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
             max-width: 100% !important;
@@ -160,12 +160,6 @@ if "user_phone" not in st.session_state:
     st.session_state.user_phone = None
 if "cart" not in st.session_state or not isinstance(st.session_state.cart, dict):
     st.session_state.cart = {}
-if "current_view" not in st.session_state:
-    st.session_state.current_view = "Home"
-if "selected_category" not in st.session_state:
-    st.session_state.selected_category = None
-if "selected_subcategory" not in st.session_state:
-    st.session_state.selected_subcategory = None
 if "shuffled_seed" not in st.session_state:
     st.session_state.shuffled_seed = random.randint(1, 10000)
 
@@ -409,24 +403,86 @@ def render_product_grid(items):
                                 st.rerun()
 
 
-# --- ROUTING LOGIC ---
+# --- STREMLIT POPUP DIALOG FOR CART & CHECKOUT ---
+@st.dialog("🛒 Shopping Cart & Secure Checkout")
+def show_cart_modal():
+    if st.session_state.cart:
+        with st.container(border=True):
+            for item_desc, qty in list(st.session_state.cart.items()):
+                cart_col1, cart_col2 = st.columns([3.2, 1], gap="small")
+                with cart_col1:
+                    st.markdown(f"<div style='font-size: 12px; font-weight: 700; color: #2d1524; padding-top: 4px;'>• {item_desc} <br><span style='color: #6b1d4f; font-weight: 800;'>Qty: {qty}</span></div>", unsafe_allow_html=True)
+                with cart_col2:
+                    if st.button("Remove", key=f"rem_{item_desc}", use_container_width=True):
+                        del st.session_state.cart[item_desc]
+                        st.rerun()
+                st.markdown("<div style='border-top: 1px solid #f3e8f1; margin: 4px 0;'></div>", unsafe_allow_html=True)
 
-if st.session_state.current_view == "Home":
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        
+        with st.form("checkout_form"):
+            st.markdown("<div style='font-size: 13px; font-weight: 800; color: #6b1d4f; margin-bottom: 6px;'>📍 Shipping & Payment Details</div>", unsafe_allow_html=True)
+            address = st.text_area("Delivery Address (with Pincode):", placeholder="Enter full address...")
+            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10, placeholder="10-digit number")
+            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
+            notes = st.text_area("Custom Instructions / Notes (Optional):", placeholder="Any specific instructions...")
+
+            st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+            if st.form_submit_button("Complete Order Now", use_container_width=True):
+                if address and len(sec_phone) == 10:
+                    res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
+                    st.success(res_msg)
+                    st.rerun()
+                else:
+                    st.warning("Please provide a valid delivery address and an exact 10-digit alternative phone number.")
+    else:
+        st.info("Your cart is empty. Add products to view them here.")
+
+
+# --- STICKY BOTTOM FLOATING WHITE CART BUTTON ---
+total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+
+st.markdown(
+    """
+    <style>
+        .floating-cart-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999999;
+            width: 90%;
+            max-width: 400px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown('<div class="floating-cart-container">', unsafe_allow_html=True)
+if st.button(f"🛒 View Cart ({total_cart_items} Items)", use_container_width=True, key="floating_cart_btn"):
+    show_cart_modal()
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# --- MAIN STORE VIEWS ---
+tab1, tab2 = st.tabs(["🔥 Products", "🗂️ Categories"])
+
+with tab1:
     filtered_items = list(product_records)
     random.seed(st.session_state.shuffled_seed)
     random.shuffle(filtered_items)
 
     grid_head_col1, grid_head_col2 = st.columns([3, 1])
     with grid_head_col1:
-        st.markdown("<h3 style='margin: 0; font-size: 14px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='margin: 0; font-size: 14px; font-weight: 900; color: #0f172a;'>Featured Products</h3>", unsafe_allow_html=True)
     with grid_head_col2:
         st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
     render_product_grid(filtered_items)
 
-
-elif st.session_state.current_view == "Categories":
+with tab2:
     categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
     
     st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
@@ -475,40 +531,3 @@ elif st.session_state.current_view == "Categories":
         st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
 
         render_product_grid(filtered_items)
-
-
-elif st.session_state.current_view == "Cart":
-    st.markdown("<h3 style='font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 12px;'>🛒 Shopping Cart & Secure Checkout</h3>", unsafe_allow_html=True)
-    
-    if st.session_state.cart:
-        with st.container(border=True):
-            for item_desc, qty in list(st.session_state.cart.items()):
-                cart_col1, cart_col2 = st.columns([3.2, 1], gap="small")
-                with cart_col1:
-                    st.markdown(f"<div style='font-size: 12px; font-weight: 700; color: #2d1524; padding-top: 4px;'>• {item_desc} <br><span style='color: #6b1d4f; font-weight: 800;'>Qty: {qty}</span></div>", unsafe_allow_html=True)
-                with cart_col2:
-                    if st.button("Remove", key=f"rem_{item_desc}", use_container_width=True):
-                        del st.session_state.cart[item_desc]
-                        st.rerun()
-                st.markdown("<div style='border-top: 1px solid #f3e8f1; margin: 4px 0;'></div>", unsafe_allow_html=True)
-
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        
-        with st.form("checkout_form"):
-            st.markdown("<div style='font-size: 13px; font-weight: 800; color: #6b1d4f; margin-bottom: 6px;'>📍 Shipping & Payment Details</div>", unsafe_allow_html=True)
-            address = st.text_area("Delivery Address (with Pincode):", placeholder="Enter full address...")
-            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10, placeholder="10-digit number")
-            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
-            notes = st.text_area("Custom Instructions / Notes (Optional):", placeholder="Any specific instructions...")
-
-            st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
-            if st.form_submit_button("Complete Order Now", use_container_width=True):
-                if address and len(sec_phone) == 10:
-                    res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
-                    st.success(res_msg)
-                    st.session_state.current_view = "Home"
-                    st.rerun()
-                else:
-                    st.warning("Please provide a valid delivery address and an exact 10-digit alternative phone number.")
-    else:
-        st.info("Your cart is empty. Click Home or Category to browse products.")
