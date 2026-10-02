@@ -26,7 +26,7 @@ st.markdown(
 
         .stApp {
             background-color: #faf7f9 !important; 
-            overflow: hidden !important; /* Lock main body scrolling */
+            overflow: hidden !important;
         }
 
         #MainMenu, header, footer {visibility: hidden; display: none !important;}
@@ -35,13 +35,13 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
 
-        /* App Main Block Container Config */
+        /* App Main Block Container Config with internal scrolling */
         .block-container {
             padding: 1rem !important;
             max-width: 100% !important;
-            height: calc(100vh - 85px) !important;
-            overflow-y: auto !important; /* Only this inner container scrolls! */
-            margin-bottom: 85px !important;
+            height: calc(100vh - 75px) !important;
+            overflow-y: auto !important;
+            margin-bottom: 75px !important;
         }
 
         /* Absolutely Fixed Bottom Navigation Bar */
@@ -197,15 +197,6 @@ st.markdown(
             align-items: center;
             justify-content: center;
             padding-top: 3rem;
-        }
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 30px;
-            border-radius: 20px;
-            background: #ffffff !important;
-            border: 1px solid #f3e8f1 !important;
-            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
         }
     </style>
     """,
@@ -506,7 +497,7 @@ elif st.session_state.current_view == "Categories":
         subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
         
         if subcats:
-            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️️ Subcategories</span>", unsafe_allow_html=True)
             for i in range(0, len(subcats), 3):
                 subcat_cols = st.columns(3, gap="small")
                 for idx, subcat in enumerate(subcats[i : i + 3]):
