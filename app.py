@@ -26,6 +26,7 @@ st.markdown(
 
         .stApp {
             background-color: #faf7f9 !important; 
+            overflow: hidden !important; /* Lock main body scrolling */
         }
 
         #MainMenu, header, footer {visibility: hidden; display: none !important;}
@@ -34,16 +35,16 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
 
-        /* Overall App Container Padding to accommodate fixed bottom bar */
+        /* App Main Block Container Config */
         .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 110px !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
+            padding: 1rem !important;
             max-width: 100% !important;
+            height: calc(100vh - 85px) !important;
+            overflow-y: auto !important; /* Only this inner container scrolls! */
+            margin-bottom: 85px !important;
         }
 
-        /* Truly Fixed Bottom Navigation Bar Container */
+        /* Absolutely Fixed Bottom Navigation Bar */
         .fixed-bottom-nav {
             position: fixed !important;
             bottom: 0 !important;
@@ -51,8 +52,8 @@ st.markdown(
             width: 100% !important;
             background: #ffffff !important;
             border-top: 1px solid #f3e8f1 !important;
-            padding: 10px 16px !important;
-            z-index: 999999 !important;
+            padding: 8px 16px !important;
+            z-index: 9999999 !important;
             box-shadow: 0 -4px 20px rgba(107, 29, 79, 0.1) !important;
         }
 
@@ -93,7 +94,7 @@ st.markdown(
         .lightbox-overlay {
             display: none;
             position: fixed;
-            z-index: 9999999;
+            z-index: 99999999;
             left: 0;
             top: 0;
             width: 100vw;
@@ -467,7 +468,7 @@ def render_product_grid(items):
                     st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
-# --- SCROLLABLE CENTER CONTENT ---
+# --- SCROLLABLE CENTER CONTENT AREA ---
 if st.session_state.current_view == "Home":
     filtered_items = list(product_records)
     random.seed(st.session_state.shuffled_seed)
@@ -565,17 +566,8 @@ elif st.session_state.current_view == "Cart":
         st.info("Your cart is empty. Click Categories to browse products.")
 
 
-# --- TRULY FIXED BOTTOM NAVIGATION BAR ---
-st.markdown(
-    """
-    <div class="fixed-bottom-nav">
-        <div id="nav-buttons-container"></div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Streamlit columns rendered securely inside the fixed footer container
+# --- LOCKED FIXED BOTTOM NAVIGATION BAR ---
+st.markdown('<div class="fixed-bottom-nav">', unsafe_allow_html=True)
 cols_footer = st.columns(4, gap="small")
 with cols_footer[0]:
     if st.button("🗂️ Categories", key="b_cat_btn", use_container_width=True):
@@ -597,3 +589,4 @@ with cols_footer[3]:
     if st.button("🚪 Logout", key="b_logout_btn", use_container_width=True):
         st.session_state.clear()
         st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
