@@ -137,7 +137,7 @@ st.markdown(
             border-radius: 4px !important;
             padding: 0rem 0.1rem !important;
             width: 100% !important;
-            min-height: 20px !important;
+            min-height: 22px !important;
             box-shadow: 0 1px 3px rgba(107, 29, 79, 0.15) !important;
         }
 
@@ -404,12 +404,6 @@ def render_product_grid(items):
                         f"</div>", unsafe_allow_html=True
                     )
 
-                    st.markdown(
-                        f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; margin-bottom: 2px;'>"
-                        f"Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
-                        f"</div>", unsafe_allow_html=True
-                    )
-
                     raw_colors = prod.get('colors', '')
                     for sep in ['\\', ',', '&']: 
                         raw_colors = raw_colors.replace(sep, '|')
@@ -422,21 +416,31 @@ def render_product_grid(items):
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    # Much smaller, compact quantity controls row
-                    q_col1, q_col2, q_col3 = st.columns([1.5, 1, 1.5], gap="small")
-                    with q_col1:
-                        if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
-                            if current_qty > 0:
-                                st.session_state.cart[item_key] = current_qty - 1
-                                if st.session_state.cart[item_key] == 0: 
-                                    del st.session_state.cart[item_key]
+                    # --- PRICE & QUANTITY CONTROLS ON THE SAME LINE ---
+                    price_col, qty_col = st.columns([1.1, 1.9], gap="small")
+                    
+                    with price_col:
+                        st.markdown(
+                            f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; padding-top: 4px;'>"
+                            f"Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600;'>Rs. 160</span>"
+                            f"</div>", unsafe_allow_html=True
+                        )
+                        
+                    with qty_col:
+                        q_col1, q_col2, q_col3 = st.columns([1, 1, 1], gap="small")
+                        with q_col1:
+                            if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
+                                if current_qty > 0:
+                                    st.session_state.cart[item_key] = current_qty - 1
+                                    if st.session_state.cart[item_key] == 0: 
+                                        del st.session_state.cart[item_key]
+                                    st.rerun()
+                        with q_col2:
+                            st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 3px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                        with q_col3:
+                            if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
+                                st.session_state.cart[item_key] = current_qty + 1
                                 st.rerun()
-                    with q_col2:
-                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 2px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
-                    with q_col3:
-                        if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
-                            st.session_state.cart[item_key] = current_qty + 1
-                            st.rerun()
 
 
 # --- ROUTING LOGIC ---
