@@ -36,7 +36,7 @@ st.markdown(
 
         /* Overall App Container Padding to accommodate fixed top and bottom bars */
         .block-container {
-            padding-top: 110px !important;
+            padding-top: 100px !important;
             padding-bottom: 90px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
@@ -483,17 +483,7 @@ def render_product_grid(items):
 
 # --- FIXED TOP HEADER BAR ---
 st.markdown('<div class="fixed-top-header">', unsafe_allow_html=True)
-top_logo, top_cat, top_home, top_cart, top_logout = st.columns([2.5, 1.2, 0.9, 0.9, 0.8], gap="small")
-
-with top_logo:
-    st.markdown(
-        """
-        <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1px solid #f3e8f1;">
-            <span style="font-size: 13px; font-weight: 900; color: #6b1d4f; text-transform: uppercase;">ANUAARI MATERIALS</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+top_cat, top_home, top_cart, top_logout = st.columns([1.2, 1, 1, 0.9], gap="small")
 
 with top_cat:
     if st.button("🗂️ Categories", key="top_cat_btn", use_container_width=True):
