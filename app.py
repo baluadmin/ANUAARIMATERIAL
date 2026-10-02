@@ -416,22 +416,28 @@ def render_product_grid(items):
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    # --- PRICE & QUANTITY CONTROLS ON SAME LINE (FORCED FLEXBOX FOR MOBILE) ---
-                    price_val = prod['price']
+                    # --- PRICE & QUANTITY CONTROLS ON THE EXACT SAME LINE ---
+                    price_html = f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; padding-top: 4px;'>Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600;'>Rs. 160</span></div>"
                     
-                    # We handle the minus button action
-                    minus_clicked = st.button("➖", key=f"minus_{u_key}", use_container_width=True)
-                    if minus_clicked:
-                        if current_qty > 0:
-                            st.session_state.cart[item_key] = current_qty - 1
-                            if st.session_state.cart[item_key] == 0: 
-                                del st.session_state.cart[item_key]
-                            st.rerun()
-
-                    plus_clicked = st.button("➕", key=f"plus_{u_key}", use_container_width=True)
-                    if plus_clicked:
-                        st.session_state.cart[item_key] = current_qty + 1
-                        st.rerun()
+                    # Using a 2-column layout to keep price and quantity buttons side-by-side cleanly
+                    p_col, q_col = st.columns([1, 1.8], gap="small")
+                    with p_col:
+                        st.markdown(price_html, unsafe_allow_html=True)
+                    with q_col:
+                        q1, q2, q3 = st.columns([1, 1, 1], gap="small")
+                        with q1:
+                            if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
+                                if current_qty > 0:
+                                    st.session_state.cart[item_key] = current_qty - 1
+                                    if st.session_state.cart[item_key] == 0: 
+                                        del st.session_state.cart[item_key]
+                                    st.rerun()
+                        with q2:
+                            st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                        with q3:
+                            if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
+                                st.session_state.cart[item_key] = current_qty + 1
+                                st.rerun()
 
 
 # --- ROUTING LOGIC ---
