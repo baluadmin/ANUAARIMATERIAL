@@ -42,28 +42,12 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Floating Quick Cart Button in Bottom Right */
-        .floating-cart-btn {
-            position: fixed;
-            bottom: 70px;
-            right: 20px;
-            z-index: 99999;
-            background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%);
-            color: #ffffff;
-            padding: 12px 20px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 14px;
-            box-shadow: 0 6px 20px rgba(107, 29, 79, 0.4);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: transform 0.2s ease;
-        }
-        .floating-cart-btn:hover {
-            transform: scale(1.05);
-            color: #ffffff;
+        /* Positioned right next to the bottom-right badge icons */
+        div[data-testid="stVerticalBlock"]:has(button[key="floating_cart_trigger"]) {
+            position: fixed !important;
+            bottom: 15px !important;
+            right: 80px !important;
+            z-index: 999999 !important;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -193,7 +177,7 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Compact Buttons Styling for Plus/Minus */
+        /* Compact Buttons Styling for Plus/Minus & Floating Cart */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
@@ -400,8 +384,8 @@ def open_quick_cart_dialog():
     else:
         st.info("Your cart is empty.")
 
-# Render Floating Action Button on Bottom Right
-if st.button(f"🛒 Cart ({total_cart_items})", key="floating_cart_trigger", help="Open Quick Cart"):
+# Render Floating Action Button pinned next to the bottom-right icons
+if st.button(f"🛒 ({total_cart_items})", key="floating_cart_trigger", help="Open Quick Cart"):
     open_quick_cart_dialog()
 
 
