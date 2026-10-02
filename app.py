@@ -217,7 +217,7 @@ if "user_phone" not in st.session_state:
 if "cart" not in st.session_state or not isinstance(st.session_state.cart, dict):
     st.session_state.cart = {}
 if "current_view" not in st.session_state:
-    st.session_state.current_view = "Home"
+    st.session_state.current_view = "Categories"  # Default view is Categories
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = None
 if "selected_subcategory" not in st.session_state:
@@ -295,21 +295,8 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- HEADER & NAVIGATION BAR ---
-nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([1, 1.2, 1, 0.8], gap="small")
-
-with nav_col1:
-    if st.button("🏠 Home", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-
-with nav_col_cat:
-    if st.button("🗂️ Category", use_container_width=True):
-        st.session_state.current_view = "Categories"
-        st.session_state.selected_category = None
-        st.session_state.selected_subcategory = None
-        st.rerun()
+# --- HEADER & NAVIGATION BAR (Cart & Logout only) ---
+nav_col2, nav_col3 = st.columns([4, 1], gap="small")
 
 with nav_col2:
     total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
@@ -499,22 +486,7 @@ def render_product_grid(items):
 
 # --- ROUTING LOGIC ---
 
-if st.session_state.current_view == "Home":
-    filtered_items = list(product_records)
-    random.seed(st.session_state.shuffled_seed)
-    random.shuffle(filtered_items)
-
-    grid_head_col1, grid_head_col2 = st.columns([3, 1])
-    with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
-    with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
-
-    render_product_grid(filtered_items)
-
-
-elif st.session_state.current_view == "Categories":
+if st.session_state.current_view == "Categories":
     categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
     
     st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
@@ -551,18 +523,15 @@ elif st.session_state.current_view == "Categories":
         if st.session_state.selected_subcategory:
             filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == st.session_state.selected_subcategory]
             header_title = st.session_state.selected_subcategory
-        else:
-            filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category]
-            header_title = f"All {st.session_state.selected_category}"
 
-        grid_head_col1, grid_head_col2 = st.columns([3, 1])
-        with grid_head_col1:
-            st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
-        with grid_head_col2:
-            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+            grid_head_col1, grid_head_col2 = st.columns([3, 1])
+            with grid_head_col1:
+                st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
+            with grid_head_col2:
+                st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-        render_product_grid(filtered_items)
+            render_product_grid(filtered_items)
 
 
 elif st.session_state.current_view == "Cart":
@@ -588,9 +557,12 @@ elif st.session_state.current_view == "Cart":
                 if address and len(sec_phone) == 10:
                     res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
-                    st.session_state.current_view = "Home"
+                    st.session_state.current_view = "Categories"
                     st.rerun()
                 else:
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
-        st.info("Your cart is empty. Click Home or Category to browse products.")
+        st.info("Your cart is empty.")
+        if st.button("Browse Categories"):
+            st.session_state.current_view = "Categories"
+            st.rerun()
