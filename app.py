@@ -239,8 +239,8 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- CLEAN TOP NAVIGATION BAR ---
-nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns(4, gap="small")
+# --- CLEAN TOP NAVIGATION BAR (Logout Button Removed) ---
+nav_col1, nav_col_cat, nav_col2 = st.columns(3, gap="small")
 
 with nav_col1:
     if st.button("🏠 Home", use_container_width=True):
@@ -259,11 +259,6 @@ with nav_col2:
     total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
     if st.button(f"🛒 Cart({total_cart_items})", use_container_width=True):
         st.session_state.current_view = "Cart"
-        st.rerun()
-
-with nav_col3:
-    if st.button("🚪 Out", use_container_width=True):
-        st.session_state.clear()
         st.rerun()
 
 st.markdown("<hr style='margin: 6px 0 10px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
@@ -419,7 +414,6 @@ def render_product_grid(items):
                     # --- PRICE & QUANTITY CONTROLS ON THE EXACT SAME LINE ---
                     price_html = f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; padding-top: 4px;'>Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600;'>Rs. 160</span></div>"
                     
-                    # Using a 2-column layout to keep price and quantity buttons side-by-side cleanly
                     p_col, q_col = st.columns([1, 1.8], gap="small")
                     with p_col:
                         st.markdown(price_html, unsafe_allow_html=True)
