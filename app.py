@@ -34,45 +34,12 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
 
-        /* Add top padding to body container so content doesn't hide under fixed header */
         .block-container {
-            padding-top: 55px !important;
+            padding-top: 1rem !important;
             padding-bottom: 2rem !important;
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
             max-width: 100% !important;
-        }
-
-        /* --- TOP NAVIGATION BAR --- */
-        .fixed-top-nav {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            z-index: 9999999 !important;
-            background-color: #faf7f9 !important;
-            padding: 8px 12px !important;
-            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.08);
-            border-bottom: 1px solid #f0e1ec;
-        }
-
-        /* --- STICKY MASTER CATEGORIES --- */
-        /* The marker is inside the Streamlit container that holds the
-           Master Categories title + category buttons. */
-        div[data-testid="stVerticalBlock"]:has(.master-category-sticky-marker) {
-            position: sticky !important;
-            top: 55px !important;
-            z-index: 9998 !important;
-            background: #faf7f9 !important;
-            padding: 6px 0 8px 0 !important;
-            margin: 0 !important;
-            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.06) !important;
-        }
-
-        .master-category-sticky-marker {
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
         }
 
         /* --- FORCE DESKTOP BROWSER GRID LAYOUT ON MOBILE --- */
@@ -272,31 +239,6 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- LOCKED FIXED TOP NAVIGATION BAR ---
-st.markdown('<div class="fixed-top-nav">', unsafe_allow_html=True)
-nav_col1, nav_col_cat, nav_col2 = st.columns(3, gap="small")
-
-with nav_col1:
-    if st.button("🏠 Home", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-
-with nav_col_cat:
-    if st.button("🗂️ Category", use_container_width=True):
-        st.session_state.current_view = "Categories"
-        st.session_state.selected_category = None
-        st.session_state.selected_subcategory = None
-        st.rerun()
-
-with nav_col2:
-    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-    if st.button(f"🛒 Cart({total_cart_items})", use_container_width=True):
-        st.session_state.current_view = "Cart"
-        st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
-
-
 # Load Inventory Directly from Google Sheets
 @st.cache_data(ttl=5)
 def load_inventory_from_sheet():
@@ -487,26 +429,20 @@ if st.session_state.current_view == "Home":
 elif st.session_state.current_view == "Categories":
     categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
     
-    # --- STICKY MASTER CATEGORY BAR ---
-    # The marker lets CSS make the whole Streamlit container sticky while
-    # the product/content area below it remains the only scrolling area.
-    with st.container():
-        st.markdown('<div class="master-category-sticky-marker"></div>', unsafe_allow_html=True)
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
+    
+    for i in range(0, len(categories), 3):
+        cat_cols = st.columns(3, gap="small")
+        for idx, cat in enumerate(categories[i : i + 3]):
+            with cat_cols[idx]:
+                is_selected = (st.session_state.selected_category == cat)
+                btn_label = f"📂 {cat}" if is_selected else cat
+                if st.button(btn_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
+                    st.session_state.selected_category = cat
+                    st.session_state.selected_subcategory = None
+                    st.rerun()
 
-        st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
-
-        for i in range(0, len(categories), 3):
-            cat_cols = st.columns(3, gap="small")
-            for idx, cat in enumerate(categories[i : i + 3]):
-                with cat_cols[idx]:
-                    is_selected = (st.session_state.selected_category == cat)
-                    btn_label = f"📂 {cat}" if is_selected else cat
-                    if st.button(btn_label, key=f"cat_btn_{i}_{idx}", use_container_width=True):
-                        st.session_state.selected_category = cat
-                        st.session_state.selected_subcategory = None
-                        st.rerun()
-
-        st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
     if st.session_state.selected_category:
         subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
