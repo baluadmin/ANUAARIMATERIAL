@@ -33,6 +33,11 @@ st.markdown(
         .stAppDeployButton {display: none !important; visibility: hidden !important;}
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
+        
+        /* Hide floating Manage App toolbar and badge */
+        div.viewerBadge_container__1QSob {display: none !important;}
+        iframe[title="streamlit_badge"] {display: none !important; visibility: hidden !important;}
+        div[data-testid="stStatusWidget"] {display: none !important;}
 
         .block-container {
             padding-top: 1rem !important;
@@ -507,7 +512,7 @@ def render_product_grid(items):
                             st.session_state.cart[item_key] = current_qty + 1
                             st.rerun()
 
-                    st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
 # --- ROUTING LOGIC ---
