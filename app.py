@@ -42,16 +42,16 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* Fixed HTML Floating Cart Button positioned directly ABOVE the Manage app button */
+        /* Fixed HTML Floating Cart Button positioned side-by-side to the left of Manage app */
         .html-floating-cart {
             position: fixed !important;
-            bottom: 65px !important;
-            right: 20px !important;
+            bottom: 15px !important;
+            right: 145px !important;
             z-index: 9999999 !important;
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
-            padding: 10px 18px !important;
-            border-radius: 25px !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
             font-weight: 800 !important;
             font-size: 13px !important;
             box-shadow: 0 4px 15px rgba(107, 29, 79, 0.4) !important;
@@ -352,7 +352,7 @@ with nav_col3:
 st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
 
-# --- HTML FIXED FLOATING CART BUTTON (Pinned right above Manage app) ---
+# --- HTML FIXED FLOATING CART BUTTON (Pinned side-by-side to the left of Manage app) ---
 total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
 
 st.markdown(
