@@ -33,29 +33,37 @@ st.markdown(
         .stAppDeployButton {display: none !important; visibility: hidden !important;}
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
-        
-        /* Force hide Streamlit viewer badges and bottom floating menu icons */
-        [data-testid="stStatusWidget"], 
-        .stStatusWidget, 
-        footer, 
-        #MainMenu, 
-        .viewerBadge_container__1QSob,
-        div[class*="viewerBadge"],
-        div[class*="styles_viewerBadge"] {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            height: 0 !important;
-            width: 0 !important;
-        }
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 4rem !important;
+            padding-bottom: 5rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
+        }
+
+        /* Floating Quick Cart Button in Bottom Right */
+        .floating-cart-btn {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            z-index: 99999;
+            background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 6px 20px rgba(107, 29, 79, 0.4);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease;
+        }
+        .floating-cart-btn:hover {
+            transform: scale(1.05);
+            color: #ffffff;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -211,15 +219,6 @@ st.markdown(
             justify-content: center;
             padding-top: 3rem;
         }
-        .login-card {
-            width: 100%;
-            max-width: 420px;
-            padding: 30px;
-            border-radius: 20px;
-            background: #ffffff !important;
-            border: 1px solid #f3e8f1 !important;
-            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
-        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -350,6 +349,60 @@ with nav_col3:
         st.rerun()
 
 st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+
+
+# --- FLOATING QUICK CART BUTTON & POPUP DIALOG ---
+total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+
+@st.dialog("🛒 Quick Cart & Checkout")
+def open_quick_cart_dialog():
+    if st.session_state.cart:
+        for item_desc, qty in list(st.session_state.cart.items()):
+            col_item, col_rem = st.columns([4, 1])
+            with col_item:
+                st.markdown(f"• **{item_desc}** — **{qty} Units**")
+            with col_rem:
+                if st.button("❌", key=f"dialog_rem_{item_desc}"):
+                    del st.session_state.cart[item_desc]
+                    st.rerun()
+
+        st.markdown("---")
+        with st.form("dialog_checkout_form"):
+            address = st.text_area("Delivery Address (with Pincode):")
+            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
+            payment_option = st.radio("Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
+            notes = st.text_area("Notes:")
+
+            if st.form_submit_button("Complete Order Now", use_container_width=True):
+                if address and len(sec_phone) == 10:
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    cart_summary = ", ".join([f"{qty} Units of {item}" for item, qty in st.session_state.cart.items()])
+                    try:
+                        order_data = {
+                            "Type": "Order",
+                            "Timestamp": timestamp,
+                            "Customer_Name": st.session_state.logged_in_user,
+                            "Primary_Phone": st.session_state.user_phone,
+                            "Items": cart_summary,
+                            "Address": address,
+                            "Payment_Method": payment_option,
+                            "Secondary_Phone": sec_phone,
+                            "Description": notes,
+                        }
+                        requests.post(GOOGLE_SCRIPT_URL, json=order_data)
+                    except Exception:
+                        pass
+                    st.session_state.cart = {}
+                    st.success(f"Order placed successfully ({payment_option})!")
+                    st.rerun()
+                else:
+                    st.warning("Please provide a valid address and a 10-digit alternative phone number.")
+    else:
+        st.info("Your cart is empty.")
+
+# Render Floating Action Button on Bottom Right
+if st.button(f"🛒 Cart ({total_cart_items})", key="floating_cart_trigger", help="Open Quick Cart"):
+    open_quick_cart_dialog()
 
 
 # Load Inventory Directly from Google Sheets
