@@ -36,7 +36,7 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 2rem !important;
+            padding-bottom: 6rem !important; /* Extra bottom padding so content isn't hidden behind the bottom bar */
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
@@ -204,6 +204,19 @@ st.markdown(
             border: 1px solid #f3e8f1 !important;
             box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
         }
+
+        /* Fixed Bottom Navigation Bar Container */
+        .bottom-nav-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid #f3e8f1;
+            padding: 8px 16px;
+            z-index: 99999;
+            box-shadow: 0 -4px 20px rgba(107, 29, 79, 0.08);
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -295,47 +308,6 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- HEADER & NAVIGATION BAR ---
-logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([3.2, 1, 1.2, 1, 0.8], gap="small")
-
-with logo_col:
-    st.markdown(
-        f"""
-        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
-            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
-            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with nav_col1:
-    if st.button("🏠 Home", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-
-with nav_col_cat:
-    if st.button("🗂️ Category", use_container_width=True):
-        st.session_state.current_view = "Categories"
-        st.session_state.selected_category = None
-        st.session_state.selected_subcategory = None
-        st.rerun()
-
-with nav_col2:
-    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-    if st.button(f"🛒 Cart ({total_cart_items})", use_container_width=True):
-        st.session_state.current_view = "Cart"
-        st.rerun()
-
-with nav_col3:
-    if st.button("🚪 Logout", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
-
-st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
-
-
 # Load Inventory Directly from Google Sheets
 @st.cache_data(ttl=2)
 def load_inventory_from_sheet():
@@ -344,7 +316,7 @@ def load_inventory_from_sheet():
         df = pd.read_csv(sheet_csv_url)
         df.to_csv("inventory.csv", index=False)
         return df
-    except Exception as e:
+    except Exception:
         if os.path.exists("inventory.csv"):
             return pd.read_csv("inventory.csv")
         return pd.DataFrame()
@@ -429,7 +401,6 @@ def render_product_grid(items):
                     u_key = prod['id']
                     raw_imgs = prod.get('images', '')
                     
-                    # Split multiple image links separated by backslash or comma
                     for sep in ['\\', ',']:
                         raw_imgs = raw_imgs.replace(sep, '|')
                     img_list = [get_image_src(img.strip()) for img in raw_imgs.split('|') if img.strip() and img.strip().lower() != 'nan']
@@ -437,7 +408,6 @@ def render_product_grid(items):
                     desc_text = prod.get('description', '')
                     total_imgs = len(img_list)
 
-                    # Render up to 3 images side-by-side with Lightbox + Left/Right navigation
                     if total_imgs > 0:
                         img_cols = st.columns(total_imgs, gap="small")
                         for img_i, img_url in enumerate(img_list):
@@ -463,7 +433,6 @@ def render_product_grid(items):
                     else:
                         st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
-                    # Details text set to 2-line height with increased font size (12px)
                     st.markdown(
                         f"<div style='font-size: 12px; font-weight: 600; color: #475569; padding: 4px 0px; height: 38px; overflow-y: auto; line-height: 1.3;'>"
                         f"<strong>Details:</strong> {desc_text if desc_text else 'No details available.'}"
@@ -607,3 +576,45 @@ elif st.session_state.current_view == "Cart":
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
         st.info("Your cart is empty. Click Home or Category to browse products.")
+
+
+# --- FIXED BOTTOM NAVIGATION BAR ---
+st.markdown('<div class="bottom-nav-container">', unsafe_allow_html=True)
+b_logo, b_nav1, b_nav_cat, b_nav2, b_nav3 = st.columns([2.8, 1, 1.2, 1, 0.8], gap="small")
+
+with b_logo:
+    st.markdown(
+        """
+        <div style="background: #ffffff; padding: 6px 12px; border-radius: 10px; border: 1px solid #f3e8f1; display: inline-block;">
+            <span style="font-size: 14px; font-weight: 900; color: #6b1d4f; text-transform: uppercase;">ANUAARI MATERIALS</span>
+            <span style="font-size: 10px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 4px;">aari supplies</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with b_nav1:
+    if st.button("🏠 Home", key="b_home", use_container_width=True):
+        st.session_state.current_view = "Home"
+        st.session_state.shuffled_seed = random.randint(1, 10000)
+        st.rerun()
+
+with b_nav_cat:
+    if st.button("🗂️ Category", key="b_cat", use_container_width=True):
+        st.session_state.current_view = "Categories"
+        st.session_state.selected_category = None
+        st.session_state.selected_subcategory = None
+        st.rerun()
+
+with b_nav2:
+    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+    if st.button(f"🛒 Cart ({total_cart_items})", key="b_cart", use_container_width=True):
+        st.session_state.current_view = "Cart"
+        st.rerun()
+
+with b_nav3:
+    if st.button("🚪 Logout", key="b_logout", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+
+st.markdown('</div>', unsafe_allow_html=True)
