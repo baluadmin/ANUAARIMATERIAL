@@ -44,13 +44,11 @@ st.markdown(
 
         /* --- FORCE DESKTOP BROWSER GRID LAYOUT ON MOBILE --- */
         @media screen and (max-width: 768px) {
-            /* Prevent columns from stacking vertically on mobile */
             div[data-testid="stHorizontalBlock"] {
                 flex-direction: row !important;
                 flex-wrap: wrap !important;
                 gap: 4px !important;
             }
-            /* Make 3-column cards fit side-by-side cleanly */
             div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
                 width: 32% !important;
                 flex: 1 1 32% !important;
@@ -245,10 +243,12 @@ if not st.session_state.logged_in_user:
 logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([2.5, 1, 1.2, 1, 0.9], gap="small")
 
 with logo_col:
+    # Clean text layout without the background box container
     st.markdown(
         """
-        <div style="background: #ffffff; padding: 6px 10px; border-radius: 10px; border: 1px solid #f3e8f1;">
-            <span style="font-size: 13px; font-weight: 900; color: #6b1d4f; text-transform: uppercase;">ANUAARI</span>
+        <div style="padding-top: 4px;">
+            <span style="font-size: 14px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI</span>
+            <span style="font-size: 10px; font-weight: 700; color: #d97706; font-style: italic; display: block;">aari supplies</span>
         </div>
         """,
         unsafe_allow_html=True,
