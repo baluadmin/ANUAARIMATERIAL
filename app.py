@@ -133,12 +133,12 @@ st.markdown(
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
-            font-size: 11px !important;
-            border-radius: 5px !important;
-            padding: 0.1rem 0.2rem !important;
+            font-size: 10px !important;
+            border-radius: 4px !important;
+            padding: 0rem 0.1rem !important;
             width: 100% !important;
-            min-height: 26px !important;
-            box-shadow: 0 2px 4px rgba(107, 29, 79, 0.15) !important;
+            min-height: 20px !important;
+            box-shadow: 0 1px 3px rgba(107, 29, 79, 0.15) !important;
         }
 
         .login-wrapper {
@@ -422,8 +422,8 @@ def render_product_grid(items):
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    # Compact side-by-side quantity controls layout
-                    q_col1, q_col2, q_col3 = st.columns([1.2, 1, 1.2], gap="small")
+                    # Much smaller, compact quantity controls row
+                    q_col1, q_col2, q_col3 = st.columns([1.5, 1, 1.5], gap="small")
                     with q_col1:
                         if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
                             if current_qty > 0:
@@ -432,7 +432,7 @@ def render_product_grid(items):
                                     del st.session_state.cart[item_key]
                                 st.rerun()
                     with q_col2:
-                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 2px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
                     with q_col3:
                         if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
                             st.session_state.cart[item_key] = current_qty + 1
