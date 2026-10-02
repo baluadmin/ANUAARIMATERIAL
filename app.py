@@ -512,31 +512,38 @@ elif st.session_state.current_view == "Categories":
 
 
 elif st.session_state.current_view == "Cart":
-    st.subheader("🛒 Shopping Cart & Secure Checkout")
+    st.markdown("<h3 style='font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 12px;'>🛒 Shopping Cart & Secure Checkout</h3>", unsafe_allow_html=True)
+    
     if st.session_state.cart:
-        for item_desc, qty in list(st.session_state.cart.items()):
-            col_item, col_rem = st.columns([3.5, 1])
-            with col_item:
-                st.markdown(f"• **{item_desc}** — Qty: **{qty}**")
-            with col_rem:
-                if st.button("Remove", key=f"rem_{item_desc}"):
-                    del st.session_state.cart[item_desc]
-                    st.rerun()
+        # Container card for cart items
+        with st.container(border=True):
+            for item_desc, qty in list(st.session_state.cart.items()):
+                cart_col1, cart_col2 = st.columns([3.2, 1], gap="small")
+                with cart_col1:
+                    st.markdown(f"<div style='font-size: 12px; font-weight: 700; color: #2d1524; padding-top: 4px;'>• {item_desc} <br><span style='color: #6b1d4f; font-weight: 800;'>Qty: {qty}</span></div>", unsafe_allow_html=True)
+                with cart_col2:
+                    if st.button("Remove", key=f"rem_{item_desc}", use_container_width=True):
+                        del st.session_state.cart[item_desc]
+                        st.rerun()
+                st.markdown("<div style='border-top: 1px solid #f3e8f1; margin: 4px 0;'></div>", unsafe_allow_html=True)
 
-        st.markdown("---")
+        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        
         with st.form("checkout_form"):
-            address = st.text_area("Delivery Address (with Pincode):")
-            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
+            st.markdown("<div style='font-size: 13px; font-weight: 800; color: #6b1d4f; margin-bottom: 6px;'>📍 Shipping & Payment Details</div>", unsafe_allow_html=True)
+            address = st.text_area("Delivery Address (with Pincode):", placeholder="Enter full address...")
+            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10, placeholder="10-digit number")
             payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
-            notes = st.text_area("Custom Instructions / Notes:")
+            notes = st.text_area("Custom Instructions / Notes (Optional):", placeholder="Any specific instructions...")
 
-            if st.form_submit_button("Complete Order Now"):
+            st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+            if st.form_submit_button("Complete Order Now", use_container_width=True):
                 if address and len(sec_phone) == 10:
                     res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
                     st.session_state.current_view = "Home"
                     st.rerun()
                 else:
-                    st.warning("Please provide a valid address and a 10-digit alternative phone number.")
+                    st.warning("Please provide a valid delivery address and an exact 10-digit alternative phone number.")
     else:
         st.info("Your cart is empty. Click Home or Category to browse products.")
