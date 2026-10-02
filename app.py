@@ -36,35 +36,10 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 5rem !important;
+            padding-bottom: 2rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
-        }
-
-        /* Fixed HTML Floating Cart Button positioned side-by-side to the left of Manage app */
-        .html-floating-cart {
-            position: fixed !important;
-            bottom: 15px !important;
-            right: 145px !important;
-            z-index: 9999999 !important;
-            background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
-            color: #ffffff !important;
-            padding: 8px 16px !important;
-            border-radius: 20px !important;
-            font-weight: 800 !important;
-            font-size: 13px !important;
-            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.4) !important;
-            text-decoration: none !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            transition: transform 0.2s ease !important;
-            border: 2px solid #ffffff !important;
-        }
-        .html-floating-cart:hover {
-            transform: scale(1.05) !important;
-            color: #ffffff !important;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -220,6 +195,15 @@ st.markdown(
             justify-content: center;
             padding-top: 3rem;
         }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 30px;
+            border-radius: 20px;
+            background: #ffffff !important;
+            border: 1px solid #f3e8f1 !important;
+            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -350,23 +334,6 @@ with nav_col3:
         st.rerun()
 
 st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
-
-
-# --- HTML FIXED FLOATING CART BUTTON (Pinned side-by-side to the left of Manage app) ---
-total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-
-st.markdown(
-    f"""
-    <a href="?view=cart" target="_self" class="html-floating-cart">
-        🛒 Cart ({total_cart_items})
-    </a>
-    """,
-    unsafe_allow_html=True
-)
-
-# Handle click from the floating HTML link to switch view to Cart
-if "view=cart" in str(st.query_params):
-    st.session_state.current_view = "Cart"
 
 
 # Load Inventory Directly from Google Sheets
@@ -540,7 +507,7 @@ def render_product_grid(items):
                             st.session_state.cart[item_key] = current_qty + 1
                             st.rerun()
 
-                st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
+                    st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
 # --- ROUTING LOGIC ---
