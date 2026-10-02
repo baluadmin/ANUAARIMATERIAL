@@ -239,8 +239,8 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- HEADER & NAVIGATION BAR (Logo Removed) ---
-nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([1, 1.2, 1, 0.9], gap="small")
+# --- CLEAN TOP NAVIGATION BAR (Logo Completely Removed) ---
+nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns(4, gap="small")
 
 with nav_col1:
     if st.button("🏠 Home", use_container_width=True):
