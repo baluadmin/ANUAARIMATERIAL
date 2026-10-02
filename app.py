@@ -42,16 +42,17 @@ st.markdown(
             max-width: 100% !important;
         }
 
-        /* --- STICKY TOP NAVIGATION BAR --- */
-        .sticky-nav-container {
+        /* --- STICKY TOP NAVIGATION BAR FIX --- */
+        .sticky-header-wrapper {
             position: sticky;
-            top: 0px;
-            z-index: 99999;
+            top: 0;
+            z-index: 999999;
             background-color: #faf7f9;
-            padding-top: 8px;
-            padding-bottom: 6px;
+            padding-top: 6px;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
             border-bottom: 1px solid #f0e1ec;
-            margin-bottom: 10px;
+            backdrop-filter: blur(5px);
         }
 
         /* --- FORCE DESKTOP BROWSER GRID LAYOUT ON MOBILE --- */
@@ -252,7 +253,7 @@ if not st.session_state.logged_in_user:
 
 
 # --- STICKY TOP NAVIGATION BAR ---
-st.markdown('<div class="sticky-nav-container">', unsafe_allow_html=True)
+st.markdown('<div class="sticky-header-wrapper">', unsafe_allow_html=True)
 nav_col1, nav_col_cat, nav_col2 = st.columns(3, gap="small")
 
 with nav_col1:
