@@ -296,18 +296,7 @@ if not st.session_state.logged_in_user:
 
 
 # --- HEADER & NAVIGATION BAR ---
-logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([3.2, 1, 1.2, 1, 0.8], gap="small")
-
-with logo_col:
-    st.markdown(
-        f"""
-        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
-            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
-            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([1, 1.2, 1, 0.8], gap="small")
 
 with nav_col1:
     if st.button("🏠 Home", use_container_width=True):
@@ -344,7 +333,7 @@ def load_inventory_from_sheet():
         df = pd.read_csv(sheet_csv_url)
         df.to_csv("inventory.csv", index=False)
         return df
-    except Exception as e:
+    except Exception:
         if os.path.exists("inventory.csv"):
             return pd.read_csv("inventory.csv")
         return pd.DataFrame()
