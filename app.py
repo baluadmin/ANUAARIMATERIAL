@@ -34,14 +34,20 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
         
-        /* Hide floating Manage App toolbar and badge */
-        div.viewerBadge_container__1QSob {display: none !important;}
-        iframe[title="streamlit_badge"] {display: none !important; visibility: hidden !important;}
-        div[data-testid="stStatusWidget"] {display: none !important;}
+        /* Completely hide and disable floating Manage App toolbar, badges, and bottom lines */
+        div.viewerBadge_container__1QSob, 
+        iframe[title="streamlit_badge"], 
+        div[data-testid="stStatusWidget"],
+        div[class*="viewerBadge"] {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 2rem !important;
+            padding-bottom: 4rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
