@@ -34,15 +34,20 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
         
-        /* Completely hide and disable floating Manage App toolbar, badges, and bottom lines */
-        div.viewerBadge_container__1QSob, 
-        iframe[title="streamlit_badge"], 
-        div[data-testid="stStatusWidget"],
-        div[class*="viewerBadge"] {
+        /* Force hide Streamlit viewer badges and bottom floating menu icons */
+        [data-testid="stStatusWidget"], 
+        .stStatusWidget, 
+        footer, 
+        #MainMenu, 
+        .viewerBadge_container__1QSob,
+        div[class*="viewerBadge"],
+        div[class*="styles_viewerBadge"] {
             display: none !important;
             visibility: hidden !important;
             opacity: 0 !important;
             pointer-events: none !important;
+            height: 0 !important;
+            width: 0 !important;
         }
 
         .block-container {
