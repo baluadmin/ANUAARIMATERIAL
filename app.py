@@ -36,7 +36,7 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 6rem !important; /* Extra bottom padding so content isn't hidden behind the bottom bar */
+            padding-bottom: 6rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
@@ -169,17 +169,16 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Compact Buttons Styling for Plus/Minus */
+        /* Compact Buttons Styling */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
             font-size: 12px !important;
-            border-radius: 6px !important;
-            padding: 0.15rem 0.3rem !important;
-            width: 100% !important;
-            min-height: 28px !important;
+            border-radius: 8px !important;
+            padding: 0.3rem 0.6rem !important;
+            min-height: 32px !important;
             box-shadow: 0 2px 5px rgba(107, 29, 79, 0.15) !important;
             transition: all 0.2s ease;
         }
@@ -390,7 +389,6 @@ def render_product_grid(items):
         st.info("No items found.")
         return
 
-    # 3-Column Grid Loop
     for i in range(0, len(items), 3):
         cols = st.columns(3, gap="small")
         batch = items[i : i + 3]
@@ -501,6 +499,7 @@ elif st.session_state.current_view == "Categories":
     
     st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
     
+    # Using 3 columns so buttons fit compactly like chips/tags
     for i in range(0, len(categories), 3):
         cat_cols = st.columns(3, gap="small")
         for idx, cat in enumerate(categories[i : i + 3]):
@@ -519,6 +518,7 @@ elif st.session_state.current_view == "Categories":
         
         if subcats:
             st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
+            # Using 3 columns for compact subcategory chips
             for i in range(0, len(subcats), 3):
                 subcat_cols = st.columns(3, gap="small")
                 for idx, subcat in enumerate(subcats[i : i + 3]):
