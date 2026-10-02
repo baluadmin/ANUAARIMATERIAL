@@ -54,7 +54,7 @@ st.markdown(
             border-radius: 2px;
         }
 
-        /* Card Container Styling */
+        /* Product Card Styling for 3 Columns */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
@@ -74,7 +74,7 @@ st.markdown(
         /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100% !important;
-            height: 115px !important;
+            height: 105px !important;
             object-fit: cover !important;
             border-radius: 6px !important;
             cursor: pointer;
@@ -169,7 +169,7 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Compact Buttons Styling */
+        /* Compact Buttons Styling for Plus/Minus */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
@@ -195,6 +195,15 @@ st.markdown(
             justify-content: center;
             padding-top: 3rem;
         }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 30px;
+            border-radius: 20px;
+            background: #ffffff !important;
+            border: 1px solid #f3e8f1 !important;
+            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -208,7 +217,7 @@ if "user_phone" not in st.session_state:
 if "cart" not in st.session_state or not isinstance(st.session_state.cart, dict):
     st.session_state.cart = {}
 if "current_view" not in st.session_state:
-    st.session_state.current_view = "Categories"
+    st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = None
 if "selected_subcategory" not in st.session_state:
@@ -287,7 +296,31 @@ if not st.session_state.logged_in_user:
 
 
 # --- HEADER & NAVIGATION BAR ---
-nav_col2, nav_col3 = st.columns([4, 1], gap="small")
+logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([3.2, 1, 1.2, 1, 0.8], gap="small")
+
+with logo_col:
+    st.markdown(
+        f"""
+        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
+            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
+            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with nav_col1:
+    if st.button("🏠 Home", use_container_width=True):
+        st.session_state.current_view = "Home"
+        st.session_state.shuffled_seed = random.randint(1, 10000)
+        st.rerun()
+
+with nav_col_cat:
+    if st.button("🗂️ Category", use_container_width=True):
+        st.session_state.current_view = "Categories"
+        st.session_state.selected_category = None
+        st.session_state.selected_subcategory = None
+        st.rerun()
 
 with nav_col2:
     total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
@@ -300,6 +333,8 @@ with nav_col3:
         st.session_state.clear()
         st.rerun()
 
+st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+
 
 # Load Inventory Directly from Google Sheets
 @st.cache_data(ttl=2)
@@ -309,7 +344,7 @@ def load_inventory_from_sheet():
         df = pd.read_csv(sheet_csv_url)
         df.to_csv("inventory.csv", index=False)
         return df
-    except Exception:
+    except Exception as e:
         if os.path.exists("inventory.csv"):
             return pd.read_csv("inventory.csv")
         return pd.DataFrame()
@@ -350,7 +385,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Bunch Beads", "price": "90.00", "colors": "Red, Blue", "images": "bunch beads 1.JPG \\ bunch beads 2.JPG \\ bunch beads 3.JPG", "description": "High quality beads."}
+        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "images": "bunch beads 1.JPG \\ bunch beads 2.JPG \\ bunch beads 3.JPG", "description": "High quality beads."}
     ]
 
 
@@ -383,6 +418,7 @@ def render_product_grid(items):
         st.info("No items found.")
         return
 
+    # 3-Column Grid Loop
     for i in range(0, len(items), 3):
         cols = st.columns(3, gap="small")
         batch = items[i : i + 3]
@@ -393,6 +429,7 @@ def render_product_grid(items):
                     u_key = prod['id']
                     raw_imgs = prod.get('images', '')
                     
+                    # Split multiple image links separated by backslash or comma
                     for sep in ['\\', ',']:
                         raw_imgs = raw_imgs.replace(sep, '|')
                     img_list = [get_image_src(img.strip()) for img in raw_imgs.split('|') if img.strip() and img.strip().lower() != 'nan']
@@ -400,6 +437,7 @@ def render_product_grid(items):
                     desc_text = prod.get('description', '')
                     total_imgs = len(img_list)
 
+                    # Render up to 3 images side-by-side with Lightbox + Left/Right navigation
                     if total_imgs > 0:
                         img_cols = st.columns(total_imgs, gap="small")
                         for img_i, img_url in enumerate(img_list):
@@ -425,6 +463,7 @@ def render_product_grid(items):
                     else:
                         st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
+                    # Details text set to 2-line height with increased font size (12px)
                     st.markdown(
                         f"<div style='font-size: 12px; font-weight: 600; color: #475569; padding: 4px 0px; height: 38px; overflow-y: auto; line-height: 1.3;'>"
                         f"<strong>Details:</strong> {desc_text if desc_text else 'No details available.'}"
@@ -471,18 +510,31 @@ def render_product_grid(items):
                     st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
-# --- ROUTING & VIEW LOGIC ---
+# --- ROUTING LOGIC ---
 
-if st.session_state.current_view == "Categories":
-    categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
-    
-    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
+if st.session_state.current_view == "Home":
+    filtered_items = list(product_records)
+    random.seed(st.session_state.shuffled_seed)
+    random.shuffle(filtered_items)
+
+    grid_head_col1, grid_head_col2 = st.columns([3, 1])
+    with grid_head_col1:
+        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
+    with grid_head_col2:
+        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-    # 2-Column Grid Loop for Master Categories
-    for i in range(0, len(categories), 2):
-        cat_cols = st.columns(2, gap="small")
-        for idx, cat in enumerate(categories[i : i + 2]):
+    render_product_grid(filtered_items)
+
+
+elif st.session_state.current_view == "Categories":
+    categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
+    
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
+    
+    for i in range(0, len(categories), 3):
+        cat_cols = st.columns(3, gap="small")
+        for idx, cat in enumerate(categories[i : i + 3]):
             with cat_cols[idx]:
                 is_selected = (st.session_state.selected_category == cat)
                 btn_label = f"📂 {cat}" if is_selected else cat
@@ -491,77 +543,39 @@ if st.session_state.current_view == "Categories":
                     st.session_state.selected_subcategory = None
                     st.rerun()
 
-    st.markdown("<hr style='margin: 14px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
-    # If a Master Category is selected, display its Subcategories in a Card Grid
     if st.session_state.selected_category:
         subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
         
         if subcats:
-            st.markdown(f"<span style='color: #d97706; font-weight: 800; font-size: 13px; text-transform: uppercase;'>🏷️ Subcategories of {st.session_state.selected_category}</span>", unsafe_allow_html=True)
-            st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
+            for i in range(0, len(subcats), 3):
+                subcat_cols = st.columns(3, gap="small")
+                for idx, subcat in enumerate(subcats[i : i + 3]):
+                    with subcat_cols[idx]:
+                        is_sel_sub = (st.session_state.selected_subcategory == subcat)
+                        sub_label = f"✨ {subcat}" if is_sel_sub else subcat
+                        if st.button(sub_label, key=f"sub_btn_{i}_{idx}", use_container_width=True):
+                            st.session_state.selected_subcategory = subcat
+                            st.rerun()
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
-            for i in range(0, len(subcats), 2):
-                sub_cols = st.columns(2, gap="small")
-                batch_sub = subcats[i : i + 2]
-                
-                for sub_idx, subcat_name in enumerate(batch_sub):
-                    with sub_cols[sub_idx]:
-                        with st.container(border=True):
-                            # Find representative item in this subcategory to display its image
-                            match_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == subcat_name]
-                            sub_img = ""
-                            if match_items and match_items[0].get('images'):
-                                raw_sub_img = match_items[0]['images']
-                                for sep in ['\\', ',']: raw_sub_img = raw_sub_img.replace(sep, '|')
-                                sub_img_list = [get_image_src(img.strip()) for img in raw_sub_img.split('|') if img.strip() and img.strip().lower() != 'nan']
-                                if sub_img_list:
-                                    sub_img = sub_img_list[0]
+        if st.session_state.selected_subcategory:
+            filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == st.session_state.selected_subcategory]
+            header_title = st.session_state.selected_subcategory
+        else:
+            filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category]
+            header_title = f"All {st.session_state.selected_category}"
 
-                            if sub_img:
-                                st.markdown(f"<img src='{sub_img}' class='zoom-thumb' alt='{subcat_name}' />", unsafe_allow_html=True)
-                            else:
-                                st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
+        grid_head_col1, grid_head_col2 = st.columns([3, 1])
+        with grid_head_col1:
+            st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
+        with grid_head_col2:
+            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-                            st.markdown(
-                                f"<div style='font-weight: 800; font-size: 14px; color: #6b1d4f; margin-top: 8px; margin-bottom: 4px;'>"
-                                f"✨ {subcat_name}"
-                                f"</div>", unsafe_allow_html=True
-                            )
-                            st.markdown(
-                                f"<div style='font-weight: 700; font-size: 11px; color: #64748b; margin-bottom: 8px;'>"
-                                f"{len(match_items)} items available"
-                                f"</div>", unsafe_allow_html=True
-                            )
-
-                            if st.button(f"Open {subcat_name}", key=f"open_sub_{i}_{sub_idx}", use_container_width=True):
-                                st.session_state.selected_subcategory = subcat_name
-                                st.session_state.current_view = "Products"
-                                st.rerun()
-
-    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-
-
-elif st.session_state.current_view == "Products":
-    # Back button to return to categories/subcategories view
-    if st.button("⬅️ Back to Subcategories", use_container_width=False):
-        st.session_state.selected_subcategory = None
-        st.session_state.current_view = "Categories"
-        st.rerun()
-
-    st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
-
-    filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == st.session_state.selected_subcategory]
-    header_title = st.session_state.selected_subcategory
-
-    grid_head_col1, grid_head_col2 = st.columns([3, 1])
-    with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
-    with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
-
-    render_product_grid(filtered_items)
+        render_product_grid(filtered_items)
 
 
 elif st.session_state.current_view == "Cart":
@@ -587,14 +601,9 @@ elif st.session_state.current_view == "Cart":
                 if address and len(sec_phone) == 10:
                     res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
-                    st.session_state.current_view = "Categories"
-                    st.session_state.selected_subcategory = None
+                    st.session_state.current_view = "Home"
                     st.rerun()
                 else:
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
-        st.info("Your cart is empty.")
-        if st.button("Browse Categories"):
-            st.session_state.current_view = "Categories"
-            st.session_state.selected_subcategory = None
-            st.rerun()
+        st.info("Your cart is empty. Click Home or Category to browse products.")
