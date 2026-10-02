@@ -469,7 +469,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 
 # --- MAIN STORE TABS ---
-tab1, tab2 = st.tabs(["🔥 Products", "🗂️️ Categories"])
+tab1, tab2 = st.tabs(["🔥 Products", "🗂 Categories"])
 
 with tab1:
     filtered_items = list(product_records)
