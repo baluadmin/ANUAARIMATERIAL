@@ -416,31 +416,22 @@ def render_product_grid(items):
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    # --- PRICE & QUANTITY CONTROLS ON THE SAME LINE ---
-                    price_col, qty_col = st.columns([1.1, 1.9], gap="small")
+                    # --- PRICE & QUANTITY CONTROLS ON SAME LINE (FORCED FLEXBOX FOR MOBILE) ---
+                    price_val = prod['price']
                     
-                    with price_col:
-                        st.markdown(
-                            f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; padding-top: 4px;'>"
-                            f"Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600;'>Rs. 160</span>"
-                            f"</div>", unsafe_allow_html=True
-                        )
-                        
-                    with qty_col:
-                        q_col1, q_col2, q_col3 = st.columns([1, 1, 1], gap="small")
-                        with q_col1:
-                            if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
-                                if current_qty > 0:
-                                    st.session_state.cart[item_key] = current_qty - 1
-                                    if st.session_state.cart[item_key] == 0: 
-                                        del st.session_state.cart[item_key]
-                                    st.rerun()
-                        with q_col2:
-                            st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 3px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
-                        with q_col3:
-                            if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
-                                st.session_state.cart[item_key] = current_qty + 1
-                                st.rerun()
+                    # We handle the minus button action
+                    minus_clicked = st.button("➖", key=f"minus_{u_key}", use_container_width=True)
+                    if minus_clicked:
+                        if current_qty > 0:
+                            st.session_state.cart[item_key] = current_qty - 1
+                            if st.session_state.cart[item_key] == 0: 
+                                del st.session_state.cart[item_key]
+                            st.rerun()
+
+                    plus_clicked = st.button("➕", key=f"plus_{u_key}", use_container_width=True)
+                    if plus_clicked:
+                        st.session_state.cart[item_key] = current_qty + 1
+                        st.rerun()
 
 
 # --- ROUTING LOGIC ---
@@ -515,7 +506,6 @@ elif st.session_state.current_view == "Cart":
     st.markdown("<h3 style='font-size: 16px; font-weight: 900; color: #0f172a; margin-bottom: 12px;'>🛒 Shopping Cart & Secure Checkout</h3>", unsafe_allow_html=True)
     
     if st.session_state.cart:
-        # Container card for cart items
         with st.container(border=True):
             for item_desc, qty in list(st.session_state.cart.items()):
                 cart_col1, cart_col2 = st.columns([3.2, 1], gap="small")
