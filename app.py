@@ -34,27 +34,14 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
 
-        /* Overall App Container Padding to accommodate fixed top and bottom bars */
+        /* Overall App Container Padding to accommodate fixed bottom bar */
         .block-container {
-            padding-top: 100px !important;
+            padding-top: 1rem !important;
             padding-bottom: 90px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
             overflow-y: auto !important;
-        }
-
-        /* Fixed Top Header Container */
-        .fixed-top-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #ffffff;
-            border-bottom: 1px solid #f3e8f1;
-            padding: 10px 16px;
-            z-index: 99999;
-            box-shadow: 0 4px 15px rgba(107, 29, 79, 0.05);
         }
 
         /* Fixed Bottom Navigation Bar Container */
@@ -481,37 +468,6 @@ def render_product_grid(items):
                     st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
-# --- FIXED TOP HEADER BAR ---
-st.markdown('<div class="fixed-top-header">', unsafe_allow_html=True)
-top_cat, top_home, top_cart, top_logout = st.columns([1.2, 1, 1, 0.9], gap="small")
-
-with top_cat:
-    if st.button("🗂️ Categories", key="top_cat_btn", use_container_width=True):
-        st.session_state.current_view = "Categories"
-        st.session_state.selected_category = None
-        st.session_state.selected_subcategory = None
-        st.rerun()
-
-with top_home:
-    if st.button("🏠 Home", key="top_home_btn", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-
-with top_cart:
-    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-    if st.button(f"🛒 Cart ({total_cart_items})", key="top_cart_btn", use_container_width=True):
-        st.session_state.current_view = "Cart"
-        st.rerun()
-
-with top_logout:
-    if st.button("🚪 Logout", key="top_logout_btn", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-
 # --- SCROLLABLE CENTER CONTENT ---
 if st.session_state.current_view == "Home":
     filtered_items = list(product_records)
@@ -615,15 +571,15 @@ st.markdown('<div class="fixed-bottom-nav">', unsafe_allow_html=True)
 b_col1, b_col2, b_col3, b_col4 = st.columns(4, gap="small")
 
 with b_col1:
-    if st.button("🏠 Home", key="b_home_btn", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-with b_col2:
     if st.button("🗂️ Categories", key="b_cat_btn", use_container_width=True):
         st.session_state.current_view = "Categories"
         st.session_state.selected_category = None
         st.session_state.selected_subcategory = None
+        st.rerun()
+with b_col2:
+    if st.button("🏠 Home", key="b_home_btn", use_container_width=True):
+        st.session_state.current_view = "Home"
+        st.session_state.shuffled_seed = random.randint(1, 10000)
         st.rerun()
 with b_col3:
     total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
