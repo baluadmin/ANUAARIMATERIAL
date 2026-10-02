@@ -37,24 +37,23 @@ st.markdown(
         /* Overall App Container Padding to accommodate fixed bottom bar */
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 90px !important;
+            padding-bottom: 110px !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
-            overflow-y: auto !important;
         }
 
-        /* Fixed Bottom Navigation Bar Container */
+        /* Truly Fixed Bottom Navigation Bar Container */
         .fixed-bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #ffffff;
-            border-top: 1px solid #f3e8f1;
-            padding: 8px 16px;
-            z-index: 99999;
-            box-shadow: 0 -4px 20px rgba(107, 29, 79, 0.08);
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            border-top: 1px solid #f3e8f1 !important;
+            padding: 10px 16px !important;
+            z-index: 999999 !important;
+            box-shadow: 0 -4px 20px rgba(107, 29, 79, 0.1) !important;
         }
 
         /* Product Card Styling for 3 Columns */
@@ -94,7 +93,7 @@ st.markdown(
         .lightbox-overlay {
             display: none;
             position: fixed;
-            z-index: 999999;
+            z-index: 9999999;
             left: 0;
             top: 0;
             width: 100vw;
@@ -566,29 +565,35 @@ elif st.session_state.current_view == "Cart":
         st.info("Your cart is empty. Click Categories to browse products.")
 
 
-# --- FIXED BOTTOM NAVIGATION BAR ---
-st.markdown('<div class="fixed-bottom-nav">', unsafe_allow_html=True)
-b_col1, b_col2, b_col3, b_col4 = st.columns(4, gap="small")
+# --- TRULY FIXED BOTTOM NAVIGATION BAR ---
+st.markdown(
+    """
+    <div class="fixed-bottom-nav">
+        <div id="nav-buttons-container"></div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
-with b_col1:
+# Streamlit columns rendered securely inside the fixed footer container
+cols_footer = st.columns(4, gap="small")
+with cols_footer[0]:
     if st.button("🗂️ Categories", key="b_cat_btn", use_container_width=True):
         st.session_state.current_view = "Categories"
         st.session_state.selected_category = None
         st.session_state.selected_subcategory = None
         st.rerun()
-with b_col2:
+with cols_footer[1]:
     if st.button("🏠 Home", key="b_home_btn", use_container_width=True):
         st.session_state.current_view = "Home"
         st.session_state.shuffled_seed = random.randint(1, 10000)
         st.rerun()
-with b_col3:
+with cols_footer[2]:
     total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
     if st.button(f"🛒 Cart ({total_cart_items})", key="b_cart_btn", use_container_width=True):
         st.session_state.current_view = "Cart"
         st.rerun()
-with b_col4:
+with cols_footer[3]:
     if st.button("🚪 Logout", key="b_logout_btn", use_container_width=True):
         st.session_state.clear()
         st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
