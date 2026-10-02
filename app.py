@@ -239,7 +239,7 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
-# --- CLEAN TOP NAVIGATION BAR (Logo Completely Removed) ---
+# --- CLEAN TOP NAVIGATION BAR ---
 nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns(4, gap="small")
 
 with nav_col1:
@@ -422,7 +422,8 @@ def render_product_grid(items):
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    q_col1, q_col2, q_col3 = st.columns([1, 1.2, 1], gap="small")
+                    # Compact side-by-side quantity controls layout
+                    q_col1, q_col2, q_col3 = st.columns([1.2, 1, 1.2], gap="small")
                     with q_col1:
                         if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
                             if current_qty > 0:
@@ -431,7 +432,7 @@ def render_product_grid(items):
                                     del st.session_state.cart[item_key]
                                 st.rerun()
                     with q_col2:
-                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 2px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 12px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
                     with q_col3:
                         if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
                             st.session_state.cart[item_key] = current_qty + 1
