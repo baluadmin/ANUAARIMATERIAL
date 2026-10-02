@@ -141,6 +141,25 @@ st.markdown(
             box-shadow: 0 1px 3px rgba(107, 29, 79, 0.15) !important;
         }
 
+        /* --- WHITE BOTTOM FLOATING CART BUTTON STYLING --- */
+        .floating-cart-wrapper {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999999;
+            width: 92%;
+            max-width: 450px;
+            background: #ffffff;
+            padding: 10px 14px;
+            border-radius: 30px;
+            box-shadow: 0 8px 25px rgba(107, 29, 79, 0.2);
+            border: 1px solid #f3e8f1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
         .login-wrapper {
             display: flex;
             flex-direction: column;
@@ -403,7 +422,7 @@ def render_product_grid(items):
                                 st.rerun()
 
 
-# --- STREMLIT POPUP DIALOG FOR CART & CHECKOUT ---
+# --- STREAMLIT POPUP DIALOG FOR CART & CHECKOUT ---
 @st.dialog("🛒 Shopping Cart & Secure Checkout")
 def show_cart_modal():
     if st.session_state.cart:
@@ -439,33 +458,20 @@ def show_cart_modal():
         st.info("Your cart is empty. Add products to view them here.")
 
 
-# --- STICKY BOTTOM FLOATING WHITE CART BUTTON ---
+# --- BOTTOM FLOATING WHITE CART BUTTON ---
 total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
 
-st.markdown(
-    """
-    <style>
-        .floating-cart-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 99999999;
-            width: 90%;
-            max-width: 400px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown('<div class="floating-cart-container">', unsafe_allow_html=True)
-if st.button(f"🛒 View Cart ({total_cart_items} Items)", use_container_width=True, key="floating_cart_btn"):
-    show_cart_modal()
+st.markdown('<div class="floating-cart-wrapper">', unsafe_allow_html=True)
+col_lbl, col_btn = st.columns([1.5, 1], gap="small")
+with col_lbl:
+    st.markdown(f"<div style='font-weight: 800; font-size: 12px; color: #6b1d4f; padding-top: 6px; padding-left: 6px;'>🛒 Cart ({total_cart_items} Items)</div>", unsafe_allow_html=True)
+with col_btn:
+    if st.button("View Cart", use_container_width=True, key="open_cart_popup"):
+        show_cart_modal()
 st.markdown('</div>', unsafe_allow_html=True)
 
 
-# --- MAIN STORE VIEWS ---
+# --- MAIN STORE TABS ---
 tab1, tab2 = st.tabs(["🔥 Products", "🗂️ Categories"])
 
 with tab1:
