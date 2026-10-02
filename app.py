@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import streamlit as st
 
-# 1. Page Configuration & Custom CSS Layout Styling
+# 1. Page Configuration & Styling
 st.set_page_config(
     page_title="ANUAARI MATERIALS | Aari & Craft Supplies",
     page_icon="🧵",
@@ -26,7 +26,6 @@ st.markdown(
 
         .stApp {
             background-color: #faf7f9 !important; 
-            overflow: hidden !important;
         }
 
         #MainMenu, header, footer {visibility: hidden; display: none !important;}
@@ -35,26 +34,12 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
 
-        /* App Main Block Container Config with internal scrolling */
         .block-container {
-            padding: 1rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
             max-width: 100% !important;
-            height: calc(100vh - 75px) !important;
-            overflow-y: auto !important;
-            margin-bottom: 75px !important;
-        }
-
-        /* Absolutely Fixed Bottom Navigation Bar */
-        .fixed-bottom-nav {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            background: #ffffff !important;
-            border-top: 1px solid #f3e8f1 !important;
-            padding: 8px 16px !important;
-            z-index: 9999999 !important;
-            box-shadow: 0 -4px 20px rgba(107, 29, 79, 0.1) !important;
         }
 
         /* Product Card Styling for 3 Columns */
@@ -94,7 +79,7 @@ st.markdown(
         .lightbox-overlay {
             display: none;
             position: fixed;
-            z-index: 99999999;
+            z-index: 999999;
             left: 0;
             top: 0;
             width: 100vw;
@@ -172,7 +157,7 @@ st.markdown(
             to { transform: scale(1); opacity: 1; }
         }
 
-        /* Compact Buttons Styling */
+        /* Compact Buttons Styling for Plus/Minus */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
@@ -180,9 +165,9 @@ st.markdown(
             font-weight: 700 !important;
             font-size: 12px !important;
             border-radius: 6px !important;
-            padding: 0.2rem 0.4rem !important;
+            padding: 0.15rem 0.3rem !important;
             width: 100% !important;
-            min-height: 30px !important;
+            min-height: 28px !important;
             box-shadow: 0 2px 5px rgba(107, 29, 79, 0.15) !important;
             transition: all 0.2s ease;
         }
@@ -211,7 +196,7 @@ if "user_phone" not in st.session_state:
 if "cart" not in st.session_state or not isinstance(st.session_state.cart, dict):
     st.session_state.cart = {}
 if "current_view" not in st.session_state:
-    st.session_state.current_view = "Categories"
+    st.session_state.current_view = "Home"
 if "selected_category" not in st.session_state:
     st.session_state.selected_category = None
 if "selected_subcategory" not in st.session_state:
@@ -225,7 +210,7 @@ GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tC
 def log_login_to_sheet(name, phone):
     try:
         payload = {"Type": "Login", "Customer_Name": name, "Primary_Phone": phone}
-        requests.post(GOOGLE_SCRIPT_URL, json=payload)
+        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=5)
     except Exception as e:
         print(f"Login sheet error: {e}")
 
@@ -270,8 +255,8 @@ if not st.session_state.logged_in_user:
 
     with login_col:
         with st.form("customer_login_form", clear_on_submit=False):
-            cust_name = st.text_input("Customer Name:", placeholder="")
-            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="")
+            cust_name = st.text_input("Customer Name:", placeholder="Enter your name")
+            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="9840XXXXXX")
             cust_phone = "".join([char for char in raw_phone if char.isdigit()])
 
             login_btn = st.form_submit_button("Enter Store", use_container_width=True)
@@ -289,15 +274,55 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
+# --- HEADER & NAVIGATION BAR ---
+logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([3.2, 1, 1.2, 1, 0.8], gap="small")
+
+with logo_col:
+    st.markdown(
+        """
+        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
+            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
+            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with nav_col1:
+    if st.button("🏠 Home", use_container_width=True):
+        st.session_state.current_view = "Home"
+        st.session_state.shuffled_seed = random.randint(1, 10000)
+        st.rerun()
+
+with nav_col_cat:
+    if st.button("🗂️ Category", use_container_width=True):
+        st.session_state.current_view = "Categories"
+        st.session_state.selected_category = None
+        st.session_state.selected_subcategory = None
+        st.rerun()
+
+with nav_col2:
+    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+    if st.button(f"🛒 Cart ({total_cart_items})", use_container_width=True):
+        st.session_state.current_view = "Cart"
+        st.rerun()
+
+with nav_col3:
+    if st.button("🚪 Logout", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+
+st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+
+
 # Load Inventory Directly from Google Sheets
-@st.cache_data(ttl=2)
+@st.cache_data(ttl=5)
 def load_inventory_from_sheet():
     sheet_csv_url = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=need+inventory+model+for+this+ANUAARI"
     try:
         df = pd.read_csv(sheet_csv_url)
-        df.to_csv("inventory.csv", index=False)
         return df
-    except Exception:
+    except Exception as e:
         if os.path.exists("inventory.csv"):
             return pd.read_csv("inventory.csv")
         return pd.DataFrame()
@@ -338,7 +363,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "images": "bunch beads 1.JPG \\ bunch beads 2.JPG \\ bunch beads 3.JPG", "description": "High quality beads."}
+        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "images": "", "description": "High quality sample item."}
     ]
 
 
@@ -359,7 +384,7 @@ def process_cart_checkout(address: str, payment_method: str, secondary_phone: st
             "Secondary_Phone": secondary_phone,
             "Description": notes,
         }
-        requests.post(GOOGLE_SCRIPT_URL, json=order_data)
+        requests.post(GOOGLE_SCRIPT_URL, json=order_data, timeout=5)
     except Exception:
         pass
     st.session_state.cart = {}
@@ -432,7 +457,8 @@ def render_product_grid(items):
                     )
 
                     raw_colors = prod.get('colors', '')
-                    for sep in ['\\', ',', '&']: raw_colors = raw_colors.replace(sep, '|')
+                    for sep in ['\\', ',', '&']: 
+                        raw_colors = raw_colors.replace(sep, '|')
                     color_list = [c.strip() for c in raw_colors.split('|') if c.strip()]
                     selected_color = color_list[0] if color_list else "Standard"
 
@@ -447,7 +473,8 @@ def render_product_grid(items):
                         if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
                             if current_qty > 0:
                                 st.session_state.cart[item_key] = current_qty - 1
-                                if st.session_state.cart[item_key] == 0: del st.session_state.cart[item_key]
+                                if st.session_state.cart[item_key] == 0: 
+                                    del st.session_state.cart[item_key]
                                 st.rerun()
                     with q_col2:
                         st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
@@ -459,7 +486,8 @@ def render_product_grid(items):
                     st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
-# --- SCROLLABLE CENTER CONTENT AREA ---
+# --- ROUTING LOGIC ---
+
 if st.session_state.current_view == "Home":
     filtered_items = list(product_records)
     random.seed(st.session_state.shuffled_seed)
@@ -467,7 +495,7 @@ if st.session_state.current_view == "Home":
 
     grid_head_col1, grid_head_col2 = st.columns([3, 1])
     with grid_head_col1:
-        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
     with grid_head_col2:
         st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
     st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
@@ -497,7 +525,7 @@ elif st.session_state.current_view == "Categories":
         subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
         
         if subcats:
-            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️️ Subcategories</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
             for i in range(0, len(subcats), 3):
                 subcat_cols = st.columns(3, gap="small")
                 for idx, subcat in enumerate(subcats[i : i + 3]):
@@ -549,35 +577,9 @@ elif st.session_state.current_view == "Cart":
                 if address and len(sec_phone) == 10:
                     res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
                     st.success(res_msg)
-                    st.session_state.current_view = "Categories"
+                    st.session_state.current_view = "Home"
                     st.rerun()
                 else:
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
-        st.info("Your cart is empty. Click Categories to browse products.")
-
-
-# --- LOCKED FIXED BOTTOM NAVIGATION BAR ---
-st.markdown('<div class="fixed-bottom-nav">', unsafe_allow_html=True)
-cols_footer = st.columns(4, gap="small")
-with cols_footer[0]:
-    if st.button("🗂️ Categories", key="b_cat_btn", use_container_width=True):
-        st.session_state.current_view = "Categories"
-        st.session_state.selected_category = None
-        st.session_state.selected_subcategory = None
-        st.rerun()
-with cols_footer[1]:
-    if st.button("🏠 Home", key="b_home_btn", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-with cols_footer[2]:
-    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-    if st.button(f"🛒 Cart ({total_cart_items})", key="b_cart_btn", use_container_width=True):
-        st.session_state.current_view = "Cart"
-        st.rerun()
-with cols_footer[3]:
-    if st.button("🚪 Logout", key="b_logout_btn", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
+        st.info("Your cart is empty. Click Home or Category to browse products.")
