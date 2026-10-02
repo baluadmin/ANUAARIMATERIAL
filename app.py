@@ -34,8 +34,9 @@ st.markdown(
         header[data-testid="stHeader"] {display: none !important; visibility: hidden !important;}
         div[data-testid="stDecoration"] {display: none !important;}
 
+        /* --- REMOVED TOP PADDING TO ELIMINATE BLANK SPACE --- */
         .block-container {
-            padding-top: 0.75rem !important;
+            padding-top: 0rem !important;
             padding-bottom: 2rem !important;
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
@@ -243,10 +244,9 @@ if not st.session_state.logged_in_user:
 logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([2.5, 1, 1.2, 1, 0.9], gap="small")
 
 with logo_col:
-    # Clean text layout without the background box container
     st.markdown(
         """
-        <div style="padding-top: 4px;">
+        <div style="padding-top: 2px;">
             <span style="font-size: 14px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI</span>
             <span style="font-size: 10px; font-weight: 700; color: #d97706; font-style: italic; display: block;">aari supplies</span>
         </div>
@@ -278,7 +278,7 @@ with nav_col3:
         st.session_state.clear()
         st.rerun()
 
-st.markdown("<hr style='margin: 8px 0 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+st.markdown("<hr style='margin: 6px 0 10px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
 
 # Load Inventory Directly from Google Sheets
