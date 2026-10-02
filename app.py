@@ -36,7 +36,7 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 6rem !important;
+            padding-bottom: 2rem !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
@@ -176,9 +176,10 @@ st.markdown(
             border: none !important;
             font-weight: 700 !important;
             font-size: 12px !important;
-            border-radius: 8px !important;
-            padding: 0.3rem 0.6rem !important;
-            min-height: 32px !important;
+            border-radius: 6px !important;
+            padding: 0.2rem 0.4rem !important;
+            width: 100% !important;
+            min-height: 30px !important;
             box-shadow: 0 2px 5px rgba(107, 29, 79, 0.15) !important;
             transition: all 0.2s ease;
         }
@@ -202,19 +203,6 @@ st.markdown(
             background: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
             box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
-        }
-
-        /* Fixed Bottom Navigation Bar Container */
-        .bottom-nav-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #ffffff;
-            border-top: 1px solid #f3e8f1;
-            padding: 8px 16px;
-            z-index: 99999;
-            box-shadow: 0 -4px 20px rgba(107, 29, 79, 0.08);
         }
     </style>
     """,
@@ -307,6 +295,45 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
+# --- HEADER & NAVIGATION BAR (TOP) ---
+logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([3.2, 1, 1.2, 1, 0.8], gap="small")
+
+with logo_col:
+    st.markdown(
+        """
+        <div style="background: #ffffff; padding: 8px 14px; border-radius: 10px; border: 1px solid #f3e8f1; display: inline-block;">
+            <span style="font-size: 16px; font-weight: 900; color: #6b1d4f; text-transform: uppercase;">ANUAARI MATERIALS</span>
+            <span style="font-size: 11px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 4px;">aari supplies</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with nav_col1:
+    if st.button("🏠 Home", use_container_width=True):
+        st.session_state.current_view = "Home"
+        st.session_state.shuffled_seed = random.randint(1, 10000)
+        st.rerun()
+
+with nav_col_cat:
+    if st.button("🗂️ Category", use_container_width=True):
+        st.session_state.current_view = "Categories"
+        st.session_state.selected_category = None
+        st.session_state.selected_subcategory = None
+        st.rerun()
+
+with nav_col2:
+    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+    if st.button(f"🛒 Cart ({total_cart_items})", use_container_width=True):
+        st.session_state.current_view = "Cart"
+        st.rerun()
+
+with nav_col3:
+    if st.button("🚪 Logout", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+
+
 # Load Inventory Directly from Google Sheets
 @st.cache_data(ttl=2)
 def load_inventory_from_sheet():
@@ -389,6 +416,7 @@ def render_product_grid(items):
         st.info("No items found.")
         return
 
+    # 3-Column Grid Loop
     for i in range(0, len(items), 3):
         cols = st.columns(3, gap="small")
         batch = items[i : i + 3]
@@ -499,7 +527,7 @@ elif st.session_state.current_view == "Categories":
     
     st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
     
-    # Using 3 columns so buttons fit compactly like chips/tags
+    # 3-Column Compact Grid for Categories
     for i in range(0, len(categories), 3):
         cat_cols = st.columns(3, gap="small")
         for idx, cat in enumerate(categories[i : i + 3]):
@@ -518,7 +546,7 @@ elif st.session_state.current_view == "Categories":
         
         if subcats:
             st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
-            # Using 3 columns for compact subcategory chips
+            # 3-Column Compact Grid for Subcategories
             for i in range(0, len(subcats), 3):
                 subcat_cols = st.columns(3, gap="small")
                 for idx, subcat in enumerate(subcats[i : i + 3]):
@@ -576,45 +604,3 @@ elif st.session_state.current_view == "Cart":
                     st.warning("Please provide a valid address and a 10-digit alternative phone number.")
     else:
         st.info("Your cart is empty. Click Home or Category to browse products.")
-
-
-# --- FIXED BOTTOM NAVIGATION BAR ---
-st.markdown('<div class="bottom-nav-container">', unsafe_allow_html=True)
-b_logo, b_nav1, b_nav_cat, b_nav2, b_nav3 = st.columns([2.8, 1, 1.2, 1, 0.8], gap="small")
-
-with b_logo:
-    st.markdown(
-        """
-        <div style="background: #ffffff; padding: 6px 12px; border-radius: 10px; border: 1px solid #f3e8f1; display: inline-block;">
-            <span style="font-size: 14px; font-weight: 900; color: #6b1d4f; text-transform: uppercase;">ANUAARI MATERIALS</span>
-            <span style="font-size: 10px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 4px;">aari supplies</span>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with b_nav1:
-    if st.button("🏠 Home", key="b_home", use_container_width=True):
-        st.session_state.current_view = "Home"
-        st.session_state.shuffled_seed = random.randint(1, 10000)
-        st.rerun()
-
-with b_nav_cat:
-    if st.button("🗂️ Category", key="b_cat", use_container_width=True):
-        st.session_state.current_view = "Categories"
-        st.session_state.selected_category = None
-        st.session_state.selected_subcategory = None
-        st.rerun()
-
-with b_nav2:
-    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-    if st.button(f"🛒 Cart ({total_cart_items})", key="b_cart", use_container_width=True):
-        st.session_state.current_view = "Cart"
-        st.rerun()
-
-with b_nav3:
-    if st.button("🚪 Logout", key="b_logout", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
-
-st.markdown('</div>', unsafe_allow_html=True)
