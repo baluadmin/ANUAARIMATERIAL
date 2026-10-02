@@ -20,7 +20,7 @@ st.markdown(
 
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-            font-size: 13px !important;
+            font-size: 14px !important;
             color: #2d1524 !important;
         }
 
@@ -36,46 +36,55 @@ st.markdown(
 
         .block-container {
             padding-top: 1rem !important;
-            padding-bottom: 5rem !important;
-            padding-left: 0.75rem !important;
-            padding-right: 0.75rem !important;
+            padding-bottom: 2rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
             max-width: 100% !important;
         }
 
-        /* --- FORCE DESKTOP BROWSER GRID LAYOUT ON MOBILE --- */
-        @media screen and (max-width: 768px) {
-            div[data-testid="stHorizontalBlock"] {
-                flex-direction: row !important;
-                flex-wrap: wrap !important;
-                gap: 4px !important;
-            }
-            div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"] {
-                width: 32% !important;
-                flex: 1 1 32% !important;
-                min-width: 30% !important;
-                margin-bottom: 6px !important;
-            }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
         }
 
-        /* Product Card Styling */
+        /* Product Card Styling for 3 Columns */
         div[data-testid="stVerticalBlock"] div[data-testid="stContainer"] {
             background-color: #ffffff !important;
             border: 1px solid #f3e8f1 !important;
-            border-radius: 12px !important;
-            padding: 8px !important;
-            box-shadow: 0 3px 10px rgba(107, 29, 79, 0.04) !important;
-            margin-bottom: 6px;
+            border-radius: 14px !important;
+            padding: 10px !important;
+            box-shadow: 0 4px 12px rgba(107, 29, 79, 0.04) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 8px;
+        }
+        
+        div[data-testid="stVerticalBlock"] div[data-testid="stContainer"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(107, 29, 79, 0.08) !important;
+            border-color: #e8d0e4 !important;
         }
 
         /* Direct Clickable Zoom Image */
         .zoom-thumb {
             width: 100% !important;
-            height: 95px !important;
+            height: 105px !important;
             object-fit: cover !important;
             border-radius: 6px !important;
             cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             display: block !important;
             margin: 0 !important;
+        }
+        .zoom-thumb:hover {
+            opacity: 0.85;
+            transform: scale(1.02);
         }
 
         /* Lightbox Overlay */
@@ -104,15 +113,16 @@ st.markdown(
             cursor: default;
         }
         .lightbox-img {
-            max-width: 90vw;
+            max-width: 85vw;
             max-height: 80vh;
             object-fit: contain;
             border-radius: 12px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: zoomIn 0.25s ease-out;
         }
         .close-hint {
             position: absolute;
-            top: -45px;
+            top: -50px;
             right: 0px;
             color: #ffffff;
             font-size: 28px;
@@ -120,41 +130,62 @@ st.markdown(
             text-decoration: none;
             background: rgba(0,0,0,0.5);
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: bold;
+            text-decoration: none;
+            background: rgba(107, 29, 79, 0.7);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: background 0.2s;
+        }
+        .nav-btn:hover {
+            background: rgba(107, 29, 79, 1);
+        }
+        .prev-btn {
+            left: -70px;
+        }
+        .next-btn {
+            right: -70px;
+        }
 
-        /* Compact Buttons Styling */
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Compact Buttons Styling for Plus/Minus */
         div.stButton > button, div[data-testid="stFormSubmitButton"] > button {
             background: linear-gradient(135deg, #6b1d4f 0%, #53143c 100%) !important;
             color: #ffffff !important;
             border: none !important;
             font-weight: 700 !important;
-            font-size: 10px !important;
-            border-radius: 4px !important;
-            padding: 0rem 0.1rem !important;
+            font-size: 12px !important;
+            border-radius: 6px !important;
+            padding: 0.15rem 0.3rem !important;
             width: 100% !important;
-            min-height: 22px !important;
-            box-shadow: 0 1px 3px rgba(107, 29, 79, 0.15) !important;
+            min-height: 28px !important;
+            box-shadow: 0 2px 5px rgba(107, 29, 79, 0.15) !important;
+            transition: all 0.2s ease;
         }
-
-        /* --- BOTTOM FLOATING WHITE CART BAR STYLING --- */
-        .floating-cart-wrapper {
-            position: fixed;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 99999999;
-            width: 92%;
-            max-width: 450px;
-            background: #ffffff;
-            padding: 8px 12px;
-            border-radius: 30px;
-            box-shadow: 0 8px 25px rgba(107, 29, 79, 0.2);
-            border: 1px solid #f3e8f1;
+        div.stButton > button:hover {
+            background: linear-gradient(135deg, #53143c 0%, #3a0d29 100%) !important;
+            opacity: 0.95;
         }
 
         .login-wrapper {
@@ -162,7 +193,16 @@ st.markdown(
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding-top: 2rem;
+            padding-top: 3rem;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 30px;
+            border-radius: 20px;
+            background: #ffffff !important;
+            border: 1px solid #f3e8f1 !important;
+            box-shadow: 0 10px 30px -5px rgba(107, 29, 79, 0.08);
         }
     </style>
     """,
@@ -176,6 +216,12 @@ if "user_phone" not in st.session_state:
     st.session_state.user_phone = None
 if "cart" not in st.session_state or not isinstance(st.session_state.cart, dict):
     st.session_state.cart = {}
+if "current_view" not in st.session_state:
+    st.session_state.current_view = "Home"
+if "selected_category" not in st.session_state:
+    st.session_state.selected_category = None
+if "selected_subcategory" not in st.session_state:
+    st.session_state.selected_subcategory = None
 if "shuffled_seed" not in st.session_state:
     st.session_state.shuffled_seed = random.randint(1, 10000)
 
@@ -185,7 +231,7 @@ GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyftApEC3eQJvJPF0tC
 def log_login_to_sheet(name, phone):
     try:
         payload = {"Type": "Login", "Customer_Name": name, "Primary_Phone": phone}
-        requests.post(GOOGLE_SCRIPT_URL, json=payload, timeout=5)
+        requests.post(GOOGLE_SCRIPT_URL, json=payload)
     except Exception as e:
         print(f"Login sheet error: {e}")
 
@@ -226,12 +272,12 @@ if not st.session_state.logged_in_user:
         unsafe_allow_html=True,
     )
 
-    _, login_col, _ = st.columns([0.2, 3, 0.2])
+    _, login_col, _ = st.columns([1, 1.8, 1])
 
     with login_col:
         with st.form("customer_login_form", clear_on_submit=False):
-            cust_name = st.text_input("Customer Name:", placeholder="Enter your name")
-            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="9840XXXXXX")
+            cust_name = st.text_input("Customer Name:", placeholder="")
+            raw_phone = st.text_input("10-Digit Mobile Number:", max_chars=10, placeholder="")
             cust_phone = "".join([char for char in raw_phone if char.isdigit()])
 
             login_btn = st.form_submit_button("Enter Store", use_container_width=True)
@@ -249,12 +295,54 @@ if not st.session_state.logged_in_user:
     st.stop()
 
 
+# --- HEADER & NAVIGATION BAR ---
+logo_col, nav_col1, nav_col_cat, nav_col2, nav_col3 = st.columns([3.2, 1, 1.2, 1, 0.8], gap="small")
+
+with logo_col:
+    st.markdown(
+        f"""
+        <div style="background: #ffffff; padding: 10px 16px; border-radius: 12px; border: 1px solid #f3e8f1; display: inline-block; box-shadow: 0 2px 8px rgba(107,29,79,0.03);">
+            <span style="font-size: 18px; font-weight: 900; color: #6b1d4f; text-transform: uppercase; letter-spacing: 0.5px;">ANUAARI MATERIALS</span>
+            <span style="font-size: 12px; font-weight: 700; color: #d97706; font-style: italic; margin-left: 6px;">aari supplies</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with nav_col1:
+    if st.button("🏠 Home", use_container_width=True):
+        st.session_state.current_view = "Home"
+        st.session_state.shuffled_seed = random.randint(1, 10000)
+        st.rerun()
+
+with nav_col_cat:
+    if st.button("🗂️ Category", use_container_width=True):
+        st.session_state.current_view = "Categories"
+        st.session_state.selected_category = None
+        st.session_state.selected_subcategory = None
+        st.rerun()
+
+with nav_col2:
+    total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
+    if st.button(f"🛒 Cart ({total_cart_items})", use_container_width=True):
+        st.session_state.current_view = "Cart"
+        st.rerun()
+
+with nav_col3:
+    if st.button("🚪 Logout", use_container_width=True):
+        st.session_state.clear()
+        st.rerun()
+
+st.markdown("<hr style='margin: 14px 0 16px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+
+
 # Load Inventory Directly from Google Sheets
-@st.cache_data(ttl=5)
+@st.cache_data(ttl=2)
 def load_inventory_from_sheet():
     sheet_csv_url = "https://docs.google.com/spreadsheets/d/1SK6S8tw4KWvwm_sQS6FHMGsSla7RkQ7XFkE7uuf9GRM/gviz/tq?tqx=out:csv&sheet=need+inventory+model+for+this+ANUAARI"
     try:
         df = pd.read_csv(sheet_csv_url)
+        df.to_csv("inventory.csv", index=False)
         return df
     except Exception as e:
         if os.path.exists("inventory.csv"):
@@ -297,7 +385,7 @@ if not inv_df.empty:
 
 if not product_records:
     product_records = [
-        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "images": "", "description": "High quality sample item."}
+        {"id": "AB0001", "name": "Glassy Beads", "category": "Beads", "subcategory": "Glassy Beads", "price": "90.00", "colors": "Red, Blue", "images": "bunch beads 1.JPG \\ bunch beads 2.JPG \\ bunch beads 3.JPG", "description": "High quality beads."}
     ]
 
 
@@ -318,18 +406,19 @@ def process_cart_checkout(address: str, payment_method: str, secondary_phone: st
             "Secondary_Phone": secondary_phone,
             "Description": notes,
         }
-        requests.post(GOOGLE_SCRIPT_URL, json=order_data, timeout=5)
+        requests.post(GOOGLE_SCRIPT_URL, json=order_data)
     except Exception:
         pass
     st.session_state.cart = {}
     return f"Order placed successfully ({payment_method})!"
 
 
-def render_product_grid(items, view_prefix="grid"):
+def render_product_grid(items):
     if not items:
         st.info("No items found.")
         return
 
+    # 3-Column Grid Loop
     for i in range(0, len(items), 3):
         cols = st.columns(3, gap="small")
         batch = items[i : i + 3]
@@ -340,6 +429,7 @@ def render_product_grid(items, view_prefix="grid"):
                     u_key = prod['id']
                     raw_imgs = prod.get('images', '')
                     
+                    # Split multiple image links separated by backslash or comma
                     for sep in ['\\', ',']:
                         raw_imgs = raw_imgs.replace(sep, '|')
                     img_list = [get_image_src(img.strip()) for img in raw_imgs.split('|') if img.strip() and img.strip().lower() != 'nan']
@@ -347,6 +437,7 @@ def render_product_grid(items, view_prefix="grid"):
                     desc_text = prod.get('description', '')
                     total_imgs = len(img_list)
 
+                    # Render up to 3 images side-by-side with Lightbox + Left/Right navigation
                     if total_imgs > 0:
                         img_cols = st.columns(total_imgs, gap="small")
                         for img_i, img_url in enumerate(img_list):
@@ -356,139 +447,90 @@ def render_product_grid(items, view_prefix="grid"):
                             with img_cols[img_i]:
                                 st.markdown(
                                     f"""
-                                    <a href="#modal_{view_prefix}_{u_key}_{img_i}_{i}_{col_idx}">
+                                    <a href="#modal_{u_key}_{img_i}">
                                         <img src="{img_url}" class="zoom-thumb" alt="{prod['name']}" title="Click to Zoom" />
                                     </a>
-                                    <div id="modal_{view_prefix}_{u_key}_{img_i}_{i}_{col_idx}" class="lightbox-overlay" onclick="location.href='#';">
+                                    <div id="modal_{u_key}_{img_i}" class="lightbox-overlay" onclick="location.href='#';">
                                         <div class="lightbox-content" onclick="event.stopPropagation();">
                                             <a href="#" class="close-hint">&times;</a>
-                                            <a href="#modal_{view_prefix}_{u_key}_{prev_i}_{i}_{col_idx}" class="nav-btn prev-btn">‹</a>
+                                            <a href="#modal_{u_key}_{prev_i}" class="nav-btn prev-btn">‹</a>
                                             <img src="{img_url}" class="lightbox-img" alt="{prod['name']}" />
-                                            <a href="#modal_{view_prefix}_{u_key}_{next_i}_{i}_{col_idx}" class="nav-btn next-btn">›</a>
+                                            <a href="#modal_{u_key}_{next_i}" class="nav-btn next-btn">›</a>
                                         </div>
                                     </div>
                                     """, unsafe_allow_html=True
                                 )
                     else:
-                        st.markdown("<div style='text-align:center; padding:20px 0; color:#94a3b8; font-size:10px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
+                        st.markdown("<div style='text-align:center; padding:35px 0; color:#94a3b8; font-size:11px; font-weight:700;'>No Image</div>", unsafe_allow_html=True)
 
+                    # Details text set to 2-line height with increased font size (12px)
                     st.markdown(
-                        f"<div style='font-size: 11px; font-weight: 600; color: #475569; padding: 2px 0px; height: 32px; overflow-y: auto; line-height: 1.2;'>"
+                        f"<div style='font-size: 12px; font-weight: 600; color: #475569; padding: 4px 0px; height: 38px; overflow-y: auto; line-height: 1.3;'>"
                         f"<strong>Details:</strong> {desc_text if desc_text else 'No details available.'}"
                         f"</div>", unsafe_allow_html=True
                     )
                     
                     st.markdown(
-                        f"<div style='font-weight: 700; font-size: 12px; color: #0f172a; height: 28px; overflow: hidden; margin-top: 2px; line-height: 1.1;'>"
+                        f"<div style='font-weight: 700; font-size: 13px; color: #0f172a; height: 32px; overflow: hidden; margin-top: 4px; line-height: 1.2;'>"
                         f"{prod['name']}"
                         f"</div>", unsafe_allow_html=True
                     )
 
+                    st.markdown(
+                        f"<div style='font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 4px;'>"
+                        f"Rs. {prod['price']} <span style='font-size: 10px; color: #94a3b8; text-decoration: line-through; font-weight: 600; margin-left: 2px;'>Rs. 160</span>"
+                        f"</div>", unsafe_allow_html=True
+                    )
+
                     raw_colors = prod.get('colors', '')
-                    for sep in ['\\', ',', '&']: 
-                        raw_colors = raw_colors.replace(sep, '|')
+                    for sep in ['\\', ',', '&']: raw_colors = raw_colors.replace(sep, '|')
                     color_list = [c.strip() for c in raw_colors.split('|') if c.strip()]
                     selected_color = color_list[0] if color_list else "Standard"
 
                     if color_list:
-                        selected_color = st.selectbox("Options", color_list, key=f"color_{view_prefix}_{u_key}_{i}_{col_idx}", label_visibility="collapsed")
+                        selected_color = st.selectbox("Options", color_list, key=f"color_{u_key}", label_visibility="collapsed")
 
                     item_key = f"{prod['name']} ({selected_color})"
                     current_qty = st.session_state.cart.get(item_key, 0)
 
-                    # --- PRICE & QUANTITY CONTROLS WITH UNIQUE KEYS ---
-                    price_html = f"<div style='font-weight: 800; font-size: 12px; color: #dc2626; padding-top: 4px;'>Rs. {prod['price']} <span style='font-size: 9px; color: #94a3b8; text-decoration: line-through; font-weight: 600;'>Rs. 160</span></div>"
-                    
-                    p_col, q_col = st.columns([1, 1.8], gap="small")
-                    with p_col:
-                        st.markdown(price_html, unsafe_allow_html=True)
-                    with q_col:
-                        q1, q2, q3 = st.columns([1, 1, 1], gap="small")
-                        with q1:
-                            if st.button("➖", key=f"minus_{view_prefix}_{u_key}_{selected_color}_{i}_{col_idx}", use_container_width=True):
-                                if current_qty > 0:
-                                    st.session_state.cart[item_key] = current_qty - 1
-                                    if st.session_state.cart[item_key] == 0: 
-                                        del st.session_state.cart[item_key]
-                                    st.rerun()
-                        with q2:
-                            st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 11px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
-                        with q3:
-                            if st.button("➕", key=f"plus_{view_prefix}_{u_key}_{selected_color}_{i}_{col_idx}", use_container_width=True):
-                                st.session_state.cart[item_key] = current_qty + 1
+                    q_col1, q_col2, q_col3 = st.columns([1, 1.2, 1], gap="small")
+                    with q_col1:
+                        if st.button("➖", key=f"minus_{u_key}", use_container_width=True):
+                            if current_qty > 0:
+                                st.session_state.cart[item_key] = current_qty - 1
+                                if st.session_state.cart[item_key] == 0: del st.session_state.cart[item_key]
                                 st.rerun()
+                    with q_col2:
+                        st.markdown(f"<div style='text-align: center; font-weight: 800; font-size: 13px; padding-top: 4px; color: #6b1d4f;'>{current_qty}</div>", unsafe_allow_html=True)
+                    with q_col3:
+                        if st.button("➕", key=f"plus_{u_key}", use_container_width=True):
+                            st.session_state.cart[item_key] = current_qty + 1
+                            st.rerun()
+
+                    st.markdown("<div style='height: 2px;'></div>", unsafe_allow_html=True)
 
 
-# --- STREAMLIT POPUP DIALOG FOR CART & CHECKOUT ---
-@st.dialog("🛒 Shopping Cart & Secure Checkout")
-def show_cart_modal():
-    if st.session_state.cart:
-        with st.container(border=True):
-            for item_desc, qty in list(st.session_state.cart.items()):
-                cart_col1, cart_col2 = st.columns([3.2, 1], gap="small")
-                with cart_col1:
-                    st.markdown(f"<div style='font-size: 12px; font-weight: 700; color: #2d1524; padding-top: 4px;'>• {item_desc} <br><span style='color: #6b1d4f; font-weight: 800;'>Qty: {qty}</span></div>", unsafe_allow_html=True)
-                with cart_col2:
-                    if st.button("Remove", key=f"rem_{item_desc}", use_container_width=True):
-                        del st.session_state.cart[item_desc]
-                        st.rerun()
-                st.markdown("<div style='border-top: 1px solid #f3e8f1; margin: 4px 0;'></div>", unsafe_allow_html=True)
+# --- ROUTING LOGIC ---
 
-        st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-        
-        with st.form("checkout_form"):
-            st.markdown("<div style='font-size: 13px; font-weight: 800; color: #6b1d4f; margin-bottom: 6px;'>📍 Shipping & Payment Details</div>", unsafe_allow_html=True)
-            address = st.text_area("Delivery Address (with Pincode):", placeholder="Enter full address...")
-            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10, placeholder="10-digit number")
-            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
-            notes = st.text_area("Custom Instructions / Notes (Optional):", placeholder="Any specific instructions...")
-
-            st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
-            if st.form_submit_button("Complete Order Now", use_container_width=True):
-                if address and len(sec_phone) == 10:
-                    res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
-                    st.success(res_msg)
-                    st.rerun()
-                else:
-                    st.warning("Please provide a valid delivery address and an exact 10-digit alternative phone number.")
-    else:
-        st.info("Your cart is empty. Add products to view them here.")
-
-
-# --- BOTTOM FLOATING WHITE CART BAR ---
-total_cart_items = sum(st.session_state.cart.values()) if isinstance(st.session_state.cart, dict) else 0
-
-st.markdown('<div class="floating-cart-wrapper">', unsafe_allow_html=True)
-col_lbl, col_btn = st.columns([1.5, 1], gap="small")
-with col_lbl:
-    st.markdown(f"<div style='font-weight: 800; font-size: 12px; color: #6b1d4f; padding-top: 6px; padding-left: 6px;'>🛒 Cart ({total_cart_items} Items)</div>", unsafe_allow_html=True)
-with col_btn:
-    if st.button("View Cart", use_container_width=True, key="open_cart_popup"):
-        show_cart_modal()
-st.markdown('</div>', unsafe_allow_html=True)
-
-
-# --- MAIN STORE TABS ---
-tab1, tab2 = st.tabs(["🔥 Products", "🗂 Categories"])
-
-with tab1:
+if st.session_state.current_view == "Home":
     filtered_items = list(product_records)
     random.seed(st.session_state.shuffled_seed)
     random.shuffle(filtered_items)
 
     grid_head_col1, grid_head_col2 = st.columns([3, 1])
     with grid_head_col1:
-        st.markdown("<h3 style='margin: 0; font-size: 14px; font-weight: 900; color: #0f172a;'>Featured Products</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>🔥 Featured Products</h3>", unsafe_allow_html=True)
     with grid_head_col2:
-        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-    render_product_grid(filtered_items, view_prefix="home")
+    render_product_grid(filtered_items)
 
-with tab2:
+
+elif st.session_state.current_view == "Categories":
     categories = sorted(list(set([p["category"] for p in product_records if p["category"]])))
     
-    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
+    st.markdown("<span style='color: #6b1d4f; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;'>🗂️ Master Categories</span>", unsafe_allow_html=True)
     
     for i in range(0, len(categories), 3):
         cat_cols = st.columns(3, gap="small")
@@ -501,13 +543,13 @@ with tab2:
                     st.session_state.selected_subcategory = None
                     st.rerun()
 
-    st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid #f0e1ec;'>", unsafe_allow_html=True)
 
     if st.session_state.selected_category:
         subcats = sorted(list(set([p["subcategory"] for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"]])))
         
         if subcats:
-            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 10px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
+            st.markdown("<span style='color: #d97706; font-weight: 800; font-size: 11px; text-transform: uppercase;'>🏷️ Subcategories</span>", unsafe_allow_html=True)
             for i in range(0, len(subcats), 3):
                 subcat_cols = st.columns(3, gap="small")
                 for idx, subcat in enumerate(subcats[i : i + 3]):
@@ -517,7 +559,7 @@ with tab2:
                         if st.button(sub_label, key=f"sub_btn_{i}_{idx}", use_container_width=True):
                             st.session_state.selected_subcategory = subcat
                             st.rerun()
-            st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
         if st.session_state.selected_subcategory:
             filtered_items = [p for p in product_records if p["category"] == st.session_state.selected_category and p["subcategory"] == st.session_state.selected_subcategory]
@@ -528,9 +570,40 @@ with tab2:
 
         grid_head_col1, grid_head_col2 = st.columns([3, 1])
         with grid_head_col1:
-            st.markdown(f"<h3 style='margin: 0; font-size: 14px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='margin: 0; font-size: 16px; font-weight: 900; color: #0f172a;'>{header_title}</h3>", unsafe_allow_html=True)
         with grid_head_col2:
-            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 10px; padding: 2px 6px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
-        st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: right;'><span style='background: rgba(107,29,79,0.1); color: #6b1d4f; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 20px;'>{len(filtered_items)} items</span></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 6px;'></div>", unsafe_allow_html=True)
 
-        render_product_grid(filtered_items, view_prefix="category")
+        render_product_grid(filtered_items)
+
+
+elif st.session_state.current_view == "Cart":
+    st.subheader("🛒 Shopping Cart & Secure Checkout")
+    if st.session_state.cart:
+        for item_desc, qty in list(st.session_state.cart.items()):
+            col_item, col_rem = st.columns([4, 1])
+            with col_item:
+                st.markdown(f"• **{item_desc}** — Quantity: **{qty} Units**")
+            with col_rem:
+                if st.button("Remove", key=f"rem_{item_desc}"):
+                    del st.session_state.cart[item_desc]
+                    st.rerun()
+
+        st.markdown("---")
+        with st.form("checkout_form"):
+            address = st.text_area("Delivery Address (with Pincode):")
+            sec_phone = st.text_input("Alternative Contact Number:", max_chars=10)
+            payment_option = st.radio("Select Payment Method:", ["Cash on Delivery (COD)", "Prepaid (UPI / Cards)"], horizontal=True)
+            notes = st.text_area("Custom Instructions / Notes:")
+
+            if st.form_submit_button("Complete Order Now"):
+                if address and len(sec_phone) == 10:
+                    res_msg = process_cart_checkout(address, payment_option, sec_phone, notes)
+                    st.success(res_msg)
+                    st.session_state.current_view = "Home"
+                    st.rerun()
+                else:
+                    st.warning("Please provide a valid address and a 10-digit alternative phone number.")
+    else:
+        st.info("Your cart is empty. Click Home or Category to browse products.")
